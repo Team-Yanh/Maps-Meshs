@@ -5,6 +5,8 @@
 #include <SDL/SDL.h>
 #include "SDL/SDL_image.h"
 
+#include "imageFilter.h"
+
 int main(void /*int argc, char **argv*/)
 {
     SDL_Init(SDL_INIT_VIDEO);
@@ -23,10 +25,20 @@ int main(void /*int argc, char **argv*/)
 
 
     SDL_Rect rcDest = {0, 0, 0, 0};
+
+    void invertFilter(Uint8 *r, Uint8 *g, Uint8 *b)
+    {
+        *r = 255 - *r;
+        *g = 255 - *g;
+        *b = 255 - *b;
+    }
+
+    forEachPixel(image, invertFilter);
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
 
     SDL_Delay(3000);
+    SDL_SaveBMP(image, "images/out.bmp");
     SDL_FreeSurface(image);
     SDL_FreeSurface(screen);
     SDL_Quit();

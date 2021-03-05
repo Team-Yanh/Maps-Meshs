@@ -3,14 +3,14 @@ CFLAGS = -Wall -Wextra -g
 LDFLAGS =
 LDLIBS = $(shell pkg-config --libs SDL_image)
 
-OBJ = main.o
+OBJ = imageFilter.o main.o
 
 all: main
 
 main :${OBJ}
 
-main.o: main.c
-
+main.o: imageFilter.o main.c
+imageFilter.o : imageFilter.h imageFilter.c
 
 .PHONY : clean
 
