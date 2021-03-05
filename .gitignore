@@ -1,4 +1,7 @@
+#trashfiles
 *.swp
 *.o
 main
 
+#images
+*.PNG|png|JPG|jpg|jpeg|BMP|bmp

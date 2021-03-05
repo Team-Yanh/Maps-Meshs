@@ -1,32 +1,33 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <err.h>
-#include <limits.h>
 
-#include "grid.h"
 #include <SDL/SDL.h>
-#include "display.h"
+#include "SDL/SDL_image.h"
 
-int main(int argc, char **argv)
+int main(void /*int argc, char **argv*/)
 {
-    int width = 5;
-    int height = 5;
-    if(argc == 3)
-    {
-        width = strtol(argv[1], NULL, 10);
-        height = strtol(argv[2], NULL, 10);
-    }
-    grid *g = newGrid(width, height);
-    printGrid(g);
-
     SDL_Init(SDL_INIT_VIDEO);
-    SDL_Surface* screen = SDL_SetVideoMode(1024, 512, 32,
+    int formats = IMG_INIT_JPG | IMG_INIT_PNG;
+    int imageInit = IMG_Init(formats);
+    if((imageInit&formats) != formats)
+        errx(1, "Couldnt init SDL_Image");
+
+    SDL_Surface *image;
+    image = IMG_Load("images/test1.PNG");
+    if(image == NULL)
+        errx(1, "Couldnt load image");
+
+    SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
             SDL_HWSURFACE | SDL_DOUBLEBUF);
-    drawGrid(g, screen);
+
+
+    SDL_Rect rcDest = {0, 0, 0, 0};
+    SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
 
-    SDL_Delay(5000);
-    freeGrid(g);
+    SDL_Delay(3000);
+    SDL_FreeSurface(image);
     SDL_FreeSurface(screen);
     SDL_Quit();
     return 0;
