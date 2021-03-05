@@ -4,4 +4,6 @@
 main
 
 #images
-*.PNG|png|JPG|jpg|jpeg|BMP|bmp
+*.png
+*.jp*g
+*.bmp
