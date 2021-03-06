@@ -6,6 +6,7 @@
 #include "SDL/SDL_image.h"
 
 #include "imageFilter.h"
+#include "filters.h"
 
 int main(void /*int argc, char **argv*/)
 {
@@ -16,7 +17,7 @@ int main(void /*int argc, char **argv*/)
         errx(1, "Couldnt init SDL_Image");
 
     SDL_Surface *image;
-    image = IMG_Load("images/test1.PNG");
+    image = IMG_Load("images/test1.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
 
@@ -26,18 +27,13 @@ int main(void /*int argc, char **argv*/)
 
     SDL_Rect rcDest = {0, 0, 0, 0};
 
-    void invertFilter(Uint8 *r, Uint8 *g, Uint8 *b)
-    {
-        *r = 255 - *r;
-        *g = 255 - *g;
-        *b = 255 - *b;
-    }
+    forEachPixel(image, cleanGray);
+    forEachPixel(image, keepTopoLine);
 
-    forEachPixel(image, invertFilter);
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
 
-    SDL_Delay(3000);
+    SDL_Delay(1000);
     SDL_SaveBMP(image, "images/out.bmp");
     SDL_FreeSurface(image);
     SDL_FreeSurface(screen);
