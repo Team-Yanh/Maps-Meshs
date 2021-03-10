@@ -2,6 +2,43 @@
 #include "filters.h"
 
 
+HSV *RGBToHSV(Uint8 r, Uint8 g, Uint8 b)
+{
+    HSV *res = malloc(sizeof(HSV));
+    float r2 = r/255.0;
+    float g2 = g/255.0;
+    float b2 = b/255.0;
+
+    float cmax = fmaxf(r2, fmaxf(g2, b2));
+    float cmin = fminf(r2, fminf(g2, b2));
+    float delta = cmax - cmin;
+
+    if(cmax == cmin)
+        res->h = 0.0;
+    else
+    {
+        if(cmax == r2)
+            res->h = fmod( (60.0 * (g2-b2)/delta + 360.0), 360.0);
+        else
+        {
+            if(cmax == g2)
+                res->h = fmod( (60.0 * (b2-r2)/delta + 120.0), 360.0);
+            else
+            {
+                if(cmax == b2)
+                    res->h = fmod( (60.0 * (r2-g2)/delta + 240.0), 360.0);
+            }
+        }
+    }
+    if(cmax == 0)
+        res->s = 0;
+    else
+        res->s = delta/cmax;
+    res->v = cmax;
+
+    return res;
+}
+
 Uint32 distanceToColor(Uint8 r, Uint8 g, Uint8 b,
         Uint8 r2, Uint8 g2, Uint8 b2 )
 {

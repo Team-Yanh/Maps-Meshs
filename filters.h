@@ -1,7 +1,15 @@
 #pragma once
 
 #include <SDL/SDL.h> // Uint8 type is from SDL
+#include <math.h>
+typedef struct HSV
+{
+    float h;
+    float s;
+    float v;
+}HSV;
 
+HSV *RGBToHSV(Uint8 r, Uint8 g, Uint8 b);
 Uint32 distanceToColor(Uint8 r, Uint8 g, Uint8 b,
         Uint8 r2, Uint8 g2, Uint8 b2 );
 void invert(Uint8 *r, Uint8 *g, Uint8 *b);
