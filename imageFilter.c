@@ -82,3 +82,45 @@ void forEachPixel(SDL_Surface *image, void (*filter)(Uint8 *r, Uint8 *g, Uint8 *
     }
     SDL_UnlockSurface(image);
 }
+
+int isValidCell(SDL_Surface *surface, int x, int y)
+{
+    if(x < 0 || x >= surface->w || y < 0 || y >= surface->h)
+        return 0;//false ie out of bound
+    return 1; //true
+}
+
+void thickenColor(SDL_Surface *image, Uint32 pixel)
+{
+    Queue *q = createQueue();
+    int x = 0;
+    int y = 0;
+
+    for(int i = 0; i < image->w; i++)
+    {
+        for(int j = 0; j < image->h; j++)
+        {
+            Uint32 currentPixel = getPixel(image, i, j);
+            if(currentPixel == pixel)
+                enqueue(q, i, j);
+        }
+    }
+
+    SDL_LockSurface(image);
+    while(!isEmpty(q))
+    {
+        dequeue(q, &x, &y);
+        //color each adjacent neighbour the same color
+        if(isValidCell(image, x-1, y))
+            putPixel(image, x-1, y, pixel);
+        if(isValidCell(image, x+1, y))
+            putPixel(image, x+1, y, pixel);
+
+        if(isValidCell(image, x, y-1))
+            putPixel(image, x, y-1, pixel);
+        if(isValidCell(image, x, y+1))
+            putPixel(image, x, y+1, pixel);
+    }
+    SDL_UnlockSurface(image);
+    freeQueue(q);
+}

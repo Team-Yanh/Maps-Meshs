@@ -39,6 +39,16 @@ HSV *RGBToHSV(Uint8 r, Uint8 g, Uint8 b)
     return res;
 }
 
+Uint32 distanceToColorHSV(Uint8 r, Uint8 g, Uint8 b,
+        Uint8 r2, Uint8 g2, Uint8 b2 )
+{
+    HSV *c1 = RGBToHSV(r, g, b);
+    HSV *c2 = RGBToHSV(r2, g2, b2);
+    return  sqrt( (c1->h - c2->h)*(c1->h - c2->h) );
+    //(Uint32)sqrt( (c1->h - c2->h)*(c1->h - c2->h) +
+    //(c1->s - c2->s)*(c1->s - c2->s) + (c1->v - c2->v)*(c1->v - c2->v) );
+}
+
 Uint32 distanceToColor(Uint8 r, Uint8 g, Uint8 b,
         Uint8 r2, Uint8 g2, Uint8 b2 )
 {
@@ -90,12 +100,69 @@ void removeGreen(Uint8 *r, Uint8 *g, Uint8 *b)
 
 void keepTopoLine(Uint8 *r, Uint8 *g, Uint8 *b)
 {
-    if(distanceToColor(*r, *g, *b, 217, 200, 170) > 30)
+    if(distanceToColor(*r, *g, *b, 217, 200, 170) > 10)
     {
         *r = 255;
         *g = 255;
         *b = 255;
     }
+}
+
+void keepTopoLineHSV(Uint8 *r, Uint8 *g, Uint8 *b)
+{
+    if(distanceToColorHSV(*r, *g, *b, 217, 200, 170) > 1)
+    {
+        *r = 255;
+        *g = 255;
+        *b = 255;
+    }
+}
+
+int isNotWhite(SDL_PixelFormat *format, Uint32 pixel)
+{
+    Uint8 r;
+    Uint8 g;
+    Uint8 b;
+    SDL_GetRGB(pixel, format, &r, &g, &b);
+    return !(r == 255 && g == 255 && b == 255);
+}
+
+Uint32 findAverageColor(SDL_Surface *image)
+{
+    Uint32 currentPixel = 0;
+    Uint32 nbPixels = 0;
+    Uint32 pixelSum;
+
+    for(int i = 0; i < image->w; i++)
+    {
+        for(int j = 0; j < image->h; j++)
+        {
+            currentPixel = getPixel(image, i, j);
+            if(isNotWhite(image->format, currentPixel))
+            {
+                nbPixels++;
+                pixelSum += currentPixel;
+            }
+        }
+    }
+
+    return pixelSum/nbPixels;
+}
+
+void setMonochromatic(SDL_Surface *image, Uint32 pixel)
+{
+    Uint32 currentPixel = 0;
+    SDL_LockSurface(image);
+    for(int i = 0; i < image->w; i++)
+    {
+        for(int j = 0; j < image->h; j++)
+        {
+            currentPixel = getPixel(image, i, j);
+            if(isNotWhite(image->format, currentPixel))
+                putPixel(image, i, j, pixel);
+        }
+    }
+    SDL_UnlockSurface(image);
 }
 
 void cleanGray(Uint8 *r, Uint8 *g, Uint8 *b)

@@ -53,6 +53,12 @@ void dequeue(Queue *q, int *x, int*y)
     free(qN);
 }
 
+int isEmpty(Queue *q)
+{
+    return q->rear == NULL;
+}
+
+
 void printNode(QueueNode *qN)
 {
     printf("Node %p, x : %i, y : %i\n", qN, qN->x, qN->y);
