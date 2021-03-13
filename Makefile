@@ -27,4 +27,4 @@ queue.o : queue.h queue.c
 .PHONY : clean
 
 clean:
-	rm -f main opengl *.o
+	rm -f opengl gtk *.o
