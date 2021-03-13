@@ -1,17 +1,21 @@
 CC= gcc -fsanitize=address
-CFLAGS = -Wall -Wextra -g -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl
+CFLAGS = -Wall -Wextra -g 
+OGLFLAGS = -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl
+GTKFLAGS = `pkg-config --cflags gtk+-3.0` -Wall -O3 `pkg-config --libs gtk+-3.0`
 LDFLAGS =
 LDLIBS = $(shell pkg-config --libs SDL_image) -lm
 
-OBJ = queue.o filters.o imageFilter.o main.o
+gtk: gtk.o
+	$(CC) -o gtk gtk.o $(CFLAGS) $(GTKFLAGS)
 
-all: main
+opengl: glad.o opengl.o
+	$(CC) -o opengl glad.o opengl.o $(CFLAGS) $(OGLFLAGS)
 
-main : glad.o main.o
-	$(CC) -o main glad.o main.o $(CFLAGS)
+gtk.o: gtk.c
+	$(CC) -o gtk.o -c gtk.c $(CFLAGS) $(GTKFLAGS)
 
-main.o : glad.o main.c
-	$(CC) -o main.o -c main.c $(CFLAGS)
+opengl.o : glad.o opengl.c
+	$(CC) -o opengl.o -c opengl.c $(CFLAGS) $(OGLFLAGS)
 
 glad.o : glad.c
 	$(CC) -o glad.o -c glad.c $(CFLAGS)
@@ -23,4 +27,4 @@ queue.o : queue.h queue.c
 .PHONY : clean
 
 clean:
-	rm -f main *.o
+	rm -f main opengl *.o
