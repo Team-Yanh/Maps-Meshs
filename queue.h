@@ -18,10 +18,6 @@ typedef struct Queue
 
 Queue *createQueue();
 void freeQueue(Queue *q);
-QueueNode *createNode(int x, int y);
 void enqueue(Queue *q, int x, int y);
 void dequeue(Queue *q, int *x, int*y);
 int isEmpty(Queue *q);
-
-void printNode(QueueNode *qN);
-void printQueue(Queue *q);

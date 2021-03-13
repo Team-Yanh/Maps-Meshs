@@ -58,18 +58,3 @@ int isEmpty(Queue *q)
     return q->rear == NULL;
 }
 
-
-void printNode(QueueNode *qN)
-{
-    printf("Node %p, x : %i, y : %i\n", qN, qN->x, qN->y);
-}
-
-void printQueue(Queue *q)
-{
-    QueueNode *qN = q->front;
-    while(qN != NULL)
-    {
-        printNode(qN);
-        qN = qN->next;
-    }
-}

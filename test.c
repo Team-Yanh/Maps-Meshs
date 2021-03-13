@@ -3,11 +3,22 @@
 #include <string.h>
 
 #include "queue.h"
-#include "filters.h"
 #include "imageFilter.h"
 
-//void printNode(QueueNode *qN);
-//void printQueue(Queue *q);
+void printNode(QueueNode *qN)
+{
+    printf("Node %p, x : %i, y : %i\n", qN, qN->x, qN->y);
+}
+
+void printQueue(Queue *q)
+{
+    QueueNode *qN = q->front;
+    while(qN != NULL)
+    {
+        printNode(qN);
+        qN = qN->next;
+    }
+}
 
 void testQueue()
 {
@@ -38,12 +49,6 @@ void testQueue()
     printf("==== Queue Testing Done ====\n");
 }
 
-void testFilters()
-{
-    printf("==== Testing Filters ====\n");
-    printf("==== Filters Testing Done ====\n");
-}
-
 void testImageFilter()
 {
     printf("==== Testing imageFilter ====\n");
@@ -56,8 +61,7 @@ int main(int argc, char *argv[])
     int currentArg = 1;
     if(argc == 1)
     {
-        printf("No file to test, current arguments are :\n
-                    queue, filters, imageFilter\n");
+        printf("No file to test, current arguments are :\n queue, imageFilter\n");
         return 0;
     }
     while(currentArg < argc)
@@ -66,18 +70,13 @@ int main(int argc, char *argv[])
         {
             testQueue();
         }
-        else if (strcmp(argv[currentArg], "filters") == 0)
-        {
-            testFilters();
-        }
         else if (strcmp(argv[currentArg], "imageFilter") == 0)
         {
             testImageFilter();
         }
         else //default
         {
-            printf("Argument not recognize. Current arguments are :\n
-                    queue, filters, imageFilter\n");
+            printf("Argument not recognize. Current arguments are :\n queue, imageFilter\n");
         }
         currentArg++;
     }

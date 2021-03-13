@@ -7,6 +7,7 @@
 
 #include "imageFilter.h"
 #include "filters.h"
+#include "queue.h"
 
 int main(void /*int argc, char **argv*/)
 {
@@ -29,14 +30,20 @@ int main(void /*int argc, char **argv*/)
 
     forEachPixel(image, cleanGray);
     forEachPixel(image, keepTopoLine);
+    //forEachPixel(image, keepTopoLineHSV);
+    Uint32 topoColor = SDL_MapRGB(image->format, 203, 191, 171);
+    Uint32 red = SDL_MapRGB(image->format, 255, 0, 0);
+    //setMonochromatic(image, red);
+    //thickenColor(image, red);
 
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
 
-    SDL_Delay(1000);
+    SDL_Delay(5000);
     SDL_SaveBMP(image, "images/out.bmp");
     SDL_FreeSurface(image);
     SDL_FreeSurface(screen);
     SDL_Quit();
+
     return 0;
 }
