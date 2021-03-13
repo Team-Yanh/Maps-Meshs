@@ -6,7 +6,6 @@
 #include "SDL/SDL_image.h"
 
 #include "imageFilter.h"
-#include "filters.h"
 #include "queue.h"
 
 int main(void /*int argc, char **argv*/)
