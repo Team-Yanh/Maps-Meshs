@@ -5,14 +5,19 @@ GTKFLAGS = `pkg-config --cflags gtk+-3.0` -Wall -O3 `pkg-config --libs gtk+-3.0`
 LDFLAGS =
 LDLIBS = $(shell pkg-config --libs SDL_image) -lm
 
-gtk: gtk.o
-	$(CC) -o gtk gtk.o $(CFLAGS) $(GTKFLAGS)
+all: main
+
+main: colorPicker.o main.o
+	$(CC) -o main colorPicker.o main.o $(CFLAGS) $(GTKFLAGS)
+
+main.o: main.c colorPicker.h
+	$(CC) -o main.o -c main.c $(CFLAGS) $(GTKFLAGS)
+
+colorPicker.o: colorPicker.c colorPicker.h
+	$(CC) -o colorPicker.o -c colorPicker.c $(CFLAGS) $(GTKFLAGS)
 
 opengl: glad.o opengl.o
 	$(CC) -o opengl glad.o opengl.o $(CFLAGS) $(OGLFLAGS)
-
-gtk.o: gtk.c
-	$(CC) -o gtk.o -c gtk.c $(CFLAGS) $(GTKFLAGS)
 
 opengl.o : glad.o opengl.c
 	$(CC) -o opengl.o -c opengl.c $(CFLAGS) $(OGLFLAGS)
@@ -27,4 +32,4 @@ queue.o : queue.h queue.c
 .PHONY : clean
 
 clean:
-	rm -f opengl gtk *.o
+	rm -f opengl main *.o
