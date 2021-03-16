@@ -8,13 +8,13 @@ LDLIBS = $(shell pkg-config --libs SDL_image) -lm
 all: main
 
 main: colorPicker.o main.o
-	$(CC) -o main colorPicker.o main.o $(CFLAGS) $(GTKFLAGS)
+	$(CC) -o main colorPicker.o main.o $(CFLAGS) $(GTKFLAGS) $(LDLIBS)
 
 main.o: main.c colorPicker.h
-	$(CC) -o main.o -c main.c $(CFLAGS) $(GTKFLAGS)
+	$(CC) -o main.o -c main.c $(CFLAGS) $(GTKFLAGS) $(LDLIBS)
 
 colorPicker.o: colorPicker.c colorPicker.h
-	$(CC) -o colorPicker.o -c colorPicker.c $(CFLAGS) $(GTKFLAGS)
+	$(CC) -o colorPicker.o -c colorPicker.c $(CFLAGS) $(GTKFLAGS) $(LDLIBS)
 
 opengl: glad.o opengl.o
 	$(CC) -o opengl glad.o opengl.o $(CFLAGS) $(OGLFLAGS)

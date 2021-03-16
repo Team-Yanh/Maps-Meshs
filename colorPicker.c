@@ -1,3 +1,4 @@
+#include <SDL/SDL.h>
 #include <gtk/gtk.h>
 #include "colorPicker.h"
 
@@ -29,6 +30,52 @@ void on_menuitm_open_activate(unused GtkButton* button, gpointer user_data)
     gtk_widget_hide(GTK_WIDGET(ui->dlg_file_chooser));
 }
 
+SDL_Color on_img_main_clicked(unused GtkEventBox* img_event_box,
+        GdkEventButton *event, gpointer user_data)
+{
+    // - Gets our variable ui
+    UserInterface* ui = user_data;
+    // - Gets the pixbuf storage of our img
+    GdkPixbuf* pixbuf = gtk_image_get_pixbuf(ui->img_main);
+
+    guchar* pixels = NULL;
+    guchar* pixel = NULL;
+
+    SDL_Color color = {0, 0, 0, 0};
+
+    // - Coordinates of the mouse click
+    int x = 0;
+    int y = 0;
+
+    // - Number of columns in the pixbuf, the number of channels for each pixel
+    int rowstride = 0;
+    int n_channels = 0;
+
+    // - If the image is loaded
+    if (pixbuf != NULL)
+    {
+        // - Gets the pixel buffer of the pixbuf storage
+        pixels = gdk_pixbuf_get_pixels(pixbuf);
+        // - Gets the number of columns
+        rowstride = gdk_pixbuf_get_rowstride(pixbuf);
+        // - Gets the number of color channels
+        n_channels = gdk_pixbuf_get_n_channels(pixbuf);
+        // - Gets the coordinates of the mouse event click
+        x = event->x;
+        y = event->y;
+
+        // - Process the address of the pixel at the right coordinates
+        // - (Just like in a Matrix)
+        pixel = pixels + y * rowstride + x * n_channels;
+
+        color.r = pixel[0];
+        color.g = pixel[1];
+        color.b = pixel[2];
+    }
+
+    return color;
+}
+
 void colorPicker()
 {
     // - Init gtk
@@ -45,13 +92,15 @@ void colorPicker()
     }
 
     // - Gets the widgets
-    GtkWindow* window = GTK_WINDOW(gtk_builder_get_object(builder,"window_main"));
+    GtkWindow* window = GTK_WINDOW(gtk_builder_get_object(builder,"window"));
     GtkMenuItem* menuitm_open = GTK_MENU_ITEM(
             gtk_builder_get_object(builder, "menuitm_open"));
     GtkFileChooserDialog* dlg_file_chooser = GTK_FILE_CHOOSER_DIALOG(
             gtk_builder_get_object(builder, "dlg_file_chooser"));
     GtkImage* img_main = GTK_IMAGE(gtk_builder_get_object(builder,
                 "img_main"));
+    GtkEventBox* img_event_box = GTK_EVENT_BOX(gtk_builder_get_object(builder,
+                "img_event_box"));
 
     g_object_ref_sink(builder);
 
@@ -65,15 +114,12 @@ void colorPicker()
 
     // - Connects signal handlers
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-    g_signal_connect(menuitm_open, "activate", 
+    g_signal_connect(menuitm_open, "activate",
             G_CALLBACK(on_menuitm_open_activate), &ui);
+    g_signal_connect(img_event_box, "button_press_event",
+            G_CALLBACK(on_img_main_clicked), &ui);
 
     g_object_unref(builder);
 
     gtk_main();
-
-    gtk_widget_destroy(GTK_WIDGET(window));
-    gtk_widget_destroy(GTK_WIDGET(menuitm_open));
-    gtk_widget_destroy(GTK_WIDGET(dlg_file_chooser));
-    gtk_widget_destroy(GTK_WIDGET(img_main));
 }
