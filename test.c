@@ -4,6 +4,16 @@
 
 #include "queue.h"
 #include "imageFilter.h"
+#include "vector.h"
+
+void print_vec(struct vector *v )
+{
+    printf("size = %ld \n capacity = %ld \n", v->size,v->capacity);
+    for(size_t i = 0; i < v->size;i++)
+    {
+        printf("%ld -> %p\n",i,*(v->data + i));
+    }
+}
 
 void printNode(QueueNode *qN)
 {
@@ -49,6 +59,21 @@ void testQueue()
     printf("==== Queue Testing Done ====\n");
 }
 
+void testvector()
+{
+
+    printf("==== Testing Vector ====\n");
+    struct vector *v = vector_new(1);
+    int x = 1;
+    int *y = &x;
+    vector_push(v,y);
+    print_vec(v);
+    printf("===== pop =====");
+    vector_pop(v,(void **)&y);
+    print_vec(v);
+    vector_free(v);
+}
+
 void testImageFilter()
 {
     printf("==== Testing imageFilter ====\n");
@@ -73,6 +98,10 @@ int main(int argc, char *argv[])
         else if (strcmp(argv[currentArg], "imageFilter") == 0)
         {
             testImageFilter();
+        }
+        else if (strcmp(argv[currentArg], "testvector") == 0)
+        {
+            testvector();
         }
         else //default
         {

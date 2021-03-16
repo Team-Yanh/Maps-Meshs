@@ -1,15 +1,15 @@
 #include <err.h>
 #include "vector.h"
 
-struct vector *vector_new()
+struct vector *vector_new(size_t size)
 {
     struct vector *newvec = malloc(sizeof(struct vector));
     if(!newvec)
         errx(1,"Not enough memory");
-    newvec->data = calloc(1,sizeof(void *));
+    newvec->data = calloc(1,sizeof(void *) * size);
     if(!(newvec->data))
         errx(1,"Not enough memory!");
-    newvec->capacity = 1;
+    newvec->capacity = size;
     newvec->size = 0;
     return newvec;
 }
