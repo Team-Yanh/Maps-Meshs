@@ -20,7 +20,7 @@ void vector_free(struct vector *v)
     free(v);
 }
 
-void double_capacity(struct vector *v)
+static void double_capacity(struct vector *v)
 {
     v->data = realloc(v->data,v->capacity * sizeof(void *));
     v->capacity *= 2;
