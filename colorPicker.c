@@ -1,6 +1,6 @@
-#include <SDL/SDL.h>
 #include <gtk/gtk.h>
 #include "colorPicker.h"
+#include "imageFilter.h"
 
 void on_menuitm_open_activate(unused GtkButton* button, gpointer user_data)
 {
@@ -30,7 +30,7 @@ void on_menuitm_open_activate(unused GtkButton* button, gpointer user_data)
     gtk_widget_hide(GTK_WIDGET(ui->dlg_file_chooser));
 }
 
-SDL_Color on_img_main_clicked(unused GtkEventBox* img_event_box,
+RGB on_img_main_clicked(unused GtkEventBox* img_event_box,
         GdkEventButton *event, gpointer user_data)
 {
     // - Gets our variable ui
@@ -41,7 +41,7 @@ SDL_Color on_img_main_clicked(unused GtkEventBox* img_event_box,
     guchar* pixels = NULL;
     guchar* pixel = NULL;
 
-    SDL_Color color = {0, 0, 0, 0};
+    RGB rgb = {0, 0, 0};
 
     // - Coordinates of the mouse click
     int x = 0;
@@ -68,12 +68,12 @@ SDL_Color on_img_main_clicked(unused GtkEventBox* img_event_box,
         // - (Just like in a Matrix)
         pixel = pixels + y * rowstride + x * n_channels;
 
-        color.r = pixel[0];
-        color.g = pixel[1];
-        color.b = pixel[2];
+        rgb.r = pixel[0];
+        rgb.g = pixel[1];
+        rgb.b = pixel[2];
     }
 
-    return color;
+    return rgb;
 }
 
 void colorPicker()

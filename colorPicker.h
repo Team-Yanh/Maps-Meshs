@@ -7,7 +7,7 @@
     #define unused
 #endif
 
-#include <SDL/SDL.h>
+#include "imageFilter.h"
 
 typedef struct UserInterface
 {
@@ -18,7 +18,7 @@ typedef struct UserInterface
 } UserInterface;
 
 void on_menuitm_open_activate(GtkButton* button, gpointer user_data);
-SDL_Color on_img_main_clicked(GtkEventBox* img_event_box, GdkEventButton* event, gpointer user_data);
+RGB on_img_main_clicked(GtkEventBox* img_event_box, GdkEventButton* event, gpointer user_data);
 void colorPicker();
 
 #endif

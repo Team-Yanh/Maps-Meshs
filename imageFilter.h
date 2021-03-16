@@ -5,6 +5,13 @@
 #include "filters.h"
 #include "queue.h"
 
+typedef struct RGB
+{
+    Uint8 r;
+    Uint8 g;
+    Uint8 b;
+} RGB;
+
 Uint32 getPixel(SDL_Surface *surface, int x, int y);
 void putPixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
 void forEachPixel(SDL_Surface *image, void(*f)(Uint8 *r, Uint8 *g, Uint8 *b));
