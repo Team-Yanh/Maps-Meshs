@@ -9,16 +9,31 @@
 
 #include "imageFilter.h"
 
+typedef struct Image
+{
+    GdkPixbuf* pixbuf;
+    guchar* pixels;
+    int rowstride;
+    int n_channels;
+    int width;
+    int height;
+} Image;
+
 typedef struct UserInterface
 {
     GtkWindow* window;
-    GtkMenuItem* menuitm_open;
+    GtkButton* img_open_btn;
+    GtkButton* color_picker_btn;
     GtkFileChooserDialog* dlg_file_chooser;
+    GtkEventBox* img_event_box;
     GtkImage* img_main;
+    Image* img_loaded;
+    guint handler_id;
 } UserInterface;
 
-void on_menuitm_open_activate(GtkButton* button, gpointer user_data);
+void on_img_open_btn_clicked(GtkButton* button, gpointer user_data);
 RGB on_img_main_clicked(GtkEventBox* img_event_box, GdkEventButton* event, gpointer user_data);
+void on_color_picker_btn_clicked(GtkButton* button, gpointer user_data);
 void colorPicker();
 
 #endif
