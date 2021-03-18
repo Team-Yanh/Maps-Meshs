@@ -24,9 +24,11 @@ typedef struct UserInterface
     GtkWindow* window;
     GtkButton* img_open_btn;
     GtkButton* color_picker_btn;
+    GtkColorChooser* color_wheel_btn;
     GtkFileChooserDialog* dlg_file_chooser;
     GtkEventBox* img_event_box;
     GtkImage* img_main;
+    GtkScale* zoom_wheel;
     Image* img_loaded;
     guint handler_id;
 } UserInterface;

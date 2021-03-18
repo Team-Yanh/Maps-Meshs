@@ -50,7 +50,8 @@ RGB on_img_main_clicked(unused GtkEventBox* img_event_box,
 {
     // - Gets our variable ui
     UserInterface* ui = user_data;
-    RGB rgb = {0, 0, 0};
+    RGB rgb = {255, 255, 255};
+    GdkRGBA col = {255, 255, 255, 1};
 
     // - Coordinates of the mouse click
     int x = event->x;
@@ -67,22 +68,33 @@ RGB on_img_main_clicked(unused GtkEventBox* img_event_box,
         pixel = ui->img_loaded->pixels + y * ui->img_loaded->rowstride + x
             * ui->img_loaded->n_channels;
 
+        // - Gets the rgb values from the pixel
         rgb.r = pixel[0];
         rgb.g = pixel[1];
         rgb.b = pixel[2];
 
-        g_signal_handler_disconnect(img_event_box, ui->handler_id);
-        ui->handler_id = 0;
+        // - Sets the values to set in the color wheel btn
+        col.red = (double)rgb.r/255.0;
+        col.green = (double)rgb.g/255.0;
+        col.blue = (double)rgb.b/255.0;
     }
 
-    g_print("Rouge: %d\nVert: %d\nBleu: %d\n", rgb.r, rgb.g, rgb.b);
+    // - Sets the color of the color wheel
+    gtk_color_chooser_set_rgba(ui->color_wheel_btn, &col);
+
+    // - Disconnects the signal of the colorpicker
+    g_signal_handler_disconnect(img_event_box, ui->handler_id);
+        ui->handler_id = 0;
 
     return rgb;
 }
 
 void on_color_picker_btn_clicked(unused GtkButton* button, gpointer user_data)
 {
+    // - Gets the ui
     UserInterface* ui = user_data;
+
+    // - If the signal is not already connected, then connects
     if (ui->handler_id == 0)
         ui->handler_id = g_signal_connect(ui->img_event_box,
                 "button_press_event", G_CALLBACK(on_img_main_clicked),
@@ -113,24 +125,29 @@ void colorPicker()
     GtkFileChooserDialog* dlg_file_chooser = GTK_FILE_CHOOSER_DIALOG(
             gtk_builder_get_object(builder, "dlg_file_chooser"));
     GtkImage* img_main = GTK_IMAGE(gtk_builder_get_object(builder,
-                "img_main"));
+            "img_main"));
     GtkEventBox* img_event_box = GTK_EVENT_BOX(gtk_builder_get_object(builder,
-                "img_event_box"));
+            "img_event_box"));
+    GtkColorChooser* color_wheel_btn = GTK_COLOR_CHOOSER(gtk_builder_get_object(
+            builder, "color_wheel_btn"));
+    GtkScale* zoom_wheel = GTK_SCALE(gtk_builder_get_object(builder, 
+            "zoom_wheel"));
 
-    //g_object_ref_sink(builder);
+    g_object_ref_sink(builder);
 
     // - Define our struct ui with the widgets we got from the builder
     UserInterface ui = {
         .window = window,
         .img_open_btn = img_open_btn,
         .color_picker_btn = color_picker_btn,
+        .color_wheel_btn = color_wheel_btn,
         .dlg_file_chooser = dlg_file_chooser,
         .img_event_box = img_event_box,
         .img_main = img_main,
+        .zoom_wheel = zoom_wheel,
         .img_loaded = calloc(1, sizeof(Image)),
         .handler_id = 0,
     };
-
 
     // - Connects signal handlers
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
@@ -138,8 +155,6 @@ void colorPicker()
             G_CALLBACK(on_img_open_btn_clicked), &ui);
     g_signal_connect(color_picker_btn, "clicked",
             G_CALLBACK(on_color_picker_btn_clicked), &ui);
-
-    g_object_unref(builder);
 
     gtk_main();
 
