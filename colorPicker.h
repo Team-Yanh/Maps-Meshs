@@ -9,16 +9,6 @@
 
 #include "imageFilter.h"
 
-typedef struct Image
-{
-    GdkPixbuf* pixbuf;
-    guchar* pixels;
-    int rowstride;
-    int n_channels;
-    int width;
-    int height;
-} Image;
-
 typedef struct UserInterface
 {
     GtkWindow* window;
@@ -29,8 +19,10 @@ typedef struct UserInterface
     GtkEventBox* img_event_box;
     GtkImage* img_main;
     GtkScale* zoom_wheel;
-    Image* img_loaded;
     guint handler_id;
+    GdkPixbuf* loaded_pixbuf;
+    GdkPixbuf* displayed_pixbuf;
+    GtkAdjustment* zoom;
 } UserInterface;
 
 void on_img_open_btn_clicked(GtkButton* button, gpointer user_data);

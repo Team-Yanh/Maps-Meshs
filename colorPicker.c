@@ -7,7 +7,7 @@ void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
     // - Gets our variable ui
     UserInterface* ui = user_data;
 
-    gchar* file_name = NULL;
+    gchar* filename = NULL;
 
     // - Display the dialog box file chooser;
     gtk_widget_show(GTK_WIDGET(ui->dlg_file_chooser));
@@ -16,28 +16,24 @@ void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
     if (gtk_dialog_run(GTK_DIALOG(ui->dlg_file_chooser)) == GTK_RESPONSE_OK)
     {
         // - Gets the file name that were choosen
-        file_name = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(
-                    ui->dlg_file_chooser));
+        filename = gtk_file_chooser_get_filename(
+                GTK_FILE_CHOOSER(ui->dlg_file_chooser));
 
         // - If the filename exists
-        if (file_name != NULL)
+        if (filename != NULL)
         {
-            GdkPixbuf* pixbuf = NULL;
+            // - Create the saved pixbuf and the display pixbuf
+            ui->loaded_pixbuf= gdk_pixbuf_new_from_file(filename, NULL);
+            ui->displayed_pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
 
-            // - Sets the image on the ui
-            gtk_image_set_from_file(GTK_IMAGE(ui->img_main), file_name);
-            // - Gets the pixbuf storage of the image
-            pixbuf = gtk_image_get_pixbuf(ui->img_main);
+            // - Display image
+            gtk_image_set_from_pixbuf(ui->img_main, ui->displayed_pixbuf);
 
-            // - Initialize our image_loaded field of our ui
-            ui->img_loaded->pixbuf = pixbuf;
-            ui->img_loaded->pixels = gdk_pixbuf_get_pixels(pixbuf);
-            ui->img_loaded->rowstride = gdk_pixbuf_get_rowstride(pixbuf);
-            ui->img_loaded->n_channels = gdk_pixbuf_get_n_channels(pixbuf);
-            ui->img_loaded->width = gdk_pixbuf_get_width(pixbuf);
-            ui->img_loaded->height = gdk_pixbuf_get_height(pixbuf);
+            // - Sets the scale to 1
+            gtk_adjustment_set_value(ui->zoom, 1.0);
 
-            g_free(file_name);
+
+            g_free(filename);
         }
     }
 
@@ -57,16 +53,21 @@ RGB on_img_main_clicked(unused GtkEventBox* img_event_box,
     int x = event->x;
     int y = event->y;
 
+    // - Informations about the image
+    int rowstride = gdk_pixbuf_get_rowstride(ui->displayed_pixbuf);
+    int n_channels = gdk_pixbuf_get_n_channels(ui->displayed_pixbuf);
+    int width = gdk_pixbuf_get_width(ui->displayed_pixbuf);
+    int height = gdk_pixbuf_get_height(ui->displayed_pixbuf);
+
     // - If the image is loaded
-    if (ui->img_loaded->pixbuf != NULL && x < ui->img_loaded->width
-            && y < ui->img_loaded->height)
+    if (x < width && y < height)
     {
         guchar* pixel = NULL;
+        guchar* pixels = gdk_pixbuf_get_pixels(ui->displayed_pixbuf);
 
         // - Process the address of the pixel at the right coordinates
         // - (Just like in a Matrix)
-        pixel = ui->img_loaded->pixels + y * ui->img_loaded->rowstride + x
-            * ui->img_loaded->n_channels;
+        pixel = pixels + y * rowstride + x * n_channels;
 
         // - Gets the rgb values from the pixel
         rgb.r = pixel[0];
@@ -95,10 +96,37 @@ void on_color_picker_btn_clicked(unused GtkButton* button, gpointer user_data)
     UserInterface* ui = user_data;
 
     // - If the signal is not already connected, then connects
-    if (ui->handler_id == 0)
+    if (ui->handler_id == 0 && ui->displayed_pixbuf != NULL)
         ui->handler_id = g_signal_connect(ui->img_event_box,
                 "button_press_event", G_CALLBACK(on_img_main_clicked),
                 user_data);
+}
+
+void on_zoom(unused GtkScale* zoom_wheel, gpointer user_data)
+{
+    // - Gets ui
+    UserInterface* ui = user_data;
+
+    double zoom_value = 0;
+    int width = 0;
+    int height = 0;
+
+    if (ui->displayed_pixbuf != NULL)
+    {
+        // - Gets the zoom value
+        zoom_value = gtk_adjustment_get_value(ui->zoom);
+
+        // - Computes the new width and height of the scaled image
+        width = gdk_pixbuf_get_width(ui->loaded_pixbuf) * zoom_value;
+        height = gdk_pixbuf_get_height(ui->loaded_pixbuf) * zoom_value;
+
+        // - Scale the pixbuf
+        ui->displayed_pixbuf = gdk_pixbuf_scale_simple(ui->loaded_pixbuf, width,
+                height, GDK_INTERP_BILINEAR);
+
+        // - Display the image
+        gtk_image_set_from_pixbuf(ui->img_main, ui->displayed_pixbuf);
+    }
 }
 
 void colorPicker()
@@ -132,6 +160,8 @@ void colorPicker()
             builder, "color_wheel_btn"));
     GtkScale* zoom_wheel = GTK_SCALE(gtk_builder_get_object(builder, 
             "zoom_wheel"));
+    GtkAdjustment* zoom = GTK_ADJUSTMENT(gtk_builder_get_object(builder,
+            "zoom_adjustment"));
 
     g_object_ref_sink(builder);
 
@@ -145,8 +175,10 @@ void colorPicker()
         .img_event_box = img_event_box,
         .img_main = img_main,
         .zoom_wheel = zoom_wheel,
-        .img_loaded = calloc(1, sizeof(Image)),
         .handler_id = 0,
+        .loaded_pixbuf = NULL,
+        .displayed_pixbuf = NULL,
+        .zoom = zoom,
     };
 
     // - Connects signal handlers
@@ -155,8 +187,7 @@ void colorPicker()
             G_CALLBACK(on_img_open_btn_clicked), &ui);
     g_signal_connect(color_picker_btn, "clicked",
             G_CALLBACK(on_color_picker_btn_clicked), &ui);
+    g_signal_connect(zoom_wheel, "value-changed", G_CALLBACK(on_zoom), &ui);
 
     gtk_main();
-
-    free(ui.img_loaded);
 }
