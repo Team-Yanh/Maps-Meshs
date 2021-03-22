@@ -122,7 +122,7 @@ void setHSV(Color *c, float h, float s, float v)
 
     c->rgb = HSVToRGB(c->hsv);
     c->pixel = SDL_MapRGB(c->format,
-        c->rgb->r, c->rgb->g, c->rgb->b);
+            c->rgb->r, c->rgb->g, c->rgb->b);
 }
 
 void setPixel(Color *c, Uint32 pixel)
@@ -131,7 +131,7 @@ void setPixel(Color *c, Uint32 pixel)
 
     Uint8 r, g, b;
     SDL_GetRGB(c->pixel, c->format,
-     &r, &g, &b);
+            &r, &g, &b);
     c->rgb->r = r;
     c->rgb->g = g;
     c->rgb->b = b;
@@ -220,7 +220,6 @@ void forEachPixel(SDL_Surface *image, void (*filter)(Color *c))
             setPixel(c, getPixel(image, i, j));
             filter(c);
             putPixel(image, i, j, c->pixel);
-            
         }
     }
     SDL_UnlockSurface(image);
@@ -281,8 +280,8 @@ Uint32 distanceToColorHSV(Color *c1, Color *c2)
 Uint32 distanceToColor(Color *c1, Color *c2)
 {
     return (Uint32)sqrt( (c1->rgb->r - c2->rgb->r)*(c1->rgb->r - c2->rgb->r) +
-     (c1->rgb->b - c2->rgb->b)*(c1->rgb->b - c2->rgb->b) + 
-     (c1->rgb->g - c2->rgb->g)*(c1->rgb->g - c2->rgb->g));
+            (c1->rgb->b - c2->rgb->b)*(c1->rgb->b - c2->rgb->b) + 
+            (c1->rgb->g - c2->rgb->g)*(c1->rgb->g - c2->rgb->g));
 }
 
 void invert(Color *c)
@@ -299,17 +298,18 @@ void grayscale(Color *c)
 void stepColoring(Color *c)
 {
     setRGB(c , c->rgb->r - (c->rgb->r % 25),
-        c->rgb->g - (c->rgb->g % 25), c->rgb->b - (c->rgb->b % 25));
+            c->rgb->g - (c->rgb->g % 25), c->rgb->b - (c->rgb->b % 25));
 }
 
 void enhanceBlack(Color *c)
 {
     Uint32 distanceToBlack = (Uint32) sqrt( (c->rgb->r * c->rgb->r) +
-        (c->rgb->g * c->rgb->g) + (c->rgb->b * c->rgb->b) );
+            (c->rgb->g * c->rgb->g) + (c->rgb->b * c->rgb->b) );
     if(distanceToBlack < 100)
-    {
-        setRGB(c, 0, 0, 0);
-    }
+        if(distanceToBlack < 100)
+        {
+            setRGB(c, 0, 0, 0);
+        }
 }
 
 void removeGreen(Color *c)
@@ -393,7 +393,7 @@ void cleanGray(Color *c)
 {
     Color *gray = initColor(c->format);
     Uint8 grayValue = (c->rgb->r + c->rgb->g + c->rgb->b) / 3;
-    
+
     setRGB(c, gray, gray, gray);
     Uint32 distance = distanceToColor(c, gray);
 
@@ -402,4 +402,45 @@ void cleanGray(Color *c)
         setRGB(c, 255, 255, 255);
     }
     freeColor(gray);
+}
+
+int isSameColor(Color *c, Color *c2)
+{
+    return c->rgb->r == c2->rgb->r &&
+        c->rgb->g == c2->rgb->g &&
+        c->rgb->b == c2->rgb->b;
+}
+
+int isValidNeighbour(SDL_Surface *image, int x, int y)
+{
+    Color *white = initColor(image->format);
+    setRGB(white, 255, 255, 255);
+    Color *currentCellColor = initColor(image->format);
+    int res = isValidCell(image, x, y);
+    if(res == 1)
+    {
+        setPixel(currentCellColor, getPixel(image, x, y));
+        res = isSameColor(white, currentCellColor);
+    }
+    freeColor(white);
+    freeColor(currentCellColor);
+    return res;
+}
+
+void colorZoneDFS(SDL_Surface *image, Color *c, int x, int y)
+{
+    putPixel(image, x, y, c->pixel);
+    if(isValidNeighbour(image, x-1, y))
+        colorZoneDFS(image, c, x-1, y);
+    if(isValidNeighbour(image, x+1, y))
+        colorZoneDFS(image, c, x+1, y);
+    if(isValidNeighbour(image, x, y-1))
+        colorZoneDFS(image, c, x, y-1);
+    if(isValidNeighbour(image, x, y+1))
+        colorZoneDFS(image, c, x, y+1);
+}
+
+void colorZone(SDL_Surface *image, Color *c1, int x, int y)
+{
+    colorZoneDFS(image, c1, x, y);
 }

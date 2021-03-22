@@ -4,6 +4,7 @@
 #include "SDL/SDL_image.h"
 #include <math.h>
 #include "queue.h"
+#include "vector.h"
 
 typedef struct RGB
 {
@@ -42,7 +43,10 @@ void putPixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
 void forEachPixel(SDL_Surface *image, void(*f)(Color *c));
 void removeAllColors(SDL_Surface *image);
 void removeLetters(SDL_Surface *image);
-void colorZones(SDL_Surface *image);
+void colorZone(SDL_Surface *image, Color *c, int x, int y);
+void colorAllZones(SDL_Surface *image);
+int isValidCell(SDL_Surface *surface, int x, int y);
+int isSameColor(Color *c1, Color *c2);
 void thickenColor(SDL_Surface *surface, Color *c);
 Uint32 findAverageColor(SDL_Surface *image);
 void setMonochromatic(SDL_Surface *image, Color *c);
@@ -58,4 +62,3 @@ void removeGreen(Color *c);
 void keepTopoLine(Color *c);
 void keepTopoLineHSV(Color *c);
 void cleanGray(Color *c);
-void setMonochromatic(SDL_Surface *image, Color *c);

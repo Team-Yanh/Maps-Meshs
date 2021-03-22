@@ -1,6 +1,6 @@
-CC= gcc -fsanitize=address
-CFLAGS = -Wall -Wextra -g
-LDFLAGS =
+CC= gcc
+CFLAGS = -fsanitize=address -Wall -Wextra -g
+LDFLAGS = -fsanitize=address -static-libasan
 LDLIBS = $(shell pkg-config --libs SDL_image) -lm
 
 OBJ = queue.o imageFilter.o main.o
