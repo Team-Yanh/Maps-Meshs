@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <gtk/gtk.h>
 #include "colorPicker.h"
 #include "imageFilter.h"
@@ -87,6 +88,11 @@ RGB on_img_main_clicked(unused GtkEventBox* img_event_box,
     g_signal_handler_disconnect(img_event_box, ui->handler_id);
         ui->handler_id = 0;
 
+    // - Update the values of the rgb_entries
+    set_rgb_entry_value(ui->rgb_entries[0], rgb.r);
+    set_rgb_entry_value(ui->rgb_entries[1], rgb.g);
+    set_rgb_entry_value(ui->rgb_entries[2], rgb.b);
+
     return rgb;
 }
 
@@ -122,11 +128,92 @@ void on_zoom(unused GtkScale* zoom_wheel, gpointer user_data)
 
         // - Scale the pixbuf
         ui->displayed_pixbuf = gdk_pixbuf_scale_simple(ui->loaded_pixbuf, width,
-                height, GDK_INTERP_BILINEAR);
+                height, GDK_INTERP_NEAREST);
 
         // - Display the image
         gtk_image_set_from_pixbuf(ui->img_main, ui->displayed_pixbuf);
     }
+}
+
+void set_rgb_entry_value(GtkEntry* text_holder, int value)
+{
+    char s[] = "0  ";
+    size_t i = 0;
+
+    if (value >= 0 || value <= 255)
+    {
+        // - Determines the beginning of the char
+        if (value < 10)
+            i = 0;
+        else if (value < 100)
+            i = 1;
+        else
+            i = 2;
+
+        // - Performs ITOA
+        while (value > 0)
+        {
+            // - Retrieve actual unit
+            char c = value % 10;
+
+            // - Converts it to char and puts it in the string
+            s[i] = c + 48;
+
+            i--;
+            value /= 10;
+        }
+    }
+
+    // - Sets the value
+    gtk_entry_set_text(text_holder, s);
+}
+
+double retrieve_color_value(GtkEntry* text_holder)
+{
+    // - Gets the text that is written in text_holder
+    const gchar* s = gtk_entry_get_text(text_holder);
+
+    // - Converts the string in int then in double
+    double v = atoi(s);
+
+    // - Readjusting value if needed
+    // - First, if value is inferrior or equal to 0 and the string is not
+    // - equal to null string then the string is containing a 0 or a letter
+    if (v <= 0 && s[0] != 0)
+    {
+        v = 0;
+        gtk_entry_set_text(text_holder, "0");
+    }
+    // - Then if the value is superior to 255 we clamp it to 255
+    else if (v > 255)
+    {
+        v = 255;
+        gtk_entry_set_text(text_holder, "255");
+    }
+
+    return v;
+}
+
+void update_rgb_value(unused GtkEditable* label, gpointer user_data)
+{
+    // - Gets the user interface
+    UserInterface* ui = user_data;
+
+    GdkRGBA col = {0, 0, 0, 1};
+
+    // - Gets the values of the different labels
+    col.red = retrieve_color_value(ui->rgb_entries[0]);
+    col.green = retrieve_color_value(ui->rgb_entries[1]);
+    col.blue = retrieve_color_value(ui->rgb_entries[2]);
+
+    // - Convertes these values between 0 and 1 to be able to set the color of
+    // - the color wheel
+    col.red /= 255;
+    col.green /= 255;
+    col.blue /= 255;
+
+    // - Sets the color wheel color
+    gtk_color_chooser_set_rgba(ui->color_wheel_btn, &col);
 }
 
 void colorPicker()
@@ -162,6 +249,9 @@ void colorPicker()
             "zoom_wheel"));
     GtkAdjustment* zoom = GTK_ADJUSTMENT(gtk_builder_get_object(builder,
             "zoom_adjustment"));
+    GtkEntry* r_entry= GTK_ENTRY(gtk_builder_get_object(builder, "r_entry"));
+    GtkEntry* g_entry= GTK_ENTRY(gtk_builder_get_object(builder, "g_entry"));
+    GtkEntry* b_entry= GTK_ENTRY(gtk_builder_get_object(builder, "b_entry"));
 
     g_object_ref_sink(builder);
 
@@ -179,6 +269,11 @@ void colorPicker()
         .loaded_pixbuf = NULL,
         .displayed_pixbuf = NULL,
         .zoom = zoom,
+        .rgb_entries= {
+            r_entry,
+            g_entry,
+            b_entry
+        }
     };
 
     // - Connects signal handlers
@@ -188,6 +283,12 @@ void colorPicker()
     g_signal_connect(color_picker_btn, "clicked",
             G_CALLBACK(on_color_picker_btn_clicked), &ui);
     g_signal_connect(zoom_wheel, "value-changed", G_CALLBACK(on_zoom), &ui);
+    g_signal_connect(GTK_EDITABLE(r_entry), "changed",
+            G_CALLBACK(update_rgb_value), &ui);
+    g_signal_connect(GTK_EDITABLE(g_entry), "changed",
+            G_CALLBACK(update_rgb_value), &ui);
+    g_signal_connect(GTK_EDITABLE(b_entry), "changed",
+            G_CALLBACK(update_rgb_value), &ui);
 
     gtk_main();
 }

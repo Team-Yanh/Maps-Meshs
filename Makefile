@@ -16,15 +16,6 @@ main.o: main.c colorPicker.h
 colorPicker.o: colorPicker.c colorPicker.h
 	$(CC) -o colorPicker.o -c colorPicker.c $(CFLAGS) $(GTKFLAGS) $(LDLIBS)
 
-opengl: glad.o opengl.o
-	$(CC) -o opengl glad.o opengl.o $(CFLAGS) $(OGLFLAGS)
-
-opengl.o : glad.o opengl.c
-	$(CC) -o opengl.o -c opengl.c $(CFLAGS) $(OGLFLAGS)
-
-glad.o : glad.c
-	$(CC) -o glad.o -c glad.c $(CFLAGS)
-
 imageFilter.o : filters.o imageFilter.h imageFilter.c
 filters.o : filters.h filters.c
 queue.o : queue.h queue.c

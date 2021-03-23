@@ -23,11 +23,16 @@ typedef struct UserInterface
     GdkPixbuf* loaded_pixbuf;
     GdkPixbuf* displayed_pixbuf;
     GtkAdjustment* zoom;
+    GtkEntry* rgb_entries[3];
 } UserInterface;
+
+void set_rgb_entry_value(GtkEntry* text_holder, int value);
+double retrieve_color_value(GtkEntry* text_holder);
 
 void on_img_open_btn_clicked(GtkButton* button, gpointer user_data);
 RGB on_img_main_clicked(GtkEventBox* img_event_box, GdkEventButton* event, gpointer user_data);
 void on_color_picker_btn_clicked(GtkButton* button, gpointer user_data);
+void update_rgb_value(GtkEditable* label, gpointer user_data);
 void colorPicker();
 
 #endif
