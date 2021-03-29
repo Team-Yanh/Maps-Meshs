@@ -215,6 +215,21 @@ void update_rgb_value(unused GtkEditable* label, gpointer user_data)
     gtk_color_chooser_set_rgba(ui->color_wheel_btn, &col);
 }
 
+void update_color_wheel_value(unused GtkColorButton* btn, gpointer user_data)
+{
+    UserInterface* ui = user_data;
+    GdkRGBA color;
+
+    // - Gets the color picked by the color wheel btn
+    gtk_color_chooser_get_rgba(ui->color_wheel_btn, &color);
+
+    // - Sets the value into the fields rgb
+
+    set_rgb_entry_value(ui->rgb_entries[0], color.red * 255);
+    set_rgb_entry_value(ui->rgb_entries[1], color.green * 255);
+    set_rgb_entry_value(ui->rgb_entries[2], color.blue * 255);
+}
+
 void colorPicker()
 {
     // - Init gtk
@@ -270,6 +285,8 @@ void colorPicker()
             G_CALLBACK(update_rgb_value), ui);
     g_signal_connect(GTK_EDITABLE(ui->rgb_entries[2]), "changed",
             G_CALLBACK(update_rgb_value), ui);
+    g_signal_connect(GTK_COLOR_BUTTON(ui->color_wheel_btn), "color-set",
+            G_CALLBACK(update_color_wheel_value), ui);
 
     gtk_main();
 
