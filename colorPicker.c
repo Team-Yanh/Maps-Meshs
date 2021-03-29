@@ -33,7 +33,6 @@ void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
             // - Sets the scale to 1
             gtk_adjustment_set_value(ui->zoom, 1.0);
 
-
             g_free(filename);
         }
     }
@@ -221,74 +220,58 @@ void colorPicker()
     // - Init gtk
     gtk_init(NULL, NULL); 
     // - Loads the UI description and builds it
-    GtkBuilder* builder = gtk_builder_new();
-    GError* error = NULL;
+    GtkBuilder* builder = NULL;
+    UserInterface* ui = g_slice_new(UserInterface);
 
     // - Managing error
-    if (gtk_builder_add_from_file(builder, "ui.glade", &error) == 0)
-    {
-        g_printerr("Error loading file: %s\n", error->message);
-        g_clear_error(&error);
-    }
+    builder = gtk_builder_new_from_file("ui.glade");
 
     // - Gets the widgets
-    GtkWindow* window = GTK_WINDOW(gtk_builder_get_object(builder,"window"));
-    GtkButton* img_open_btn= GTK_BUTTON(
+    ui->window = GTK_WINDOW(gtk_builder_get_object(builder,"window"));
+    ui->img_open_btn= GTK_BUTTON(
             gtk_builder_get_object(builder, "img_open_btn"));
-    GtkButton* color_picker_btn = GTK_BUTTON(
+    ui->color_picker_btn = GTK_BUTTON(
             gtk_builder_get_object(builder, "color_picker_btn"));
-    GtkFileChooserDialog* dlg_file_chooser = GTK_FILE_CHOOSER_DIALOG(
+    ui->dlg_file_chooser = GTK_FILE_CHOOSER_DIALOG(
             gtk_builder_get_object(builder, "dlg_file_chooser"));
-    GtkImage* img_main = GTK_IMAGE(gtk_builder_get_object(builder,
+    ui->img_main = GTK_IMAGE(gtk_builder_get_object(builder,
             "img_main"));
-    GtkEventBox* img_event_box = GTK_EVENT_BOX(gtk_builder_get_object(builder,
+    ui->img_event_box = GTK_EVENT_BOX(gtk_builder_get_object(builder,
             "img_event_box"));
-    GtkColorChooser* color_wheel_btn = GTK_COLOR_CHOOSER(gtk_builder_get_object(
+    ui->color_wheel_btn = GTK_COLOR_CHOOSER(gtk_builder_get_object(
             builder, "color_wheel_btn"));
-    GtkScale* zoom_wheel = GTK_SCALE(gtk_builder_get_object(builder, 
+    ui->zoom_wheel = GTK_SCALE(gtk_builder_get_object(builder, 
             "zoom_wheel"));
-    GtkAdjustment* zoom = GTK_ADJUSTMENT(gtk_builder_get_object(builder,
+    ui->zoom = GTK_ADJUSTMENT(gtk_builder_get_object(builder,
             "zoom_adjustment"));
-    GtkEntry* r_entry= GTK_ENTRY(gtk_builder_get_object(builder, "r_entry"));
-    GtkEntry* g_entry= GTK_ENTRY(gtk_builder_get_object(builder, "g_entry"));
-    GtkEntry* b_entry= GTK_ENTRY(gtk_builder_get_object(builder, "b_entry"));
+    ui->rgb_entries[0] = GTK_ENTRY(gtk_builder_get_object(builder,
+                "r_entry"));
+    ui->rgb_entries[1] = GTK_ENTRY(gtk_builder_get_object(builder,
+                "g_entry"));
+    ui->rgb_entries[2] = GTK_ENTRY(gtk_builder_get_object(builder,
+                "b_entry"));
+    ui->handler_id = 0;
+    ui->loaded_pixbuf = NULL;
+    ui->displayed_pixbuf = NULL;
 
-    g_object_ref_sink(builder);
-
-    // - Define our struct ui with the widgets we got from the builder
-    UserInterface ui = {
-        .window = window,
-        .img_open_btn = img_open_btn,
-        .color_picker_btn = color_picker_btn,
-        .color_wheel_btn = color_wheel_btn,
-        .dlg_file_chooser = dlg_file_chooser,
-        .img_event_box = img_event_box,
-        .img_main = img_main,
-        .zoom_wheel = zoom_wheel,
-        .handler_id = 0,
-        .loaded_pixbuf = NULL,
-        .displayed_pixbuf = NULL,
-        .zoom = zoom,
-        .rgb_entries= {
-            r_entry,
-            g_entry,
-            b_entry
-        }
-    };
+    // - Free bulder
+    g_object_unref(builder);
 
     // - Connects signal handlers
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-    g_signal_connect(img_open_btn, "clicked",
-            G_CALLBACK(on_img_open_btn_clicked), &ui);
-    g_signal_connect(color_picker_btn, "clicked",
-            G_CALLBACK(on_color_picker_btn_clicked), &ui);
-    g_signal_connect(zoom_wheel, "value-changed", G_CALLBACK(on_zoom), &ui);
-    g_signal_connect(GTK_EDITABLE(r_entry), "changed",
-            G_CALLBACK(update_rgb_value), &ui);
-    g_signal_connect(GTK_EDITABLE(g_entry), "changed",
-            G_CALLBACK(update_rgb_value), &ui);
-    g_signal_connect(GTK_EDITABLE(b_entry), "changed",
-            G_CALLBACK(update_rgb_value), &ui);
+    g_signal_connect(ui->window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+    g_signal_connect(ui->img_open_btn, "clicked",
+            G_CALLBACK(on_img_open_btn_clicked), ui);
+    g_signal_connect(ui->color_picker_btn, "clicked",
+            G_CALLBACK(on_color_picker_btn_clicked), ui);
+    g_signal_connect(ui->zoom_wheel, "value-changed", G_CALLBACK(on_zoom), ui);
+    g_signal_connect(GTK_EDITABLE(ui->rgb_entries[0]), "changed",
+            G_CALLBACK(update_rgb_value), ui);
+    g_signal_connect(GTK_EDITABLE(ui->rgb_entries[1]), "changed",
+            G_CALLBACK(update_rgb_value), ui);
+    g_signal_connect(GTK_EDITABLE(ui->rgb_entries[2]), "changed",
+            G_CALLBACK(update_rgb_value), ui);
 
     gtk_main();
+
+    g_slice_free(UserInterface, ui);
 }
