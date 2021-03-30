@@ -41,6 +41,24 @@ void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
     gtk_widget_hide(GTK_WIDGET(ui->dlg_file_chooser));
 }
 
+void on_treat_btn_clicked(unused GtkButton* button, gpointer user_data)
+{
+    UserInterface* ui = user_data;
+
+    // - Sets the image
+    gtk_image_set_from_file(ui->treated_img, "coding.jpg");
+
+    // - Shows the dlg window showing the treated img
+    gtk_widget_show(GTK_WIDGET(ui->dlg_window));
+
+    // - Waits the user to close the window
+    gtk_dialog_run(GTK_DIALOG(ui->dlg_window));
+
+    // - Hide the dialog window
+    gtk_widget_hide(GTK_WIDGET(ui->dlg_window));
+
+}
+
 RGB on_img_main_clicked(unused GtkEventBox* img_event_box,
         GdkEventButton *event, gpointer user_data)
 {
@@ -243,28 +261,27 @@ void colorPicker()
 
     // - Gets the widgets
     ui->window = GTK_WINDOW(gtk_builder_get_object(builder,"window"));
-    ui->img_open_btn= GTK_BUTTON(
-            gtk_builder_get_object(builder, "img_open_btn"));
+    ui->dlg_window= GTK_DIALOG(gtk_builder_get_object(builder,
+                "dlg_window"));
+    ui->img_open_btn= GTK_BUTTON(gtk_builder_get_object(builder,
+                "img_open_btn"));
+    ui->treat_btn = GTK_BUTTON(gtk_builder_get_object(builder, "treat_btn"));
     ui->color_picker_btn = GTK_BUTTON(
             gtk_builder_get_object(builder, "color_picker_btn"));
     ui->dlg_file_chooser = GTK_FILE_CHOOSER_DIALOG(
             gtk_builder_get_object(builder, "dlg_file_chooser"));
-    ui->img_main = GTK_IMAGE(gtk_builder_get_object(builder,
-            "img_main"));
+    ui->img_main = GTK_IMAGE(gtk_builder_get_object(builder, "img_main"));
+    ui->treated_img = GTK_IMAGE(gtk_builder_get_object(builder, "treated_img"));
     ui->img_event_box = GTK_EVENT_BOX(gtk_builder_get_object(builder,
             "img_event_box"));
     ui->color_wheel_btn = GTK_COLOR_CHOOSER(gtk_builder_get_object(
             builder, "color_wheel_btn"));
-    ui->zoom_wheel = GTK_SCALE(gtk_builder_get_object(builder, 
-            "zoom_wheel"));
+    ui->zoom_wheel = GTK_SCALE(gtk_builder_get_object(builder, "zoom_wheel"));
     ui->zoom = GTK_ADJUSTMENT(gtk_builder_get_object(builder,
-            "zoom_adjustment"));
-    ui->rgb_entries[0] = GTK_ENTRY(gtk_builder_get_object(builder,
-                "r_entry"));
-    ui->rgb_entries[1] = GTK_ENTRY(gtk_builder_get_object(builder,
-                "g_entry"));
-    ui->rgb_entries[2] = GTK_ENTRY(gtk_builder_get_object(builder,
-                "b_entry"));
+                "zoom_adjustment"));
+    ui->rgb_entries[0] = GTK_ENTRY(gtk_builder_get_object(builder, "r_entry"));
+    ui->rgb_entries[1] = GTK_ENTRY(gtk_builder_get_object(builder, "g_entry"));
+    ui->rgb_entries[2] = GTK_ENTRY(gtk_builder_get_object(builder, "b_entry"));
     ui->handler_id = 0;
     ui->loaded_pixbuf = NULL;
     ui->displayed_pixbuf = NULL;
@@ -276,6 +293,8 @@ void colorPicker()
     g_signal_connect(ui->window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     g_signal_connect(ui->img_open_btn, "clicked",
             G_CALLBACK(on_img_open_btn_clicked), ui);
+    g_signal_connect(ui->treat_btn, "clicked",
+            G_CALLBACK(on_treat_btn_clicked), ui);
     g_signal_connect(ui->color_picker_btn, "clicked",
             G_CALLBACK(on_color_picker_btn_clicked), ui);
     g_signal_connect(ui->zoom_wheel, "value-changed", G_CALLBACK(on_zoom), ui);
