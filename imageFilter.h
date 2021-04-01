@@ -40,15 +40,20 @@ void freeColor(Color *c);
 
 Uint32 getPixel(SDL_Surface *surface, int x, int y);
 void putPixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
+
 void forEachPixel(SDL_Surface *image, void(*f)(Color *c));
 void removeAllColors(SDL_Surface *image);
-void removeLetters(SDL_Surface *image);
-void colorZone(SDL_Surface *image, Color *c, int x, int y);
+void colorZoneDFS(SDL_Surface *image, Color *c, int x, int y);
+void colorCircles(SDL_Surface *image);
+int colorZoneBFS(SDL_Surface *image, Color *c, int x, int y);
+int colorZoneDFSCount(SDL_Surface *image, Color *c, int x, int y);
+
 void colorAllZones(SDL_Surface *image);
 int isValidCell(SDL_Surface *surface, int x, int y);
 int isSameColor(Color *c1, Color *c2);
+int isValidNeighbour(SDL_Surface *image, int x, int y);
+void replaceColor(SDL_Surface *image, Color *c1, Color *c2);
 void thickenColor(SDL_Surface *surface, Color *c);
-Uint32 findAverageColor(SDL_Surface *image);
 void setMonochromatic(SDL_Surface *image, Color *c);
 
 Uint32 distanceToColorHSV(Color *c, Color *c2);
@@ -58,7 +63,5 @@ void invert(Color *c);
 void grayscale(Color *c);
 void stepColoring(Color *c);
 void enhanceBlack(Color *c);
-void removeGreen(Color *c);
 void keepTopoLine(Color *c);
 void keepTopoLineHSV(Color *c);
-void cleanGray(Color *c);

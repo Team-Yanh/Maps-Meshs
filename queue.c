@@ -10,8 +10,10 @@ Queue *createQueue()
 
 void freeQueue(Queue *q)
 {
+    int x = 0;
+    int y = 0;
     while(q->rear != NULL)
-        dequeue(q, NULL, NULL);
+        dequeue(q, &x, &y);
     free(q);
 }
 QueueNode *createNode(int x, int y)
