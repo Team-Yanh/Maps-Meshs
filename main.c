@@ -28,14 +28,15 @@ int main(void /*int argc, char **argv*/)
 
     SDL_Rect rcDest = {0, 0, 0, 0};
 
-    forEachPixel(image, cleanGray);
-    forEachPixel(image, keepTopoLine);
+    //forEachPixel(image, cleanGray);
+    //forEachPixel(image, keepTopoLine);
     //forEachPixel(image, keepTopoLineHSV);
-    Uint32 topoColor = SDL_MapRGB(image->format, 203, 191, 171);
-    Uint32 red = SDL_MapRGB(image->format, 255, 0, 0);
+    //Uint32 topoColor = SDL_MapRGB(image->format, 203, 191, 171);
+    //Uint32 red = SDL_MapRGB(image->format, 255, 0, 0);
     //setMonochromatic(image, red);
     //thickenColor(image, red);
-
+    printf("starting         \n");
+    FindAllExtremity(image);
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
 
@@ -43,7 +44,7 @@ int main(void /*int argc, char **argv*/)
     SDL_SaveBMP(image, "images/out.bmp");
     SDL_FreeSurface(image);
     SDL_FreeSurface(screen);
-    SDL_Quit();
+//    SDL_Quit();
 
     return 0;
 }

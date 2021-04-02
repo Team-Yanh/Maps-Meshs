@@ -3,15 +3,18 @@
 
 int isMarkedCell(SDL_Surface *surface, int x, int y)
 {
-    Uint32 pixel = getPixel(surface,x,y);
-    SDL_PixelFormat *format = surface->format;
-    Uint8 r;
-    Uint8 g;
-    Uint8 b;
-    SDL_GetRGB(pixel,format,&r,&g,&b);
-    if (x < 0 || x >= surface->w || y < 0 || y >= surface->h || r != 0)
-        return 0;
-    return 1; 
+    if (!(x < 0 || x >= surface->w || y < 0 || y >= surface->h))
+    {
+        Uint32 pixel = getPixel(surface,x,y);
+        SDL_PixelFormat *format = surface->format;
+        Uint8 r;
+        Uint8 g;
+        Uint8 b;
+        SDL_GetRGB(pixel,format,&r,&g,&b);
+        if(r == 0)
+            return 1;
+    }
+    return 0; 
 }
 
 void FindAllExtremity(SDL_Surface *image)
@@ -33,8 +36,10 @@ void FindAllExtremity(SDL_Surface *image)
             Uint8 b;
             Point p = { i , j };
             SDL_GetRGB(pixel,format,&r,&g,&b);
-            if(r == 0 && g == 0 && b == 0)
+           if(r == 0 && g == 0 && b == 0)
+           {
                 FindExtremity(image,ListEx,p);
+           }
         }
     }
 
@@ -55,12 +60,13 @@ void FindExtremity(SDL_Surface *image,struct vector *v,Point point)
     enqueue(q,point.x,point.y);
     int isEx ;
     Color *mark= initColor(image->format);
-    setRGB(mark,0,255,0);
+    setRGB(mark,1,255,1);
     //parcours largeur sur tous les pixels noir 
     while(!isEmpty(q))
     {
         isEx = 1;
         dequeue(q,&point.x,&point.y);
+        putPixel(image , point.x,point.y,mark->pixel);
         for(int i = -1;i <= 1; i++)
         {
             for(int j = -1; j<=1;j++)
@@ -70,7 +76,6 @@ void FindExtremity(SDL_Surface *image,struct vector *v,Point point)
                 if(isMarkedCell(image,x2,y2))    
                 {
                     //marque le pixel
-                    putPixel(image , x2,y2,mark->pixel);
                     isEx = 0;
                     enqueue(q,x2,y2);        
                 }
@@ -88,6 +93,7 @@ void FindExtremity(SDL_Surface *image,struct vector *v,Point point)
     //marque = plus noir(plus exactement)
     freeColor(mark);
     //recupere les deux ou plus extremite dans v
+    freeQueue(q);
     //free tout ca
 }
 /*

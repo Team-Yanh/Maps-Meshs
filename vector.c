@@ -1,4 +1,5 @@
 #include <err.h>
+#include <stdio.h>
 #include "vector.h"
 
 struct vector *vector_new(size_t size)
@@ -27,8 +28,8 @@ void vector_free(struct vector *v)
 
 static void double_capacity(struct vector *v)
 {
-    v->data = realloc(v->data,v->capacity * sizeof(void *));
     v->capacity *= 2;
+    v->data = realloc(v->data,v->capacity * sizeof(void *));
 }
 
 void vector_push(struct vector *v, void *x)
