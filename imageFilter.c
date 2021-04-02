@@ -1,4 +1,5 @@
 #include "imageFilter.h"
+#include "queue.h"
 
 HSV *RGBToHSV(RGB *rgb)
 {
@@ -107,22 +108,24 @@ Color *initColor(SDL_PixelFormat *format)
 void setRGB(Color *c, Uint8 r, Uint8 g, Uint8 b)
 {
     c->rgb->r = r;
-    c->rgb->g = b;
+    c->rgb->g = g;
     c->rgb->b = b;
 
     c->pixel = SDL_MapRGB(c->format, r, g, b);
+    free(c->hsv);
     c->hsv = RGBToHSV(c->rgb);
 }
 
 void setHSV(Color *c, float h, float s, float v)
 {
-    c->hsv->h = h;
+    c->hsv->h = fmodf(h, 360.0);
     c->hsv->s = s;
     c->hsv->v = v;
 
+    free(c->rgb);
     c->rgb = HSVToRGB(c->hsv);
     c->pixel = SDL_MapRGB(c->format,
-        c->rgb->r, c->rgb->g, c->rgb->b);
+            c->rgb->r, c->rgb->g, c->rgb->b);
 }
 
 void setPixel(Color *c, Uint32 pixel)
@@ -131,10 +134,11 @@ void setPixel(Color *c, Uint32 pixel)
 
     Uint8 r, g, b;
     SDL_GetRGB(c->pixel, c->format,
-     &r, &g, &b);
+            &r, &g, &b);
     c->rgb->r = r;
     c->rgb->g = g;
     c->rgb->b = b;
+    free(c->hsv);
     c->hsv = RGBToHSV(c->rgb);
 }
 
@@ -220,7 +224,6 @@ void forEachPixel(SDL_Surface *image, void (*filter)(Color *c))
             setPixel(c, getPixel(image, i, j));
             filter(c);
             putPixel(image, i, j, c->pixel);
-            
         }
     }
     SDL_UnlockSurface(image);
@@ -271,8 +274,6 @@ void thickenColor(SDL_Surface *image, Color *color)
     freeQueue(q);
 }
 
-
-
 Uint32 distanceToColorHSV(Color *c1, Color *c2)
 {
     return  sqrt( (c1->hsv->h - c2->hsv->h) * (c1->hsv->h - c2->hsv->h) );
@@ -281,8 +282,425 @@ Uint32 distanceToColorHSV(Color *c1, Color *c2)
 Uint32 distanceToColor(Color *c1, Color *c2)
 {
     return (Uint32)sqrt( (c1->rgb->r - c2->rgb->r)*(c1->rgb->r - c2->rgb->r) +
-     (c1->rgb->b - c2->rgb->b)*(c1->rgb->b - c2->rgb->b) + 
-     (c1->rgb->g - c2->rgb->g)*(c1->rgb->g - c2->rgb->g));
+            (c1->rgb->b - c2->rgb->b)*(c1->rgb->b - c2->rgb->b) + 
+            (c1->rgb->g - c2->rgb->g)*(c1->rgb->g - c2->rgb->g));
+}
+
+int isSameColor(Color *c, Color *c2)
+{
+    return c->pixel == c2->pixel;
+    //return c->rgb->r == c2->rgb->r &&
+    //    c->rgb->g == c2->rgb->g &&
+    //    c->rgb->b == c2->rgb->b;
+}
+
+int isWhiteInImage(SDL_Surface *image)
+{
+    Color *white = initColor(image->format);
+    setRGB(white, 255, 255, 255);
+    Color *currentColor = initColor(image->format);
+
+    for(int i = 0; i < image->w; i++)
+    {
+        for(int j = 0; j < image->h; j++)
+        {
+            setPixel(currentColor, getPixel(image, i, j));
+            if(isSameColor(white, currentColor))
+            {
+                freeColor(white);
+                freeColor(currentColor);
+                return 1;
+            }
+        }
+    }
+
+    freeColor(white);
+    freeColor(currentColor);
+    return 0;
+}
+
+int isValidNeighbour(SDL_Surface *image, int x, int y)
+{
+    Color *white = initColor(image->format);
+    setRGB(white, 255, 255, 255);
+    Color *currentCellColor = initColor(image->format);
+    int res = isValidCell(image, x, y);
+    if(res == 1)
+    {
+        setPixel(currentCellColor, getPixel(image, x, y));
+        res = isSameColor(white, currentCellColor);
+    }
+    freeColor(white);
+    freeColor(currentCellColor);
+    return res;
+}
+
+void replaceColor(SDL_Surface *image, Color *c1, Color *c2)
+{
+    Color *currentColor = initColor(image->format);
+    for(int i = 0; i < image->w; i++)
+    {
+        for(int j = 0; j < image->h; j++)
+        {
+            setPixel(currentColor, getPixel(image, i, j));
+            if(isSameColor(currentColor, c1))
+                putPixel(image, i, j, c2->pixel);
+        }
+    }
+    freeColor(currentColor);
+}
+
+void colorZoneDFS(SDL_Surface *image, Color *c, int x, int y)
+{
+    putPixel(image, x, y, c->pixel);
+    if(isValidNeighbour(image, x-1, y))
+        colorZoneDFS(image, c, x-1, y);
+    if(isValidNeighbour(image, x+1, y))
+        colorZoneDFS(image, c, x+1, y);
+    if(isValidNeighbour(image, x, y-1))
+        colorZoneDFS(image, c, x, y-1);
+    if(isValidNeighbour(image, x, y+1))
+        colorZoneDFS(image, c, x, y+1);
+}
+
+void colorAllZonesFromCircles(SDL_Surface *image)
+{
+    Color *currentColor = initColor(image->format);
+    Color *circle = initColor(image->format);
+    Color *c = initColor(image->format);
+    Color *white = initColor(image->format);
+    Color *black = initColor(image->format);
+    Color *blackMarked = initColor(image->format);
+    setRGB(black, 0, 0, 0);
+    setRGB(blackMarked, 0, 255, 0);
+    setRGB(circle, 255, 0, 0);
+    setRGB(c, 200, 0, 0);
+    //setHSV(c, c->hsv->h - 20, c->hsv->s, c->hsv->v);
+    setRGB(white, 255, 255, 255);
+
+    colorCircles(image);
+
+    //int count = 0; //debug purpose
+    while(isWhiteInImage(image) /*&& count < 3 */) //while we can, color adjacent circles with c
+    {
+        for(int i = 0; i < image->w; i++)
+        {
+            for(int j = 0; j < image->h; j++)
+            {
+                setPixel(currentColor, getPixel(image, i, j));
+                if(isSameColor(circle, currentColor))
+                {
+                    if(isValidCell(image, i-1, j))
+                    {
+                        setPixel(currentColor, getPixel(image, i-1, j));
+                        if(isSameColor(white, currentColor))
+                        {
+                            colorZoneBFS(image, c, i-1, j);
+                            replaceColor(image, blackMarked, c);
+                        }
+                    }
+                    if(isValidCell(image, i+1, j))
+                    {
+                        setPixel(currentColor, getPixel(image, i+1, j));
+                        if(isSameColor(white, currentColor))
+                        {
+                            colorZoneBFS(image, c, i+1, j);
+                            replaceColor(image, blackMarked, c);
+                        }
+                    }
+                    if(isValidCell(image, i, j-1))
+                    {
+                        setPixel(currentColor, getPixel(image, i, j-1));
+                        if(isSameColor(white, currentColor))
+                        {
+                            colorZoneBFS(image, c, i, j-1);
+                            replaceColor(image, blackMarked, c);
+                        }
+                    }
+                    if(isValidCell(image, i, j+1))
+                    {
+                        setPixel(currentColor, getPixel(image, i, j+1));
+                        if(isSameColor(white, currentColor))
+                        {
+                            colorZoneBFS(image, c, i, j+1);
+                            replaceColor(image, blackMarked, c);
+                        }
+                    }
+                }
+            }
+        }
+        //count++;
+        //setHSV(c, c->hsv->h + 20, c->hsv->s, c->hsv->v);
+        setRGB(circle, c->rgb->r,
+                c->rgb->g, c->rgb->b);
+        setHSV(c, c->hsv->h + 20, c->hsv->s, c->hsv->v);
+        //setRGB(c, (c->rgb->r + 10) %255,
+          //      (c->rgb->g + 10)%255, (c->rgb->b + 10)%255);
+    }
+
+    freeColor(currentColor);
+    freeColor(circle);
+    freeColor(c);
+    freeColor(white);
+    freeColor(black);
+    freeColor(blackMarked);
+}
+
+void colorCircles(SDL_Surface *image)
+{
+    int counter = 0;
+    Queue *q = createQueue();
+    Color *c = initColor(image->format);
+    Color *currentColor = initColor(image->format);
+    Color *circle = initColor(image->format);
+    Color *white = initColor(image->format);
+    Color *black = initColor(image->format);
+    Color *blackMarked = initColor(image->format);
+    setRGB(c, 200, 0, 0);
+    setRGB(black, 0, 0, 0);
+    setRGB(blackMarked, 0, 255, 0);
+    setRGB(circle, 255, 0, 0);
+    setRGB(white, 255, 255, 255);
+
+    for(int i = 0; i < image->w; i++)
+    {
+        for(int j = 0; j < image->h; j++)
+        {
+            setPixel(currentColor, getPixel(image, i, j));
+            if(isSameColor(white, currentColor))
+            {
+                counter = colorZoneBFS(image, c, i, j);
+                replaceColor(image, blackMarked, black);
+                if(counter == 1)
+                    enqueue(q, i, j);
+            }
+        }
+    }
+
+    int x = 0;
+    int y = 0;
+    while(!isEmpty(q))
+    {
+        dequeue(q, &x, &y);
+        colorZoneBFS(image, circle, x, y);
+        replaceColor(image, blackMarked, circle);
+    }
+
+    replaceColor(image, c, white);
+    freeQueue(q);
+    freeColor(c);
+    freeColor(currentColor);
+    freeColor(circle);
+    freeColor(white);
+    freeColor(black);
+    freeColor(blackMarked);
+}
+
+int colorZoneBFS(SDL_Surface *image, Color *c, int x, int y)
+{
+    Queue *q = createQueue();
+
+    int counter = 0;
+    Color *black = initColor(image->format);
+    setRGB(black, 0, 0, 0);
+    Color *blackMarked = initColor(image->format);
+    setRGB(blackMarked, 0, 255, 0);
+    Color *bgColor = initColor(image->format);
+    Color *currentColor = initColor(image->format);
+    setPixel(bgColor, getPixel(image, x, y));
+
+    putPixel(image, x, y, c->pixel);
+    enqueue(q, x, y);
+
+    while(!isEmpty(q))
+    {
+        dequeue(q, &x, &y);
+
+        if(isValidCell(image, x-1, y))
+        {
+            setPixel(currentColor, getPixel(image, x-1, y));
+            if(isSameColor(bgColor, currentColor))
+            {
+                putPixel(image, x-1, y, c->pixel);
+                enqueue(q, x-1, y);
+            }
+            else if(isSameColor(black, currentColor))
+            {
+                counter++;
+                colorZoneBFS(image, blackMarked, x-1, y);
+            }
+        }
+        else
+        {
+            counter++;
+        }
+        if(isValidCell(image, x+1, y))
+        {
+            setPixel(currentColor, getPixel(image, x+1, y));
+            if(isSameColor(bgColor, currentColor))
+            {
+                putPixel(image, x+1, y, c->pixel);
+                enqueue(q, x+1, y);
+            }
+            else if(isSameColor(black, currentColor))
+            {
+                counter++;
+                colorZoneBFS(image, blackMarked, x+1, y);
+            }
+        }
+        else
+        {
+            counter++;
+        }
+        if(isValidCell(image, x, y-1))
+        {
+            setPixel(currentColor, getPixel(image, x, y-1));
+            if(isSameColor(bgColor, currentColor))
+            {
+                putPixel(image, x, y-1, c->pixel);
+                enqueue(q, x, y-1);
+            }
+            else if(isSameColor(black, currentColor))
+            {
+                counter++;
+                colorZoneBFS(image, blackMarked, x, y-1);
+            }
+        }
+        else
+        {
+            counter++;
+        }
+        if(isValidCell(image, x, y+1))
+        {
+            setPixel(currentColor, getPixel(image, x, y+1));
+            if(isSameColor(bgColor, currentColor))
+            {
+                putPixel(image, x, y+1, c->pixel);
+                enqueue(q, x, y+1);
+            }
+            else if(isSameColor(black, currentColor))
+            {
+                counter++;
+                colorZoneBFS(image, blackMarked, x, y+1);
+            }
+        }
+        else
+        {
+            counter++;
+        }
+    }
+
+    freeColor(black);
+    freeColor(blackMarked);
+    freeColor(bgColor);
+    freeColor(currentColor);
+    freeQueue(q);
+    return counter;
+}
+
+void colorAllZones(SDL_Surface *image)
+{
+    Color *c = initColor(image->format);
+    Color *white = initColor(image->format);
+    Color *currentColor = initColor(image->format);
+
+    setHSV(c, 0.0, 1.0, 1.0);
+    setRGB(white, 255, 255, 255);
+
+    for(int i = 0; i < image->w; i++)
+    {
+        for(int j = 0; j < image->h; j++)
+        {
+            setPixel(currentColor, getPixel(image, i, j));
+            if(isSameColor(currentColor, white))
+            {
+                colorZoneDFS(image, c, i, j);
+                setHSV(c, c->hsv->h + 20, 1.0, 1.0);
+            }
+        }
+    }
+
+    freeColor(c);
+    freeColor(white);
+    freeColor(currentColor);
+}
+
+
+int colorZoneDFSCount(SDL_Surface *image, Color *c, int x, int y)
+{
+    int res = 0;
+    Color *black = initColor(image->format);
+    Color *blackMark = initColor(image->format);
+    Color *white = initColor(image->format);
+    Color *currentColor = initColor(image->format);
+    setRGB(white, 255, 255, 255);
+    setRGB(black, 0, 0, 0);
+    setRGB(blackMark, 1, 1, 1);
+    putPixel(image, x, y, c->pixel);
+
+    if(isValidCell(image, x-1, y))
+    {
+        currentColor->pixel = getPixel(image, x-1, y);
+        if(isSameColor(currentColor, white))
+            colorZoneDFS(image, c, x-1, y);
+        else
+        {
+            if(isSameColor(currentColor, black))
+            {
+                res++;
+                colorZoneDFS(image, blackMark, x-1, y);
+            }
+        }
+    }
+
+    if(isValidCell(image, x+1, y))
+    {
+        currentColor->pixel = getPixel(image, x+1, y);
+        if(isSameColor(currentColor, white))
+            colorZoneDFS(image, c, x+1, y);
+        else
+        {
+            if(isSameColor(currentColor, black))
+            {
+                res++;
+                colorZoneDFS(image, blackMark, x+1, y);
+            }
+        }
+    }
+
+    if(isValidCell(image, x, y-1))
+    {
+        currentColor->pixel = getPixel(image, x, y-1);
+        if(isSameColor(currentColor, white))
+            colorZoneDFS(image, c, x, y-1);
+        else
+        {
+            if(isSameColor(currentColor, black))
+            {
+                res++;
+                colorZoneDFS(image, blackMark, x, y-1);
+            }
+        }
+    }
+    if(isValidCell(image, x, y+1))
+    {
+        currentColor->pixel = getPixel(image, x, y+1);
+        if(isSameColor(currentColor, white))
+            colorZoneDFS(image, c, x, y+1);
+        else
+        {
+            if(isSameColor(currentColor, black))
+            {
+                res++;
+                colorZoneDFS(image, blackMark, x, y+1);
+            }
+        }
+    }
+    freeColor(black);
+    freeColor(blackMark);
+    freeColor(white);
+    freeColor(currentColor);
+    return res;
 }
 
 void invert(Color *c)
@@ -299,25 +717,18 @@ void grayscale(Color *c)
 void stepColoring(Color *c)
 {
     setRGB(c , c->rgb->r - (c->rgb->r % 25),
-        c->rgb->g - (c->rgb->g % 25), c->rgb->b - (c->rgb->b % 25));
+            c->rgb->g - (c->rgb->g % 25), c->rgb->b - (c->rgb->b % 25));
 }
 
 void enhanceBlack(Color *c)
 {
     Uint32 distanceToBlack = (Uint32) sqrt( (c->rgb->r * c->rgb->r) +
-        (c->rgb->g * c->rgb->g) + (c->rgb->b * c->rgb->b) );
+            (c->rgb->g * c->rgb->g) + (c->rgb->b * c->rgb->b) );
     if(distanceToBlack < 100)
-    {
-        setRGB(c, 0, 0, 0);
-    }
-}
-
-void removeGreen(Color *c)
-{
-    if(c->rgb->g > 230)
-    {
-        setRGB(c, 255, 255, 255);
-    }
+        if(distanceToBlack < 100)
+        {
+            setRGB(c, 0, 0, 0);
+        }
 }
 
 void keepTopoLine(Color *c)
@@ -342,64 +753,21 @@ void keepTopoLineHSV(Color *c)
     freeColor(topoColor);
 }
 
-int isNotWhite(SDL_PixelFormat *format, Uint32 pixel)
-{
-    Uint8 r;
-    Uint8 g;
-    Uint8 b;
-    SDL_GetRGB(pixel, format, &r, &g, &b);
-    return !(r == 255 && g == 255 && b == 255);
-}
-
-Uint32 findAverageColor(SDL_Surface *image)
-{
-    Uint32 currentPixel = 0;
-    Uint32 nbPixels = 0;
-    Uint32 pixelSum;
-
-    for(int i = 0; i < image->w; i++)
-    {
-        for(int j = 0; j < image->h; j++)
-        {
-            currentPixel = getPixel(image, i, j);
-            if(isNotWhite(image->format, currentPixel))
-            {
-                nbPixels++;
-                pixelSum += currentPixel;
-            }
-        }
-    }
-
-    return pixelSum/nbPixels;
-}
-
 void setMonochromatic(SDL_Surface *image, Color *c)
 {
-    Uint32 currentPixel = 0;
+    Color *white = initColor(image->format);
+    Color *currentColor = initColor(image->format);
     SDL_LockSurface(image);
     for(int i = 0; i < image->w; i++)
     {
         for(int j = 0; j < image->h; j++)
         {
-            currentPixel = getPixel(image, i, j);
-            if(isNotWhite(image->format, currentPixel))
+            setPixel(currentColor, getPixel(image, i, j));
+            if(isSameColor(white, currentColor))
                 putPixel(image, i, j, c->pixel);
         }
     }
     SDL_UnlockSurface(image);
-}
-
-void cleanGray(Color *c)
-{
-    Color *gray = initColor(c->format);
-    Uint8 grayValue = (c->rgb->r + c->rgb->g + c->rgb->b) / 3;
-    
-    setRGB(c, gray, gray, gray);
-    Uint32 distance = distanceToColor(c, gray);
-
-    if(distance < 20)
-    {
-        setRGB(c, 255, 255, 255);
-    }
-    freeColor(gray);
+    freeColor(white);
+    freeColor(currentColor);
 }
