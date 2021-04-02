@@ -14,7 +14,6 @@ struct vector *vector_new(size_t size);
 
 void vector_free(struct vector *v);
 
-static void double_capacity(struct vector *v);
 
 void vector_push(struct vector *v,void *x);
 

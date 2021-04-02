@@ -16,6 +16,11 @@ struct vector *vector_new(size_t size)
 
 void vector_free(struct vector *v)
 {
+    for(size_t i = 0 ; i < v->size;i ++)
+    {
+        void *p = *(v->data + i);
+        free(p);
+    }
     free(v->data);
     free(v);
 }
@@ -55,7 +60,7 @@ int vector_get(struct vector *v, size_t i, void **x)
 
 void vector_insert(struct vector *v, size_t i, void *x)
 {
-    if(i < 0 || i > v->size){
+    if( i > v->size){
         return ;
     }
     v->size ++;
@@ -71,7 +76,7 @@ void vector_insert(struct vector *v, size_t i, void *x)
 
 int vector_remove(struct vector *v, size_t i, void **x)
 {
-    if(i < 0 || i > v->size){
+    if( i > v->size){
         return 0;
     }
     v->size --;

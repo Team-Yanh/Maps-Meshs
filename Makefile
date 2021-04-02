@@ -9,8 +9,8 @@ all: main
 
 main :${OBJ}
 
-test: test.o queue.o imageFilter.o vector.o
-
+test: test.o queue.o imageFilter.o vector.o CompleteLine.o
+CompleteLine.o: CompleteLine.c CompleteLine.h 
 main.o: queue.o imageFilter.o main.c
 imageFilter.o : queue.o imageFilter.h imageFilter.c
 queue.o : queue.h queue.c
