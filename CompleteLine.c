@@ -44,7 +44,7 @@ void FindAllExtremity(SDL_Surface *image)
         putPixel(image,Ex->x,Ex->y,red->pixel); 
     }
     vector_free(ListEx);
-
+    freeColor(red);
     //LinkExtremity(image,ListEx);
 }
 

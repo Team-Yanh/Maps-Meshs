@@ -3,7 +3,7 @@ CFLAGS = -Wall -Wextra -g
 LDFLAGS =
 LDLIBS = $(shell pkg-config --libs SDL_image) -lm
 
-OBJ = queue.o imageFilter.o main.o test.o vector.o
+OBJ = queue.o imageFilter.o main.o vector.o CompleteLine.o
 
 all: main
 

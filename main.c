@@ -5,6 +5,7 @@
 #include <SDL/SDL.h>
 #include "SDL/SDL_image.h"
 
+#include "CompleteLine.h"
 #include "imageFilter.h"
 #include "queue.h"
 
