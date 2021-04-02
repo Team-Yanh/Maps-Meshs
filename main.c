@@ -18,7 +18,7 @@ int main(void /*int argc, char **argv*/)
         errx(1, "Couldnt init SDL_Image");
 
     SDL_Surface *image;
-    image = IMG_Load("images/test1.png");
+    image = IMG_Load("images/test5.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
 
