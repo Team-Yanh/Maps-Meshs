@@ -49,9 +49,11 @@ int colorZoneBFS(SDL_Surface *image, Color *c, int x, int y);
 int colorZoneDFSCount(SDL_Surface *image, Color *c, int x, int y);
 
 void colorAllZones(SDL_Surface *image);
+void colorAllZonesFromCircles(SDL_Surface *image);
 int isValidCell(SDL_Surface *surface, int x, int y);
 int isSameColor(Color *c1, Color *c2);
 int isValidNeighbour(SDL_Surface *image, int x, int y);
+int isWhiteInImage(SDL_Surface *image);
 void replaceColor(SDL_Surface *image, Color *c1, Color *c2);
 void thickenColor(SDL_Surface *surface, Color *c);
 void setMonochromatic(SDL_Surface *image, Color *c);
