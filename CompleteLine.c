@@ -19,8 +19,6 @@ int isMarkedCell(SDL_Surface *surface, int x, int y)
 
 void FindAllExtremity(SDL_Surface *image)
 {
-    Color *red = initColor(image->format);
-    setRGB(red,255,0,0);
     size_t width = image->w;
     size_t height = image->h;
     struct vector *ListEx = vector_new(1);
@@ -43,14 +41,8 @@ void FindAllExtremity(SDL_Surface *image)
         }
     }
 
-    for(size_t i = 0; i < ListEx->size; i++)
-    {
-        Point *Ex = *(ListEx->data + i);
-        putPixel(image,Ex->x,Ex->y,red->pixel); 
-    }
     LinkExtremity(image,ListEx);
     vector_free(ListEx);
-    freeColor(red);
     //LinkExtremity(image,ListEx);
 }
 
@@ -61,6 +53,8 @@ void FindExtremity(SDL_Surface *image,struct vector *v,Point point)
     enqueue(q,point.x,point.y);
     int isEx ,x2 , y2, nbadj,nb;
     nb= 0;
+    Color *red = initColor(image->format);
+    setRGB(red,255,0,0);
     Color *mark= initColor(image->format);
     setRGB(mark,1,255,1);
     //parcours largeur sur tous les pixels noir 
@@ -104,12 +98,14 @@ void FindExtremity(SDL_Surface *image,struct vector *v,Point point)
                 newex->x = point.x;
                 newex->y = point.y;
                 vector_push(v,newex);
+                putPixel(image,newex->x,newex->y,red->pixel); 
             }
         }
     }
     //marque = plus noir(plus exactement)
     freeColor(mark);
     //recupere les deux ou plus extremite dans v
+    freeColor(red);
     freeQueue(q);
     //free tout ca
 }
@@ -157,6 +153,38 @@ void DrawLine(SDL_Surface *image,Point *p1,Point *p2)
     x2 = p2->x;
     y1 = p1->y;
     y2 = p2->y;
+    //putPixel(image , x1,y1,black->pixel);
+    while(x1 != x2 || y1 != y2)
+    {
+        if(x1 > x2)
+        {
+            putPixel(image , x1,y1,black->pixel);
+            x1 --;
+        }
+        else 
+        {
+            if(x1 != x2)
+            {
+                putPixel(image,x1,y1,black->pixel);
+                x1 ++;
+            }
+        }
+        if(y1 > y2)
+        {
+            putPixel(image , x1,y1,black->pixel);
+            y1 --;
+        }
+        else 
+        {
+            if(y1 != y2)
+            {
+                putPixel(image,x1,y1,black->pixel);
+                y1 ++;
+            }
+        }
+        
+    }
+    /*
     if(x1 > x2)
     {
         while(x1>x2)
@@ -188,7 +216,10 @@ void DrawLine(SDL_Surface *image,Point *p1,Point *p2)
             putPixel(image , x1,y1,black->pixel);
             y1 ++;
        }
-    } 
+    }
+    */
+    if(isValidCell(image,x1,y1))
+        putPixel(image , x1,y1,black->pixel);
     freeColor(black);
 
 }
