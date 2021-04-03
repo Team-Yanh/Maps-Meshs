@@ -12,6 +12,7 @@ int x;
 int y;
 }Point;
 
+
 void FindExtremity(SDL_Surface *image , struct vector *v,Point point);
 void LinkExtremity(SDL_Surface *image,struct vector *ListEx);
 void DrawLine(SDL_Surface *image,Point *p1,Point *p2);

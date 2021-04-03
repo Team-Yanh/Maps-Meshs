@@ -48,6 +48,7 @@ void FindAllExtremity(SDL_Surface *image)
         Point *Ex = *(ListEx->data + i);
         putPixel(image,Ex->x,Ex->y,red->pixel); 
     }
+    LinkExtremity(image,ListEx);
     vector_free(ListEx);
     freeColor(red);
     //LinkExtremity(image,ListEx);
@@ -198,12 +199,12 @@ void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
     void *temp;
     Point *temp2;
     Point *closest ;
-
     Point *Ex2;
     size_t i ;
     int clsi = -1;
     while(ListEx->size != 0)
     {
+        clsi = -1;
         Point clo;
         vector_pop(ListEx,&Ex);
         Ex2 = (Point *)Ex;
@@ -214,18 +215,19 @@ void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
         {
             vector_get(ListEx,i,&temp);
             temp2 = (Point *)temp;
-            if(Distance(closest,Ex2)>Distance(Ex2,temp2))
+            if(Distance(closest,Ex2)>Distance(Ex2,temp2) && Distance(Ex2,temp2) < 15)
             {
                 closest = temp2;
                 clsi = i;
             }
             i++;
         }
+        DrawLine(image,Ex,closest);
         if(clsi != -1)
         {
             vector_remove(ListEx,clsi,&temp);
+            free(temp);
         }
-        DrawLine(image,Ex,closest);
         free(Ex);
     }
     //chercher le point le plus proche a une distance x et min 
