@@ -21,7 +21,7 @@ int main()
 
     SDL_Surface *image;
 
-    image = IMG_Load("images/draw.png");
+    image = IMG_Load("images/test5.png");
 
     if(image == NULL)
         errx(1, "Couldnt load image");
@@ -35,7 +35,7 @@ int main()
     //Point p1 = {0,0};
     //Point p2 = {100,100};
 
-    struct vector *List = vector_new(1);
+    /*struct vector *List = vector_new(1);
     Point *p1 = malloc(sizeof(Point));
     Point *p2 = malloc(sizeof(Point));
     p1->x = 1;
@@ -48,6 +48,9 @@ int main()
     //DrawLine(image,&p1,&p2);
 
     vector_free(List);
+    */
+
+    FindAllExtremity(image);
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
     SDL_Delay(5000);

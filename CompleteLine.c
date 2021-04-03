@@ -58,21 +58,25 @@ void FindExtremity(SDL_Surface *image,struct vector *v,Point point)
     //init la queue et enqueu le point de depart
     Queue *q = createQueue();
     enqueue(q,point.x,point.y);
-    int isEx ,x2 , y2;
+    int isEx ,x2 , y2, nbadj,nb;
+    nb= 0;
     Color *mark= initColor(image->format);
     setRGB(mark,1,255,1);
     //parcours largeur sur tous les pixels noir 
     while(!isEmpty(q))
     {
+        nb ++;
+        nbadj =0;
         isEx = 1; 
         dequeue(q,&point.x,&point.y);
+        putPixel(image , point.x,point.y,mark->pixel);
         for(int j = -1; j<=1;j++)
         {
             x2 = point.x;
             y2 = j + point.y;
             if(isMarkedCell(image,x2,y2))    
             {
-                //marque le pixel
+                nbadj ++;
                 putPixel(image , x2,y2,mark->pixel);
                 isEx = 0;
                 enqueue(q,x2,y2);        
@@ -85,15 +89,15 @@ void FindExtremity(SDL_Surface *image,struct vector *v,Point point)
             if(isMarkedCell(image,x2,y2))    
             {
                 //marque le pixel
+                nbadj++;
                 putPixel(image , x2,y2,mark->pixel);
                 isEx = 0;
                 enqueue(q,x2,y2);        
             }
         }
-        
-        if(isEx)
+        if(isEx == 1 || (nb == 1 && nbadj == 1))
         {
-            if(!(point.x == 0 || point.x == image->w - 1 || point.y == 0 || point.x == image->h - 1))
+            if(!(point.x == 0 || point.x == image->w - 1 || point.y == 0 || point.y == image->h - 1))
             {
                 Point *newex = malloc(sizeof(Point));
                 newex->x = point.x;
