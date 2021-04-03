@@ -23,7 +23,7 @@ void FindAllExtremity(SDL_Surface *image)
     size_t height = image->h;
     struct vector *ListEx = vector_new(1);
     SDL_PixelFormat *format = image->format;
-
+    int c = 0;
     for (size_t i = 0 ; i < width;i ++)
     {
         for(size_t j = 0; j < height; j ++)
@@ -36,7 +36,8 @@ void FindAllExtremity(SDL_Surface *image)
             SDL_GetRGB(pixel,format,&r,&g,&b);
            if(r == 0 && g == 0 && b == 0)
            {
-                FindExtremity(image,ListEx,p);
+                FindExtremity(image,ListEx,p,c);
+                c = (c+1)% 256;
            }
         }
     }
@@ -46,7 +47,7 @@ void FindAllExtremity(SDL_Surface *image)
     //LinkExtremity(image,ListEx);
 }
 
-void FindExtremity(SDL_Surface *image,struct vector *v,Point point)
+void FindExtremity(SDL_Surface *image,struct vector *v,Point point,int color)
 {
     //init la queue et enqueu le point de depart
     Queue *q = createQueue();
@@ -54,7 +55,7 @@ void FindExtremity(SDL_Surface *image,struct vector *v,Point point)
     int isEx ,x2 , y2, nbadj,nb;
     nb= 0;
     Color *red = initColor(image->format);
-    setRGB(red,255,0,0);
+    setRGB(red,255,0,color);
     Color *mark= initColor(image->format);
     setRGB(mark,1,255,1);
     //parcours largeur sur tous les pixels noir 
@@ -184,40 +185,6 @@ void DrawLine(SDL_Surface *image,Point *p1,Point *p2)
         }
         
     }
-    /*
-    if(x1 > x2)
-    {
-        while(x1>x2)
-        {
-            putPixel(image , x1,y1,black->pixel);
-            x1 --;
-        }
-    }
-    else
-    {
-       while(x2>x1)
-       {
-           putPixel(image , x1,y1,black->pixel);
-           x1 ++;
-       }
-    } 
-    if(y1 > y2)
-    {
-        while(y1>y2)
-        {
-            putPixel(image , x1,y1,black->pixel);
-            y1 --;
-        }
-    }
-    else
-    {
-       while(y2>y1)
-       {
-            putPixel(image , x1,y1,black->pixel);
-            y1 ++;
-       }
-    }
-    */
     if(isValidCell(image,x1,y1))
         putPixel(image , x1,y1,black->pixel);
     freeColor(black);
@@ -231,6 +198,9 @@ void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
     Point *temp2;
     Point *closest ;
     Point *Ex2;
+    Uint32 ExPixel;
+    Uint32 clsPixel;
+    SDL_PixelFormat *format = image->format;
     size_t i ;
     int clsi = -1;
     while(ListEx->size != 0)
@@ -239,6 +209,11 @@ void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
         Point clo;
         vector_pop(ListEx,&Ex);
         Ex2 = (Point *)Ex;
+        ExPixel = getPixel(image,Ex2->x,Ex2->y);
+        Uint8 r;
+        Uint8 g;
+        Uint8 b;
+        SDL_GetRGB(ExPixel,format,&r,&g,&b);
         clo = ClosestWall(image,Ex2);
         closest = &clo;
         i = 1;
@@ -246,7 +221,12 @@ void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
         {
             vector_get(ListEx,i,&temp);
             temp2 = (Point *)temp;
-            if(Distance(closest,Ex2)>Distance(Ex2,temp2) && Distance(Ex2,temp2) < 15)
+            clsPixel = getPixel(image,temp2->x,temp2->y);
+            Uint8 r2;
+            Uint8 g2;
+            Uint8 b2;
+            SDL_GetRGB(clsPixel,format,&r2,&g2,&b2);
+            if(Distance(closest,Ex2)>Distance(Ex2,temp2) && Distance(Ex2,temp2) < 15 && (r != r2 || g != g2 || b != b2))
             {
                 closest = temp2;
                 clsi = i;
