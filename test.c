@@ -20,6 +20,16 @@ void printQueue(Queue *q)
     }
 }
 
+void testQueueFree()
+{
+    printf("testQueueFree : init\n");
+    Queue *q = createQueue();
+    printf("testQueueFree : enqueue 1\n");
+    enqueue(q, 1, 1);
+    printf("testQueueFree : free\n");
+    freeQueue(q);
+}
+
 void testQueue()
 {
     printf("==== Testing Queue ====\n");
@@ -27,26 +37,39 @@ void testQueue()
     printQueue(q);
     printf("isEmpty ? %d Expected True 1 \n", isEmpty(q));
 
+    printf("Enqueuing 1, 2, 3, 4, 5\n");
     enqueue(q, 1, 1);
     enqueue(q, 2, 2);
     enqueue(q, 3, 3);
+    enqueue(q, 4, 4);
+    enqueue(q, 5, 5);
     printQueue(q);
     printf("isEmpty ? %d Expected False 0 \n", isEmpty(q));
 
     int x = 0;
     int y = 0;
+    printf("Dequeuing\n");
     dequeue(q, &x, &y);
     printf("x : %d, y: %d, Expected 1,1\n", x, y);
+    printf("Dequeuing\n");
     dequeue(q, &x, &y);
+    printf("x : %d, y: %d, Expected 2,2\n", x, y);
+    printf("Dequeuing\n");
     dequeue(q, &x, &y);
     printf("x : %d, y: %d Expected 3,3\n", x, y);
 
+    printf("Dequeuing 4\n");
+    dequeue(q, &x, &y);
+    printf("Dequeuing 5\n");
+    dequeue(q, &x, &y);
+    printf("x, y : %d %d\n", x, y);
     printf("Queue is empty, trying to dequeue again\n");
     dequeue(q, &x, &y);
-    printf("x : %d, y: %d Expected 3,3\n", x, y);
+    printf("x, y : %d %d Values shouldnt change\n", x, y);
 
     printf("isEmpty ? %d Expected True 1 \n", isEmpty(q));
     printf("==== Queue Testing Done ====\n");
+    freeQueue(q);
 }
 
 void testImageFilter()
@@ -69,6 +92,7 @@ int main(int argc, char *argv[])
         if(strcmp(argv[currentArg], "queue") == 0)
         {
             testQueue();
+            testQueueFree();
         }
         else if (strcmp(argv[currentArg], "imageFilter") == 0)
         {
