@@ -266,7 +266,6 @@ void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
     while(ListEx->size != 0)
     {
         i = 1;
-        printf("size : %lu\n",ListEx->size);
         vector_get(ListEx,i,&Ex);
         Ex2 = (Point *)Ex;
         closest = closestPoint(image,ListEx,Ex2,&clsi);
