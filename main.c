@@ -21,7 +21,7 @@ int main()
 
     SDL_Surface *image;
 
-    image = IMG_Load("images/test1.PNG");
+    image = IMG_Load("images/draw.png");
 
     if(image == NULL)
         errx(1, "Couldnt load image");
@@ -31,46 +31,27 @@ int main()
 
     SDL_Rect rcDest = {0, 0, 0, 0};
 
-    Color *black = initColor(image->format);
-    Color *white = initColor(image->format);
-    Color *red = initColor(image->format);
-    Color *green = initColor(image->format);
-    Color *orange = initColor(image->format);
-    setRGB(black, 0, 0, 0);
-    setRGB(white, 255, 255, 255);
-    setRGB(red, 255, 0, 0);
-    setRGB(green, 0, 255, 0);
-    setRGB(orange, 255, 165, 0);
+    //FindAllExtremity(image);
+    //Point p1 = {0,0};
+    //Point p2 = {100,100};
 
-    //forEachPixel(image, cleanGray);
+    struct vector *List = vector_new(1);
+    Point *p1 = malloc(sizeof(Point));
+    Point *p2 = malloc(sizeof(Point));
+    p1->x = 1;
+    p1->y = 1;
+    p2->x = 110;
+    p2->y = 110;
+    vector_push(List,p1);
+    vector_push(List,p2);
+    LinkExtremity(image,List);
+    //DrawLine(image,&p1,&p2);
 
-    //forEachPixel(image, keepTopoLine);
-    //forEachPixel(image, keepTopoLineHSV);
-    //Uint32 topoColor = SDL_MapRGB(image->format, 203, 191, 171);
-    //Uint32 red = SDL_MapRGB(image->format, 255, 0, 0);
-
-
-    //int counter = colorZoneBFS(image, red, 550, 300);
-    //printf("counter from ColorZoneCount = %d\n", counter);
-    //colorCircles(image);
-    //replaceColor(image, green, black);
-
-    //colorAllZonesFromCircles(image);
-
-    //setMonochromatic(image, red);
-    //thickenColor(image, red);
-    FindAllExtremity(image);
-
+    vector_free(List);
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
     SDL_Delay(5000);
     SDL_SaveBMP(image, "images/out.bmp");
-
-    freeColor(black);
-    freeColor(white);
-    freeColor(red);
-    freeColor(green);
-    freeColor(orange);
 
     SDL_FreeSurface(image);
     SDL_FreeSurface(screen);
