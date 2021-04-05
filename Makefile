@@ -5,7 +5,6 @@ LDLIBS = $(shell pkg-config --libs SDL_image) -lm
 
 OBJ = vector.o queue.o CompleteLine.o imageFilter.o imageUtils.o imageColoring.o
 
-
 all: main
 
 main :${OBJ} main.o
