@@ -55,8 +55,7 @@ int main(void /*int argc, char **argv*/)
 
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
-
-    SDL_Delay(5);
+    SDL_Delay(50);
     SDL_SaveBMP(image, "images/out.bmp");
 
     freeColor(black);

@@ -17,7 +17,7 @@ test.o: queue.o imageFilter.o test.c
 
 queue.o : queue.h queue.c
 
-imageFilter.o : imageFilter.h imageFilter.c imageUtils.o imageColoring.o
+imageFilter.o : imageFilter.h imageFilter.c
 imageUtils.o:  queue.o imageFilter.o imageUtils.h imageUtils.c 
 imageColoring.o:  queue.o imageFilter.o imageUtils.o imageColoring.h imageColoring.c
 
