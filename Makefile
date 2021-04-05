@@ -3,7 +3,7 @@ CFLAGS = -fsanitize=address -Wall -Wextra -g
 LDFLAGS = -fsanitize=address -static-libasan
 LDLIBS = $(shell pkg-config --libs SDL_image) -lm
 
-OBJ = queue.o imageFilter.o
+OBJ = queue.o imageFilter.o imageUtils.o imageColoring.o
 
 all: main
 
@@ -15,8 +15,11 @@ main.o: queue.o imageFilter.o main.c
 
 test.o: queue.o imageFilter.o test.c
 
-imageFilter.o : queue.o imageFilter.h imageFilter.c
 queue.o : queue.h queue.c
+
+imageFilter.o : imageFilter.h imageFilter.c imageUtils.o imageColoring.o
+imageUtils.o:  queue.o imageFilter.o imageUtils.h imageUtils.c 
+imageColoring.o:  queue.o imageFilter.o imageUtils.o imageColoring.h imageColoring.c
 
 .PHONY : clean
 

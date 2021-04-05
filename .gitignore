@@ -1,7 +1,9 @@
 #trashfiles
 *.swp
 *.o
+.vscode/
 main
+test
 
 #images
 *.png

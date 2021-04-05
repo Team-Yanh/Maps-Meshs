@@ -5,8 +5,11 @@
 #include <SDL/SDL.h>
 #include "SDL/SDL_image.h"
 
-#include "imageFilter.h"
 #include "queue.h"
+#include "imageFilter.h"
+#include "imageUtils.h"
+#include "imageColoring.h"
+
 
 int main(void /*int argc, char **argv*/)
 {
