@@ -1,4 +1,5 @@
 #include "imageFilter.h"
+#include "queue.h"
 
 HSV *RGBToHSV(RGB *rgb)
 {

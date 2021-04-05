@@ -5,13 +5,15 @@
 #include <SDL/SDL.h>
 #include "SDL/SDL_image.h"
 
+#include "CompleteLine.h"
+
 #include "queue.h"
 #include "imageFilter.h"
 #include "imageUtils.h"
 #include "imageColoring.h"
 
 
-int main(void /*int argc, char **argv*/)
+int main(void)
 {
     SDL_Init(SDL_INIT_VIDEO);
     int formats = IMG_INIT_JPG | IMG_INIT_PNG;
@@ -20,7 +22,9 @@ int main(void /*int argc, char **argv*/)
         errx(1, "Couldnt init SDL_Image");
 
     SDL_Surface *image;
-    image = IMG_Load("images/test4.png");
+
+    image = IMG_Load("images/test5.png");
+
     if(image == NULL)
         errx(1, "Couldnt load image");
 
@@ -40,10 +44,14 @@ int main(void /*int argc, char **argv*/)
     setRGB(red, 255, 0, 0);
     setRGB(green, 0, 255, 0);
     setRGB(orange, 255, 165, 0);
+
+    //forEachPixel(image, cleanGray);
+
     //forEachPixel(image, keepTopoLine);
     //forEachPixel(image, keepTopoLineHSV);
     //Uint32 topoColor = SDL_MapRGB(image->format, 203, 191, 171);
     //Uint32 red = SDL_MapRGB(image->format, 255, 0, 0);
+
     thickenColor(image, black);
 
     //int counter = colorZoneBFS(image, red, 550, 300);
@@ -51,7 +59,12 @@ int main(void /*int argc, char **argv*/)
     //colorCircles(image);
     //replaceColor(image, green, black);
 
-    colorAllZonesFromCircles(image);
+    //colorAllZonesFromCircles(image);
+
+    //setMonochromatic(image, red);
+    //thickenColor(image, red);
+    printf("starting         \n");
+    FindAllExtremity(image);
 
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
@@ -66,7 +79,7 @@ int main(void /*int argc, char **argv*/)
 
     SDL_FreeSurface(image);
     SDL_FreeSurface(screen);
-    SDL_Quit();
+//    SDL_Quit();
 
     return 0;
 }

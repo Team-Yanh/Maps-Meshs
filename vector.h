@@ -10,11 +10,10 @@ struct vector
     void **data;
 };
 
-struct vector *vector_new();
+struct vector *vector_new(size_t size);
 
 void vector_free(struct vector *v);
 
-void double_capacity(struct vector *v);
 
 void vector_push(struct vector *v,void *x);
 

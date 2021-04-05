@@ -1,29 +1,35 @@
 #include <err.h>
+#include <stdio.h>
 #include "vector.h"
 
-struct vector *vector_new()
+struct vector *vector_new(size_t size)
 {
     struct vector *newvec = malloc(sizeof(struct vector));
     if(!newvec)
         errx(1,"Not enough memory");
-    newvec->data = calloc(1,sizeof(void *));
+    newvec->data = calloc(1,sizeof(void *) * size);
     if(!(newvec->data))
         errx(1,"Not enough memory!");
-    newvec->capacity = 1;
+    newvec->capacity = size;
     newvec->size = 0;
     return newvec;
 }
 
 void vector_free(struct vector *v)
 {
+    for(size_t i = 0 ; i < v->size;i ++)
+    {
+        void *p = *(v->data + i);
+        free(p);
+    }
     free(v->data);
     free(v);
 }
 
-void double_capacity(struct vector *v)
+static void double_capacity(struct vector *v)
 {
-    v->data = realloc(v->data,v->capacity * sizeof(void *));
     v->capacity *= 2;
+    v->data = realloc(v->data,v->capacity * sizeof(void *));
 }
 
 void vector_push(struct vector *v, void *x)
@@ -55,7 +61,7 @@ int vector_get(struct vector *v, size_t i, void **x)
 
 void vector_insert(struct vector *v, size_t i, void *x)
 {
-    if(i < 0 || i > v->size){
+    if( i > v->size){
         return ;
     }
     v->size ++;
@@ -71,7 +77,7 @@ void vector_insert(struct vector *v, size_t i, void *x)
 
 int vector_remove(struct vector *v, size_t i, void **x)
 {
-    if(i < 0 || i > v->size){
+    if( i > v->size){
         return 0;
     }
     v->size --;

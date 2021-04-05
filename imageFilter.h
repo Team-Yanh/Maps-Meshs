@@ -3,6 +3,8 @@
 #include <SDL/SDL.h>
 #include "SDL/SDL_image.h"
 #include <math.h>
+#include "vector.h"
+
 
 typedef struct RGB
 {
@@ -44,4 +46,3 @@ int isSameColor(Color *c1, Color *c2);
 int isValidCellAndColor(SDL_Surface *image, int x, int y, Color *c);
 int isValidNeighbour(SDL_Surface *image, int x, int y);
 int isWhiteInImage(SDL_Surface *image);
-
