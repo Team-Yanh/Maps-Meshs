@@ -5,7 +5,6 @@
 #include <math.h>
 #include "vector.h"
 
-
 typedef struct RGB
 {
     Uint8 r;

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <gtk/gtk.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <GL/glut.h>
@@ -9,6 +10,7 @@
 #include "opengl.h"
 #include <math.h>
 
+#include "colorPicker.h"
 #include "CompleteLine.h"
 
 #include "queue.h"
@@ -233,12 +235,24 @@ int main(int argc, char* argv[])
     // ------------------------------------------------------------------
     glfwTerminate();
 
+    SDL_Init(SDL_INIT_VIDEO);
+    int formats = IMG_INIT_JPG | IMG_INIT_PNG;
+    int imageInit = IMG_Init(formats);
+    if((imageInit&formats) != formats)
+        errx(1, "Couldnt init SDL_Image");
+
     SDL_Surface *image;
 
     image = IMG_Load("images/test5.png");
 
     if(image == NULL)
         errx(1, "Couldnt load image");
+
+    SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
+            SDL_HWSURFACE | SDL_DOUBLEBUF);
+
+    SDL_Rect rcDest = {0, 0, 0, 0};
+
     Color *black = initColor(image->format);
     Color *white = initColor(image->format);
     Color *red = initColor(image->format);
@@ -285,6 +299,8 @@ int main(int argc, char* argv[])
     SDL_FreeSurface(image);
     SDL_FreeSurface(screen);
     SDL_Quit();
+
+    colorPicker();
 
     return 0;
 }
