@@ -24,4 +24,4 @@ imageColoring.o:  queue.o imageFilter.o imageUtils.o imageColoring.h imageColori
 .PHONY : clean
 
 clean:
-	rm -f main *.o
+	rm -f main test *.o
