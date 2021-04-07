@@ -4,12 +4,11 @@
 #include <GL/glut.h>
 #include "indices.h"
 #include "map.h"
+#include "opengl.h"
 #include <err.h>
 #include <stdlib.h>
 #include <math.h>
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window);
 
 
 
@@ -122,10 +121,11 @@ int opengl_Create_Terrain(int col, int line)
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     
-    int nb_vertices =(col + 1) * (line + 1)* 3;
-    int nb_triangle = col * line + col + line - 1;
+    int nb_vertices = (col + 1) * (line + 1) * 3;
+    int nb_triangle = (col + 1) * line + (col - 1);
     int nb_indices = nb_triangle * 3;
 
+    printf("indices : %d\n", nb_indices);
     float vertices[nb_vertices];
     Array_map(col, line, vertices, nb_vertices);
 
@@ -239,7 +239,7 @@ void processInput(GLFWwindow *window)
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void framebuffer_size_callback(GLFWwindow* window __attribute__((unused)), int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
