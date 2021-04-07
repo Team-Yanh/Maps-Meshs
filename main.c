@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
     int col = atoi(argv[1]);
     int line = atoi(argv[2]);
 
-    //opengl_Create_Terrain(col, line);
+    opengl_Create_Terrain(col, line);
 
     SDL_Init(SDL_INIT_VIDEO);
 
