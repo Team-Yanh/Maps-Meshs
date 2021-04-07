@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
     int col = atoi(argv[1]);
     int line = atoi(argv[2]);
 
-    opengl_Create_Terrain(col, line);
+    //opengl_Create_Terrain(col, line);
 
     SDL_Init(SDL_INIT_VIDEO);
     int formats = IMG_INIT_JPG | IMG_INIT_PNG;
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 
     SDL_Surface *image;
 
-    image = IMG_Load("images/test5.png");
+    image = IMG_Load("images/test1.png");
 
     if(image == NULL)
         errx(1, "Couldnt load image");
@@ -51,20 +51,22 @@ int main(int argc, char* argv[])
     Color *red = initColor(image->format);
     Color *green = initColor(image->format);
     Color *orange = initColor(image->format);
+    Color *topoColor = initColor(image->format);
     setRGB(black, 0, 0, 0);
     setRGB(white, 255, 255, 255);
     setRGB(red, 255, 0, 0);
     setRGB(green, 0, 255, 0);
     setRGB(orange, 255, 165, 0);
 
+    setRGB(topoColor, 217, 200, 170);
     //forEachPixel(image, cleanGray);
 
     //forEachPixel(image, keepTopoLine);
-    //forEachPixel(image, keepTopoLineHSV);
     //Uint32 topoColor = SDL_MapRGB(image->format, 203, 191, 171);
+    keepTopoLineHSV(image, topoColor);
     //Uint32 red = SDL_MapRGB(image->format, 255, 0, 0);
 
-    thickenColor(image, black);
+    //thickenColor(image, black);
 
     //int counter = colorZoneBFS(image, red, 550, 300);
     //printf("counter from ColorZoneCount = %d\n", counter);
@@ -74,9 +76,8 @@ int main(int argc, char* argv[])
     //colorAllZonesFromCircles(image);
 
     //setMonochromatic(image, red);
-    //thickenColor(image, red);
-    printf("starting         \n");
-    FindAllExtremity(image);
+    //printf("starting         \n");
+    //FindAllExtremity(image);
 
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
@@ -88,6 +89,7 @@ int main(int argc, char* argv[])
     freeColor(red);
     freeColor(green);
     freeColor(orange);
+    freeColor(topoColor);
 
     SDL_FreeSurface(image);
     SDL_FreeSurface(screen);
