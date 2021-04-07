@@ -14,7 +14,9 @@ void waitForClick()
 
 void updateScreen(SDL_Surface *screen, SDL_Surface *image)
 {
+    Uint32 bg = SDL_MapRGB(screen->format, 0, 0, 0);
     SDL_Rect rcDest = {0, 0, 0, 0};
+    SDL_FillRect(screen, NULL, bg);
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
     waitForClick();
@@ -32,9 +34,8 @@ void display_images()
     image = IMG_Load("images/test1.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
-    SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
+    SDL_Surface* screen = SDL_SetVideoMode(1200, 800, 32,
             SDL_HWSURFACE | SDL_DOUBLEBUF);
-    
 
     Color *black = initColor(image->format);
     Color *white = initColor(image->format);
@@ -47,25 +48,27 @@ void display_images()
     setRGB(red, 255, 0, 0);
     setRGB(green, 0, 255, 0);
     setRGB(orange, 255, 165, 0);
-    setRGB(topoColor, 217, 200, 170);    
-    
+    setRGB(topoColor, 217, 200, 170);
+
 
     updateScreen(screen, image);
     keepTopoLineHSV(image, topoColor);
     updateScreen(screen, image);
 
+    SDL_FreeSurface(image);
+
     image = IMG_Load("images/test4.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
-    screen = SDL_SetVideoMode(image->w, image->h, 32,
-            SDL_HWSURFACE | SDL_DOUBLEBUF);
+
     updateScreen(screen, image);
+
+    SDL_FreeSurface(image);
 
     image = IMG_Load("images/out.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
-    screen = SDL_SetVideoMode(image->w, image->h, 32,
-            SDL_HWSURFACE | SDL_DOUBLEBUF);
+
     updateScreen(screen, image);
 
     //colorCircles(image);
@@ -121,7 +124,7 @@ void display_images_hugo()
 
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
-    
+
     waitForClick();
 
     SDL_SaveBMP(image, "images/out.bmp");
