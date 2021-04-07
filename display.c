@@ -12,6 +12,14 @@ void waitForClick()
     }
 }
 
+void updateScreen(SDL_Surface *screen, SDL_Surface *image)
+{
+    SDL_Rect rcDest = {0, 0, 0, 0};
+    SDL_BlitSurface(image, NULL, screen, &rcDest);
+    SDL_Flip(screen);
+    waitForClick();
+}
+
 void display_images()
 {
     int formats = IMG_INIT_JPG | IMG_INIT_PNG;
@@ -22,55 +30,54 @@ void display_images()
     SDL_Surface *image;
 
     image = IMG_Load("images/test1.png");
-
     if(image == NULL)
         errx(1, "Couldnt load image");
-
     SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
             SDL_HWSURFACE | SDL_DOUBLEBUF);
-
-    SDL_Rect rcDest = {0, 0, 0, 0};
+    
 
     Color *black = initColor(image->format);
     Color *white = initColor(image->format);
     Color *red = initColor(image->format);
     Color *green = initColor(image->format);
     Color *orange = initColor(image->format);
+    Color *topoColor = initColor(image->format);
     setRGB(black, 0, 0, 0);
     setRGB(white, 255, 255, 255);
     setRGB(red, 255, 0, 0);
     setRGB(green, 0, 255, 0);
     setRGB(orange, 255, 165, 0);
-
-    SDL_BlitSurface(image, NULL, screen, &rcDest);
-    SDL_Flip(screen);
-    waitForClick();
+    setRGB(topoColor, 217, 200, 170);    
     
-    //forEachPixel(image, cleanGray);
 
-    //forEachPixel(image, keepTopoLine);
-    //forEachPixel(image, keepTopoLineHSV);
-    //Uint32 topoColor = SDL_MapRGB(image->format, 203, 191, 171);
-    //Uint32 red = SDL_MapRGB(image->format, 255, 0, 0);
+    updateScreen(screen, image);
+    keepTopoLineHSV(image, topoColor);
+    updateScreen(screen, image);
 
-    //int counter = colorZoneBFS(image, red, 550, 300);
-    //printf("counter from ColorZoneCount = %d\n", counter);
+    image = IMG_Load("images/test4.png");
+    if(image == NULL)
+        errx(1, "Couldnt load image");
+    screen = SDL_SetVideoMode(image->w, image->h, 32,
+            SDL_HWSURFACE | SDL_DOUBLEBUF);
+    updateScreen(screen, image);
+
+    image = IMG_Load("images/out.png");
+    if(image == NULL)
+        errx(1, "Couldnt load image");
+    screen = SDL_SetVideoMode(image->w, image->h, 32,
+            SDL_HWSURFACE | SDL_DOUBLEBUF);
+    updateScreen(screen, image);
+
+    //colorCircles(image);
+    //updateScreen(screen, image);
+    //colorAllZonesFromCircles(image);
+    //updateScreen(screen, image);
+
     //colorCircles(image);
     //replaceColor(image, green, black);
-
     //colorAllZonesFromCircles(image);
-
     //setMonochromatic(image, red);
-    //thickenColor(image, red);
-
-    
-
-    SDL_BlitSurface(image, NULL, screen, &rcDest);
-    SDL_Flip(screen);
-
-    waitForClick();
-
-    thickenColor(image, black);
+    //thickenColor(image, black);
 
     SDL_SaveBMP(image, "images/out.bmp");
 
@@ -79,6 +86,7 @@ void display_images()
     freeColor(red);
     freeColor(green);
     freeColor(orange);
+    freeColor(topoColor);
 
     SDL_FreeSurface(image);
     SDL_FreeSurface(screen);
