@@ -16,7 +16,7 @@ void grayscale(Color *c);
 void stepColoring(Color *c);
 void enhanceBlack(Color *c);
 void keepTopoLine(Color *c);
-void keepTopoLineHSV(Color *c);
+void keepTopoLineHSV(SDL_Surface *image, Color *topoColor);
 void setMonochromatic(SDL_Surface *image, Color *c);
 
 void replaceColor(SDL_Surface *image, Color *c1, Color *c2);

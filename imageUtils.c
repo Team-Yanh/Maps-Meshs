@@ -88,15 +88,23 @@ void keepTopoLine(Color *c)
     freeColor(topoColor);
 }
 
-void keepTopoLineHSV(Color *c)
+void keepTopoLineHSV(SDL_Surface *image, Color *topoColor)
 {
-    Color *topoColor = initColor(c->format);
+    Color *currentColor = initColor(topoColor->format);
+    Color *white = initColor(topoColor->format);
     setRGB(topoColor, 217, 200, 170);
-    if(distanceToColorHSV(c, topoColor) > 1)
+    setRGB(white, 255, 255, 255);
+    for(int i = 0; i < image->w; i++)
     {
-        setRGB(c, 255, 255, 255);
+        for(int j = 0; j < image->h; j++)
+        {
+            setPixel(currentColor, getPixel(image, i, j));
+            if(distanceToColorHSV(currentColor, topoColor) > 1)
+                putPixel(image, i, j, white->pixel);
+        }
     }
-    freeColor(topoColor);
+    freeColor(currentColor);
+    freeColor(white);
 }
 
 void setMonochromatic(SDL_Surface *image, Color *c)
