@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
 
     SDL_Init(SDL_INIT_VIDEO);
     display_images();
+    display_images_hugo();
     SDL_Quit();
 
     colorPicker();

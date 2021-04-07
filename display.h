@@ -9,3 +9,4 @@
 #include "CompleteLine.h"
 
 void display_images();
+void display_images_hugo();
