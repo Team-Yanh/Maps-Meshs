@@ -120,22 +120,23 @@ int opengl_Create_Terrain(int col, int line)
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    
+
     int nb_vertices = (col + 1) * (line + 1) * 3;
     int nb_triangle = (col + 1) * line + (col - 1);
     int nb_indices = nb_triangle * 3;
 
-    printf("indices : %d\n", nb_indices);
+    //printf("indices : %d\n", nb_indices);
     float vertices[nb_vertices];
     Array_map(col, line, vertices, nb_vertices);
 
     unsigned int indices[nb_indices];
     Array_Indices(col, line, indices);
-    
+
     vertices[0] = -1.0f;
     vertices[1] = -1.0f;
     vertices[3] = (2.0f / col) - 1;
 
+    /*
     for(int i = 0; i < nb_vertices - 2; i+= 3)
     {
         printf("Vertices --- i: %d, x: %f, y: %f, z: %f\n", i,  vertices[i], vertices[i + 1], vertices[i + 2]);
@@ -145,8 +146,8 @@ int opengl_Create_Terrain(int col, int line)
     {
        printf("Indices --- i: %d, 1st: %u, 2nd: %u, 3rd; %u\n", i, indices[i], indices[i + 1], indices[i + 2]);
     }
+    */
 
-        
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
