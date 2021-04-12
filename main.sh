@@ -1,1 +1,1 @@
-LSAN_OPTIONS=suppressions=lsan.supp ./main 100 100
+LSAN_OPTIONS=suppressions=lsan.supp ./main
