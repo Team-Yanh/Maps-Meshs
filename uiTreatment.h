@@ -10,7 +10,6 @@
 typedef struct UserInterface
 {
     GtkWindow* window;
-    GtkDialog* dlg_window;
     GtkButton* img_open_btn;
     GtkButton* treat_btn;
     GtkButton* color_picker_btn;
@@ -18,11 +17,13 @@ typedef struct UserInterface
     GtkFileChooserDialog* dlg_file_chooser;
     GtkEventBox* img_event_box;
     GtkImage* img_main;
-    GtkImage* treated_img;
+    GtkDrawingArea* draw_area;
+    cairo_surface_t *img_treated;
     GtkScale* zoom_scale;
     guint handler_id;
     GdkPixbuf* loaded_pixbuf;
     GdkPixbuf* displayed_pixbuf;
+    GdkPixbuf* treated_pixbuf;
     GtkAdjustment* zoom;
     GtkEntry* rgb_entries[3];
 } UserInterface;

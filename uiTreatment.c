@@ -1,7 +1,7 @@
-#include <stdlib.h>
 #include <gtk/gtk.h>
 #include "uiTreatment.h"
-#include "colorPicker.h"
+#include "uiColorPick.h"
+#include "uiDraw.h"
 #include "imageFilter.h"
 
 void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
@@ -45,19 +45,18 @@ void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
 void on_treat_btn_clicked(unused GtkButton* button, gpointer user_data)
 {
     UserInterface* ui = user_data;
+    char filename[] = "images/test1.png";
+    int width = 0, height = 0;
 
-    // - Sets the image
-    gtk_image_set_from_file(ui->treated_img, "coding.jpg");
+    // - Load the new image to draw
+    ui->treated_pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
 
-    // - Shows the dlg window showing the treated img
-    gtk_widget_show(GTK_WIDGET(ui->dlg_window));
+    // - Width and height of the pixbuf
+    width = gdk_pixbuf_get_width(ui->treated_pixbuf);
+    height = gdk_pixbuf_get_height(ui->treated_pixbuf);
 
-    // - Waits the user to close the window
-    gtk_dialog_run(GTK_DIALOG(ui->dlg_window));
-
-    // - Hide the dialog window
-    gtk_widget_hide(GTK_WIDGET(ui->dlg_window));
-
+    // - Send a draw signal to redraw the entire area
+    gtk_widget_queue_draw_area(GTK_WIDGET(ui->draw_area), 0, 0, width, height);
 }
 
 void on_zoom(unused GtkScale* zoom_scale, gpointer user_data)
@@ -100,8 +99,6 @@ void uiTreatment()
 
     // - Gets the widgets
     ui->window = GTK_WINDOW(gtk_builder_get_object(builder,"window"));
-    ui->dlg_window= GTK_DIALOG(gtk_builder_get_object(builder,
-                "dlg_window"));
     ui->img_open_btn= GTK_BUTTON(gtk_builder_get_object(builder,
                 "img_open_btn"));
     ui->treat_btn = GTK_BUTTON(gtk_builder_get_object(builder, "treat_btn"));
@@ -110,20 +107,22 @@ void uiTreatment()
     ui->dlg_file_chooser = GTK_FILE_CHOOSER_DIALOG(
             gtk_builder_get_object(builder, "dlg_file_chooser"));
     ui->img_main = GTK_IMAGE(gtk_builder_get_object(builder, "img_main"));
-    ui->treated_img = GTK_IMAGE(gtk_builder_get_object(builder, "treated_img"));
+    ui->draw_area = GTK_DRAWING_AREA(gtk_builder_get_object(builder,
+            "draw_area"));
     ui->img_event_box = GTK_EVENT_BOX(gtk_builder_get_object(builder,
             "img_event_box"));
     ui->color_wheel_btn = GTK_COLOR_CHOOSER(gtk_builder_get_object(
             builder, "color_wheel_btn"));
-    ui->zoom_scale= GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale"));
+    ui->zoom_scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale_1"));
     ui->zoom = GTK_ADJUSTMENT(gtk_builder_get_object(builder,
-                "zoom_adjustment"));
+            "zoom_adjustment_1"));
     ui->rgb_entries[0] = GTK_ENTRY(gtk_builder_get_object(builder, "r_entry"));
     ui->rgb_entries[1] = GTK_ENTRY(gtk_builder_get_object(builder, "g_entry"));
     ui->rgb_entries[2] = GTK_ENTRY(gtk_builder_get_object(builder, "b_entry"));
     ui->handler_id = 0;
     ui->loaded_pixbuf = NULL;
     ui->displayed_pixbuf = NULL;
+    ui->treated_pixbuf = NULL;
 
     // - Free bulder
     g_object_unref(builder);
@@ -132,8 +131,6 @@ void uiTreatment()
     g_signal_connect(ui->window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     g_signal_connect(ui->img_open_btn, "clicked",
             G_CALLBACK(on_img_open_btn_clicked), ui);
-    g_signal_connect(ui->treat_btn, "clicked",
-            G_CALLBACK(on_treat_btn_clicked), ui);
     g_signal_connect(ui->color_picker_btn, "clicked",
             G_CALLBACK(on_color_picker_btn_clicked), ui);
     g_signal_connect(ui->zoom_scale, "value-changed", G_CALLBACK(on_zoom), ui);
@@ -145,6 +142,9 @@ void uiTreatment()
             G_CALLBACK(update_rgb_value), ui);
     g_signal_connect(GTK_COLOR_BUTTON(ui->color_wheel_btn), "color-set",
             G_CALLBACK(update_color_wheel_value), ui);
+    g_signal_connect(ui->draw_area, "draw", G_CALLBACK(on_draw), ui);
+    g_signal_connect(ui->treat_btn, "clicked", G_CALLBACK(on_treat_btn_clicked),
+            ui);
 
     gtk_main();
 

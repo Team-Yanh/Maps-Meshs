@@ -1,7 +1,6 @@
-#include <stdlib.h>
 #include <gtk/gtk.h>
 #include "uiTreatment.h"
-#include "colorPicker.h"
+#include "uiColorPick.h"
 #include "imageFilter.h"
 
 RGB on_img_main_clicked(unused GtkEventBox* img_event_box,

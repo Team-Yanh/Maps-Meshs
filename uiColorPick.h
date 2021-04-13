@@ -1,5 +1,5 @@
-#ifndef COLORPICKER_H
-#define COLORPICKER_H
+#ifndef UICOLORPICK_H
+#define UICOLORPICK_H
 
 #if !defined(SPARSE) && defined(__GNUC__)
     #define unused __attribute__((unused))
