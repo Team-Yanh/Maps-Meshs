@@ -2,12 +2,11 @@
 #include "uiTreatment.h"
 #include "uiColorPick.h"
 #include "imageFilter.h"
-
-RGB on_img_main_clicked(unused GtkEventBox* img_event_box,
-        GdkEventButton *event, gpointer user_data)
+/*
+RGB color_pick(unused GtkEventBox* ebox, GdkEventButton *event, gpointer udata)
 {
     // - Gets our variable ui
-    UserInterface* ui = user_data;
+    UserInterface* ui = udata;
     RGB rgb = {255, 255, 255};
     GdkRGBA col = {255, 255, 255, 1};
 
@@ -62,13 +61,18 @@ void on_color_picker_btn_clicked(unused GtkButton* button, gpointer user_data)
     // - Gets the ui
     UserInterface* ui = user_data;
 
-    // - If the signal is not already connected, then connects
-    if (ui->handler_id == 0 && ui->displayed_pixbuf != NULL)
-        ui->handler_id = g_signal_connect(ui->img_event_box,
-                "button_press_event", G_CALLBACK(on_img_main_clicked),
+    // - Connects the signals if needed
+    if (ui->draw_left.handler_id == 0 && ui->draw_left.pb != NULL)
+        ui->draw_left.handler_id = g_signal_connect(ui->draw_left.ebox,
+                "button_press_event", G_CALLBACK(color_pick),
+                user_data);
+
+    if (ui->draw_right.handler_id == 0 && ui->draw_right.pb != NULL)
+        ui->draw_right.handler_id = g_signal_connect(ui->draw_right.ebox,
+                "button_press_event", G_CALLBACK(color_pick),
                 user_data);
 }
-
+*/
 void set_rgb_entry_value(GtkEntry* text_holder, int value)
 {
     char s[] = "0  ";
