@@ -29,14 +29,14 @@ int main(int argc, char* argv[])
 
     opengl_Create_Terrain(col, line);
 
-    SDL_Init(SDL_INIT_VIDEO);
+    //SDL_Init(SDL_INIT_VIDEO);
 
-    display_images();
-    display_images_hugo();
+    //display_images();
+    //display_images_hugo();
 
-    SDL_Quit();
+    //SDL_Quit();
 
-    colorPicker();
+    //colorPicker();
 
     return 0;
 }

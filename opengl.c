@@ -10,8 +10,6 @@
 #include <math.h>
 
 
-
-
 typedef struct vec3 
 {
     float x, y, z;
@@ -122,10 +120,14 @@ int opengl_Create_Terrain(int col, int line)
     // ------------------------------------------------------------------
 
     int nb_vertices = (col + 1) * (line + 1) * 3;
-    int nb_triangle = (col + 1) * line + (col - 1);
+    int nb_triangle = col * line * 2;
     int nb_indices = nb_triangle * 3;
 
     //printf("indices : %d\n", nb_indices);
+    
+    //float *vertices = malloc(nb_vertices * sizeof(float));
+    //unsigned int *indices = malloc(nb_indices * sizeof(unsigned int));
+
     float vertices[nb_vertices];
     Array_map(col, line, vertices, nb_vertices);
 
@@ -136,8 +138,7 @@ int opengl_Create_Terrain(int col, int line)
     vertices[1] = -1.0f;
     vertices[3] = (2.0f / col) - 1;
 
-    /*
-    for(int i = 0; i < nb_vertices - 2; i+= 3)
+    /*for(int i = 0; i < nb_vertices - 2; i+= 3)
     {
         printf("Vertices --- i: %d, x: %f, y: %f, z: %f\n", i,  vertices[i], vertices[i + 1], vertices[i + 2]);
     }
@@ -145,8 +146,7 @@ int opengl_Create_Terrain(int col, int line)
     for(int i = 0; i < nb_indices - 2; i += 3)
     {
        printf("Indices --- i: %d, 1st: %u, 2nd: %u, 3rd; %u\n", i, indices[i], indices[i + 1], indices[i + 2]);
-    }
-    */
+    }*/
 
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
