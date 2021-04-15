@@ -85,6 +85,7 @@ void uiTreatment()
     ui->treat_btn = GTK_BUTTON(gtk_builder_get_object(builder, "treat_btn"));
     ui->color_picker_btn = GTK_BUTTON(
             gtk_builder_get_object(builder, "color_picker_btn"));
+    ui->paint_btn = GTK_BUTTON(gtk_builder_get_object(builder, "paint_btn"));
     ui->dlg_file_chooser = GTK_FILE_CHOOSER_DIALOG(
             gtk_builder_get_object(builder, "dlg_file_chooser"));
     ui->color_wheel_btn = GTK_COLOR_CHOOSER(gtk_builder_get_object(
@@ -100,7 +101,8 @@ void uiTreatment()
     draw_l.scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale_1"));
     draw_l.zoom = GTK_ADJUSTMENT(gtk_builder_get_object(builder,
             "zoom_adjustment_1"));
-    draw_l.handler_id = 0;
+    draw_l.pick_id = 0;
+    draw_l.paint_id = 0;
 
     draw_r.darea = GTK_DRAWING_AREA(gtk_builder_get_object(builder,
             "draw_area_2"));
@@ -109,7 +111,8 @@ void uiTreatment()
     draw_r.scale = GTK_SCALE(gtk_builder_get_object(builder, "zoom_scale_2"));
     draw_r.zoom = GTK_ADJUSTMENT(gtk_builder_get_object(builder,
             "zoom_adjustment_2"));
-    draw_r.handler_id = 0;
+    draw_r.pick_id = 0;
+    draw_r.paint_id = 0;
 
     ui->draw_left = draw_l;
     ui->draw_right = draw_r;
@@ -121,10 +124,8 @@ void uiTreatment()
     g_signal_connect(ui->window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     g_signal_connect(ui->img_open_btn, "clicked",
             G_CALLBACK(on_img_open_btn_clicked), ui);
-    /*
     g_signal_connect(ui->color_picker_btn, "clicked",
             G_CALLBACK(on_color_picker_btn_clicked), ui);
-    */
     g_signal_connect(ui->draw_left.scale, "value-changed",
             G_CALLBACK(on_zoom), &ui->draw_left);
     g_signal_connect(ui->draw_right.scale, "value-changed",
@@ -135,6 +136,8 @@ void uiTreatment()
             &ui->draw_right);
     g_signal_connect(ui->treat_btn, "clicked", G_CALLBACK(on_treat_btn_clicked),
             &ui->draw_right);
+    g_signal_connect(ui->paint_btn, "clicked", G_CALLBACK(on_paint_btn_clicked),
+            ui);
     g_signal_connect(GTK_EDITABLE(ui->rgb_entries[0]), "changed",
             G_CALLBACK(update_rgb_value), ui);
     g_signal_connect(GTK_EDITABLE(ui->rgb_entries[1]), "changed",

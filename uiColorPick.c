@@ -2,29 +2,51 @@
 #include "uiTreatment.h"
 #include "uiColorPick.h"
 #include "imageFilter.h"
-/*
-RGB color_pick(unused GtkEventBox* ebox, GdkEventButton *event, gpointer udata)
+
+RGB color_pick(GtkEventBox* ebox, GdkEventButton *event, gpointer udata)
 {
     // - Gets our variable ui
     UserInterface* ui = udata;
     RGB rgb = {255, 255, 255};
     GdkRGBA col = {255, 255, 255, 1};
+    GdkPixbuf* pb;
+    int width = 0, height = 0;
+    double zoom = 1;
 
     // - Coordinates of the mouse click
     int x = event->x;
     int y = event->y;
 
+    // - Guess which event box is clicked and sets the variables
+    if (ebox == ui->draw_left.ebox)
+    {
+        pb = ui->draw_left.pb;
+        zoom = gtk_adjustment_get_value(ui->draw_left.zoom);
+        width = ui->draw_left.w * zoom;
+        height = ui->draw_left.h * zoom;
+    }
+
+    else
+    {
+        pb = ui->draw_right.pb;
+        zoom = gtk_adjustment_get_value(ui->draw_right.zoom);
+        width = ui->draw_right.w * zoom;
+        height = ui->draw_right.h * zoom;
+    }
+
     // - Informations about the image
-    int rowstride = gdk_pixbuf_get_rowstride(ui->displayed_pixbuf);
-    int n_channels = gdk_pixbuf_get_n_channels(ui->displayed_pixbuf);
-    int width = gdk_pixbuf_get_width(ui->displayed_pixbuf);
-    int height = gdk_pixbuf_get_height(ui->displayed_pixbuf);
+    int rowstride = gdk_pixbuf_get_rowstride(pb);
+    int n_channels = gdk_pixbuf_get_n_channels(pb);
 
     // - If the image is loaded
     if (x < width && y < height)
     {
         guchar* pixel = NULL;
-        guchar* pixels = gdk_pixbuf_get_pixels(ui->displayed_pixbuf);
+        guchar* pixels = gdk_pixbuf_get_pixels(pb);
+
+        // - Gets the real position of the clicked in the pixbuf not zoomed
+        x /= zoom;
+        y /= zoom;
 
         // - Process the address of the pixel at the right coordinates
         // - (Just like in a Matrix)
@@ -44,9 +66,16 @@ RGB color_pick(unused GtkEventBox* ebox, GdkEventButton *event, gpointer udata)
     // - Sets the color of the color wheel
     gtk_color_chooser_set_rgba(ui->color_wheel_btn, &col);
 
-    // - Disconnects the signal of the colorpicker
-    g_signal_handler_disconnect(img_event_box, ui->handler_id);
-        ui->handler_id = 0;
+    // - Disconnects the signals of the colorpicker
+    if (ui->draw_left.pick_id > 0)
+        g_signal_handler_disconnect(ui->draw_left.ebox,
+                ui->draw_left.pick_id);
+    if (ui->draw_right.pick_id > 0)
+        g_signal_handler_disconnect(ui->draw_right.ebox,
+                ui->draw_right.pick_id);
+
+    ui->draw_left.pick_id = 0;
+    ui->draw_right.pick_id = 0;
 
     // - Update the values of the rgb_entries
     set_rgb_entry_value(ui->rgb_entries[0], rgb.r);
@@ -62,17 +91,15 @@ void on_color_picker_btn_clicked(unused GtkButton* button, gpointer user_data)
     UserInterface* ui = user_data;
 
     // - Connects the signals if needed
-    if (ui->draw_left.handler_id == 0 && ui->draw_left.pb != NULL)
-        ui->draw_left.handler_id = g_signal_connect(ui->draw_left.ebox,
-                "button_press_event", G_CALLBACK(color_pick),
-                user_data);
+    if (ui->draw_left.pick_id == 0 && ui->draw_left.pb != NULL)
+        ui->draw_left.pick_id = g_signal_connect(ui->draw_left.ebox,
+                "button_press_event", G_CALLBACK(color_pick), ui);
 
-    if (ui->draw_right.handler_id == 0 && ui->draw_right.pb != NULL)
-        ui->draw_right.handler_id = g_signal_connect(ui->draw_right.ebox,
-                "button_press_event", G_CALLBACK(color_pick),
-                user_data);
+    if (ui->draw_right.pick_id == 0 && ui->draw_right.pb != NULL)
+        ui->draw_right.pick_id = g_signal_connect(ui->draw_right.ebox,
+                "button_press_event", G_CALLBACK(color_pick), ui);
 }
-*/
+
 void set_rgb_entry_value(GtkEntry* text_holder, int value)
 {
     char s[] = "0  ";

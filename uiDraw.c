@@ -3,7 +3,43 @@
 #include "uiTreatment.h"
 #include "uiDraw.h"
 
-void on_draw(unused GtkButton* b, cairo_t *cr, gpointer user_data)
+void on_paint_btn_clicked(unused GtkButton* b, gpointer user_data)
+{
+    UserInterface* ui = user_data;
+    
+    if (ui->draw_left.pb != NULL)
+    {
+        if (ui->draw_left.paint_id == 0)
+            ui->draw_left.paint_id = g_signal_connect(ui->draw_left.ebox,
+                    "button_press_event", G_CALLBACK(paint), &ui->draw_left);
+        else
+        {
+            g_signal_handler_disconnect(ui->draw_left.ebox, ui->draw_left.paint_id);
+            ui->draw_left.paint_id = 0;
+        }
+    }
+
+    if (ui->draw_right.pb != NULL)
+    {
+        if (ui->draw_right.paint_id == 0 && ui->draw_right.pb != NULL)
+            ui->draw_right.paint_id = g_signal_connect(ui->draw_right.ebox,
+                    "button_press_event", G_CALLBACK(paint), &ui->draw_right);
+        else
+        {
+            g_signal_handler_disconnect(ui->draw_right.ebox,
+                    ui->draw_right.paint_id);
+            ui->draw_right.paint_id = 0;
+        }
+    }
+}
+
+void paint(unused GtkEventBox* ebox, unused GdkEventButton* event,
+       unused gpointer udata)
+{
+    g_print("Paint !\n");
+}
+
+void on_draw(unused GtkDrawingArea* darea, cairo_t *cr, gpointer user_data)
 {
     DrawManagement* dm = user_data;
     double zoom_value = 1;

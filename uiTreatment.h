@@ -14,7 +14,8 @@ typedef struct DrawManagement
     GtkEventBox* ebox;
     GtkScale* scale;
     GtkAdjustment* zoom;
-    guint handler_id;
+    guint pick_id;
+    guint paint_id;
     int w;
     int h;
 } DrawManagement;
@@ -25,6 +26,7 @@ typedef struct UserInterface
     GtkButton* img_open_btn;
     GtkButton* treat_btn;
     GtkButton* color_picker_btn;
+    GtkButton* paint_btn;
     DrawManagement draw_left;
     DrawManagement draw_right;
     GtkColorChooser* color_wheel_btn;
