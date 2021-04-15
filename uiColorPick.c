@@ -3,64 +3,36 @@
 #include "uiColorPick.h"
 #include "imageFilter.h"
 
-RGB color_pick(GtkEventBox* ebox, GdkEventButton *event, gpointer udata)
+void color_pick(GtkEventBox* ebox, GdkEventButton *event, gpointer udata)
 {
     // - Gets our variable ui
     UserInterface* ui = udata;
-    RGB rgb = {255, 255, 255};
     GdkRGBA col = {255, 255, 255, 1};
-    GdkPixbuf* pb;
-    int width = 0, height = 0;
-    double zoom = 1;
-
-    // - Coordinates of the mouse click
-    int x = event->x;
-    int y = event->y;
+    DrawManagement dm;
+    guchar* pixel = NULL;
 
     // - Guess which event box is clicked and sets the variables
     if (ebox == ui->draw_left.ebox)
-    {
-        pb = ui->draw_left.pb;
-        zoom = gtk_adjustment_get_value(ui->draw_left.zoom);
-        width = ui->draw_left.w * zoom;
-        height = ui->draw_left.h * zoom;
-    }
+        dm = ui->draw_left;
 
     else
+        dm = ui->draw_right;
+
+    // - Gets the pixel
+    pixel = get_clicked_pixel(dm, event->x, event->y);
+
+    // - If we found a pixel
+    if (pixel != NULL)
     {
-        pb = ui->draw_right.pb;
-        zoom = gtk_adjustment_get_value(ui->draw_right.zoom);
-        width = ui->draw_right.w * zoom;
-        height = ui->draw_right.h * zoom;
-    }
-
-    // - Informations about the image
-    int rowstride = gdk_pixbuf_get_rowstride(pb);
-    int n_channels = gdk_pixbuf_get_n_channels(pb);
-
-    // - If the image is loaded
-    if (x < width && y < height)
-    {
-        guchar* pixel = NULL;
-        guchar* pixels = gdk_pixbuf_get_pixels(pb);
-
-        // - Gets the real position of the clicked in the pixbuf not zoomed
-        x /= zoom;
-        y /= zoom;
-
-        // - Process the address of the pixel at the right coordinates
-        // - (Just like in a Matrix)
-        pixel = pixels + y * rowstride + x * n_channels;
-
         // - Gets the rgb values from the pixel
-        rgb.r = pixel[0];
-        rgb.g = pixel[1];
-        rgb.b = pixel[2];
+        ui->color.r = pixel[0];
+        ui->color.g = pixel[1];
+        ui->color.b = pixel[2];
 
         // - Sets the values to set in the color wheel btn
-        col.red = (double)rgb.r/255.0;
-        col.green = (double)rgb.g/255.0;
-        col.blue = (double)rgb.b/255.0;
+        col.red = (double)ui->color.r/255.0;
+        col.green = (double)ui->color.g/255.0;
+        col.blue = (double)ui->color.b/255.0;
     }
 
     // - Sets the color of the color wheel
@@ -78,11 +50,9 @@ RGB color_pick(GtkEventBox* ebox, GdkEventButton *event, gpointer udata)
     ui->draw_right.pick_id = 0;
 
     // - Update the values of the rgb_entries
-    set_rgb_entry_value(ui->rgb_entries[0], rgb.r);
-    set_rgb_entry_value(ui->rgb_entries[1], rgb.g);
-    set_rgb_entry_value(ui->rgb_entries[2], rgb.b);
-
-    return rgb;
+    set_rgb_entry_value(ui->rgb_entries[0], ui->color.r);
+    set_rgb_entry_value(ui->rgb_entries[1], ui->color.g);
+    set_rgb_entry_value(ui->rgb_entries[2], ui->color.b);
 }
 
 void on_color_picker_btn_clicked(unused GtkButton* button, gpointer user_data)

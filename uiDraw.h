@@ -2,7 +2,7 @@
 #define UIDRAW_H
 
 void on_paint_btn_clicked(GtkButton* b, gpointer user_data);
-void paint(GtkEventBox* ebox, GdkEventButton* event, gpointer udata);
+void paint(GtkEventBox* ebox, GdkEventButton* event, gpointer user_data);
 void on_draw(GtkDrawingArea* darea, cairo_t* cr, gpointer user_data);
 
 #endif

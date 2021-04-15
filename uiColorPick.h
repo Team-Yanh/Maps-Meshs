@@ -7,9 +7,7 @@
     #define unused
 #endif
 
-#include "imageFilter.h"
-
-RGB color_pick(GtkEventBox* ebox, GdkEventButton* event, gpointer udata);
+void color_pick(GtkEventBox* ebox, GdkEventButton* event, gpointer udata);
 void on_color_picker_btn_clicked(GtkButton* button, gpointer user_data);
 void set_rgb_entry_value(GtkEntry* text_holder, int value);
 double retrieve_color_value(GtkEntry* text_holder);

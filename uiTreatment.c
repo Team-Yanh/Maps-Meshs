@@ -65,6 +65,36 @@ void on_zoom(unused GtkScale* zoom_scale, gpointer user_data)
         gtk_widget_queue_draw(GTK_WIDGET(dm->darea));
 }
 
+guchar* get_clicked_pixel(DrawManagement dm, int x, int y)
+{
+    double zoom = 1;
+    int rowstride = 0, n_channels = 0, width = 0, height = 0;
+    guchar* pixel = NULL;
+    guchar* pixels = NULL;
+
+    zoom = gtk_adjustment_get_value(dm.zoom);
+    width = dm.w * zoom;
+    height = dm.h * zoom;
+    n_channels = gdk_pixbuf_get_n_channels(dm.pb);
+    rowstride = gdk_pixbuf_get_rowstride(dm.pb);
+
+    if (x < width && y < height)
+    {
+        // - Gets the pixels
+        pixels = gdk_pixbuf_get_pixels(dm.pb);
+
+        // - Converts the click position into the buffer from the zoomed pos
+        x /= zoom;
+        y /= zoom;
+
+        // - Process the address of the pixel at the right coordinates
+        // - (Just like in a Matrix)
+        pixel = pixels + y * rowstride + x * n_channels;
+    }
+
+    return pixel;
+}
+
 void uiTreatment()
 {
     // - Init gtk
@@ -93,6 +123,9 @@ void uiTreatment()
     ui->rgb_entries[0] = GTK_ENTRY(gtk_builder_get_object(builder, "r_entry"));
     ui->rgb_entries[1] = GTK_ENTRY(gtk_builder_get_object(builder, "g_entry"));
     ui->rgb_entries[2] = GTK_ENTRY(gtk_builder_get_object(builder, "b_entry"));
+    ui->color.r = 255;
+    ui->color.g = 255;
+    ui->color.b = 255;
 
     draw_l.darea = GTK_DRAWING_AREA(gtk_builder_get_object(builder,
             "draw_area_1"));

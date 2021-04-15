@@ -7,6 +7,8 @@
     #define unused
 #endif
 
+#include "imageFilter.h"
+
 typedef struct DrawManagement
 {
     GtkDrawingArea* darea;
@@ -32,12 +34,14 @@ typedef struct UserInterface
     GtkColorChooser* color_wheel_btn;
     GtkFileChooserDialog* dlg_file_chooser;
     GtkEntry* rgb_entries[3];
+    RGB color;
 } UserInterface;
 
 void on_img_open_btn_clicked(GtkButton* button, gpointer user_data);
 void on_treat_btn_clicked(unused GtkButton* button, gpointer user_data);
 void load_image(DrawManagement* dm, char* filename);
 void on_zoom(unused GtkScale* zoom_scale, gpointer user_data);
+guchar* get_clicked_pixel(DrawManagement dm, int x, int y);
 void uiTreatment();
 
 #endif
