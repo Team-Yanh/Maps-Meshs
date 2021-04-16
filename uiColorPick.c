@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include "uiTreatment.h"
+#include "uiDraw.h"
 #include "uiColorPick.h"
 #include "imageFilter.h"
 
@@ -8,15 +9,16 @@ void color_pick(GtkEventBox* ebox, GdkEventButton *event, gpointer udata)
     // - Gets our variable ui
     UserInterface* ui = udata;
     GdkRGBA col = {255, 255, 255, 1};
-    DrawManagement dm;
+    DrawManagement* dm;
     guchar* pixel = NULL;
+    RGB rgb = {255, 255, 255};
 
     // - Guess which event box is clicked and sets the variables
     if (ebox == ui->draw_left.ebox)
-        dm = ui->draw_left;
+        dm = &ui->draw_left;
 
     else
-        dm = ui->draw_right;
+        dm = &ui->draw_right;
 
     // - Gets the pixel
     pixel = get_clicked_pixel(dm, event->x, event->y);
@@ -25,34 +27,50 @@ void color_pick(GtkEventBox* ebox, GdkEventButton *event, gpointer udata)
     if (pixel != NULL)
     {
         // - Gets the rgb values from the pixel
-        ui->color.r = pixel[0];
-        ui->color.g = pixel[1];
-        ui->color.b = pixel[2];
+        rgb.r = pixel[0];
+        rgb.g = pixel[1];
+        rgb.b = pixel[2];
+
+        ui->draw_left.color = rgb;
+        ui->draw_right.color = rgb;
 
         // - Sets the values to set in the color wheel btn
-        col.red = (double)ui->color.r/255.0;
-        col.green = (double)ui->color.g/255.0;
-        col.blue = (double)ui->color.b/255.0;
+        col.red = (double)rgb.r/255.0;
+        col.green = (double)rgb.g/255.0;
+        col.blue = (double)rgb.b/255.0;
     }
+
+    // - Removes the picks signals
+    remove_pick_signal(&ui->draw_left);
+    remove_pick_signal(&ui->draw_right);
 
     // - Sets the color of the color wheel
     gtk_color_chooser_set_rgba(ui->color_wheel_btn, &col);
 
-    // - Disconnects the signals of the colorpicker
-    if (ui->draw_left.pick_id > 0)
-        g_signal_handler_disconnect(ui->draw_left.ebox,
-                ui->draw_left.pick_id);
-    if (ui->draw_right.pick_id > 0)
-        g_signal_handler_disconnect(ui->draw_right.ebox,
-                ui->draw_right.pick_id);
-
-    ui->draw_left.pick_id = 0;
-    ui->draw_right.pick_id = 0;
-
     // - Update the values of the rgb_entries
-    set_rgb_entry_value(ui->rgb_entries[0], ui->color.r);
-    set_rgb_entry_value(ui->rgb_entries[1], ui->color.g);
-    set_rgb_entry_value(ui->rgb_entries[2], ui->color.b);
+    set_rgb_entry_value(ui->rgb_entries[0], rgb.r);
+    set_rgb_entry_value(ui->rgb_entries[1], rgb.g);
+    set_rgb_entry_value(ui->rgb_entries[2], rgb.b);
+}
+
+void remove_pick_signal(DrawManagement* dm)
+{
+    // - Disconnects the signals of the colorpicker
+    if (dm->pick_id > 0)
+        g_signal_handler_disconnect(dm->ebox, dm->pick_id);
+
+    dm->pick_id = 0;
+}
+
+void add_pick_signal(DrawManagement* dm, UserInterface* ui)
+{
+    // - Connects the signals if needed
+    if (dm->pick_id == 0 && dm->pb != NULL)
+    {
+        dm->pick_id = g_signal_connect(dm->ebox, "button_press_event",
+                G_CALLBACK(color_pick), ui);
+        remove_paint_signal(dm);
+    }
 }
 
 void on_color_picker_btn_clicked(unused GtkButton* button, gpointer user_data)
@@ -60,14 +78,9 @@ void on_color_picker_btn_clicked(unused GtkButton* button, gpointer user_data)
     // - Gets the ui
     UserInterface* ui = user_data;
 
-    // - Connects the signals if needed
-    if (ui->draw_left.pick_id == 0 && ui->draw_left.pb != NULL)
-        ui->draw_left.pick_id = g_signal_connect(ui->draw_left.ebox,
-                "button_press_event", G_CALLBACK(color_pick), ui);
-
-    if (ui->draw_right.pick_id == 0 && ui->draw_right.pb != NULL)
-        ui->draw_right.pick_id = g_signal_connect(ui->draw_right.ebox,
-                "button_press_event", G_CALLBACK(color_pick), ui);
+    // - Connects the signals
+    add_pick_signal(&ui->draw_left, ui);
+    add_pick_signal(&ui->draw_right, ui);
 }
 
 void set_rgb_entry_value(GtkEntry* text_holder, int value)
@@ -133,13 +146,21 @@ void update_rgb_value(unused GtkEditable* label, gpointer user_data)
 {
     // - Gets the user interface
     UserInterface* ui = user_data;
-
+    RGB rgb;
     GdkRGBA col = {0, 0, 0, 1};
 
     // - Gets the values of the different labels
     col.red = retrieve_color_value(ui->rgb_entries[0]);
     col.green = retrieve_color_value(ui->rgb_entries[1]);
     col.blue = retrieve_color_value(ui->rgb_entries[2]);
+
+    // - Sets the color selected
+    rgb.r = col.red;
+    rgb.g = col.green;
+    rgb.b = col.blue;
+
+    ui->draw_left.color = rgb;
+    ui->draw_right.color = rgb;
 
     // - Convertes these values between 0 and 1 to be able to set the color of
     // - the color wheel
@@ -155,13 +176,22 @@ void update_color_wheel_value(unused GtkColorButton* btn, gpointer user_data)
 {
     UserInterface* ui = user_data;
     GdkRGBA color;
+    RGB rgb;
 
     // - Gets the color picked by the color wheel btn
     gtk_color_chooser_get_rgba(ui->color_wheel_btn, &color);
 
-    // - Sets the value into the fields rgb
+    // - Converts into rgb
+    rgb.r = color.red * 255;
+    rgb.g = color.green * 255;
+    rgb.b = color.blue * 255;
 
-    set_rgb_entry_value(ui->rgb_entries[0], color.red * 255);
-    set_rgb_entry_value(ui->rgb_entries[1], color.green * 255);
-    set_rgb_entry_value(ui->rgb_entries[2], color.blue * 255);
+    // - Sets the value into the fields rgb
+    set_rgb_entry_value(ui->rgb_entries[0], rgb.r);
+    set_rgb_entry_value(ui->rgb_entries[1], rgb.g);
+    set_rgb_entry_value(ui->rgb_entries[2], rgb.b);
+
+    // - Sets the color selected
+    ui->draw_left.color = rgb;
+    ui->draw_right.color = rgb;
 }

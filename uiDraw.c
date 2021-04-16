@@ -1,49 +1,49 @@
 #include <gtk/gtk.h>
 #include <cairo.h>
 #include "uiTreatment.h"
+#include "uiColorPick.h"
 #include "uiDraw.h"
+
+void remove_paint_signal(DrawManagement* dm)
+{
+    if (dm->paint_id > 0)
+        g_signal_handler_disconnect(dm->ebox, dm->paint_id);
+
+    dm->paint_id = 0;
+}
+
+void add_paint_signal(DrawManagement* dm)
+{
+    if (dm->pb != NULL && dm->paint_id == 0)
+        dm->paint_id = g_signal_connect(dm->ebox, "button_press_event",
+                G_CALLBACK(paint), dm);
+}
+
+void switch_paint_signal(DrawManagement* dm)
+{
+    if (dm->paint_id == 0)
+    {
+        add_paint_signal(dm);
+        remove_pick_signal(dm);
+    }
+    else
+        remove_paint_signal(dm);
+}
 
 void on_paint_btn_clicked(unused GtkButton* b, gpointer user_data)
 {
     UserInterface* ui = user_data;
 
-    if (ui->draw_left.pb != NULL)
-    {
-        if (ui->draw_left.paint_id == 0)
-            ui->draw_left.paint_id = g_signal_connect(ui->draw_left.ebox,
-                    "button_press_event", G_CALLBACK(paint), ui);
-        else
-        {
-            g_signal_handler_disconnect(ui->draw_left.ebox, ui->draw_left.paint_id);
-            ui->draw_left.paint_id = 0;
-        }
-    }
-
-    if (ui->draw_right.pb != NULL)
-    {
-        if (ui->draw_right.paint_id == 0 && ui->draw_right.pb != NULL)
-            ui->draw_right.paint_id = g_signal_connect(ui->draw_right.ebox,
-                    "button_press_event", G_CALLBACK(paint), ui);
-        else
-        {
-            g_signal_handler_disconnect(ui->draw_right.ebox,
-                    ui->draw_right.paint_id);
-            ui->draw_right.paint_id = 0;
-        }
-    }
+    switch_paint_signal(&ui->draw_left);
+    switch_paint_signal(&ui->draw_right);
 }
 
-void paint(GtkEventBox* ebox, GdkEventButton* event, gpointer user_data)
+void paint(unused GtkEventBox* ebox, GdkEventButton* event, gpointer user_data)
 {
-    UserInterface* ui = user_data;
-    DrawManagement dm;
+    DrawManagement* dm = user_data;
     guchar* pixel = NULL;
-    int size = 1;
+    int size = 10;
 
-    if (ebox == ui->draw_left.ebox)
-        dm = ui->draw_left;
-    else
-        dm = ui->draw_right;
 
     // - Gets the pixel
     pixel = get_clicked_pixel(dm, event->x, event->y);
@@ -51,14 +51,14 @@ void paint(GtkEventBox* ebox, GdkEventButton* event, gpointer user_data)
     if (pixel != NULL)
     {
         // - Puts the color
-        pixel[0] = ui->color.r;
-        pixel[1] = ui->color.g;
-        pixel[2] = ui->color.b;
+        pixel[0] = dm->color.r;
+        pixel[1] = dm->color.g;
+        pixel[2] = dm->color.b;
 
-        size *= gtk_adjustment_get_value(dm.zoom);
+        size *= gtk_adjustment_get_value(dm->zoom);
 
         // - Request draw signal
-        gtk_widget_queue_draw_area(GTK_WIDGET(dm.darea),
+        gtk_widget_queue_draw_area(GTK_WIDGET(dm->darea),
                 event->x - size / 2, event->y - size / 2, size, size);
     }
 }
