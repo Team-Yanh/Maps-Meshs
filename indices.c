@@ -2,13 +2,11 @@
 #include <err.h>
 #include <stdlib.h>
 
-
 unsigned int* Array_Indices(int col, int line, unsigned int* indices)
 {
     int new_nb_indices = col * line * 2 * 3;
     int count_col = 0;
     unsigned int count_vertex = 0;
-
     for(int i = 0; i < new_nb_indices; i += 6)
     {
         if(count_col == col)
