@@ -9,66 +9,29 @@
 #include <stdlib.h>
 #include <math.h>
 #include "cglm/include/cglm/cglm.h"
-
-/*typedef struct vec3 
-{
-    float x, y, z;
-}vec3;
-
-struct vec3 newvec3(float x, float y, float z)
-{
-    struct vec3 *values = malloc(sizeof(struct vec3));
-
-    values->x = x;
-    values->y = y;
-    values->z = z;
-    return *values;
-}*/
-
-
-vec3 cameraPos = {0.0f, 0.0f, 3.0f};
-vec3 cameraTarget = {0.0f, 0.0f, 0.0f};
-vec3 cameraDirection;
-vec3 up = {0.0f, 0.1f, 0.0f};
-vec3 cameraRight;
-vec3 cameraUp;
-
-void camera()
-{
-    //cameraDirection
-    glm_vec3_sub(cameraPos, cameraTarget, cameraDirection);
-    glm_vec3_normalize(cameraDirection);
-    
-    //cameraRight
-    glm_vec3_cross(up, cameraDirection, cameraRight);
-    glm_vec3_normalize(cameraRight);
-
-    //cameraUp
-    glm_vec3_cross(cameraDirection, cameraRight, cameraUp);
-}
-vec3 cameraFront = {0.0f, 0.0f, -1.0f};
-vec3 cameraUp = {0.0f, 1.0f, 0.0f};
+#include "shader.h"
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
+    "uniform mat4 transform;\n"
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
     "}\0";
 const char *fragmentShaderSource = "#version 330 core\n"
     "out vec4 FragColor;\n"
+    "uniform vec4 ourColor;\n"
     "void main()\n"
     "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "   FragColor = ourColor;\n"
     "}\n\0";
 
 
 int opengl_Create_Terrain(int col, int line)
 {
-    camera();
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -97,6 +60,9 @@ int opengl_Create_Terrain(int col, int line)
         return -1;
     }
 
+    //Shader ourShader;
+    //ourShader.ID = new_Shader("shader/shader.vs", "shader/shader.fs");
+    
     // build and compile our shader program
     // ------------------------------------
 
@@ -144,8 +110,6 @@ int opengl_Create_Terrain(int col, int line)
     int nb_triangle = col * line * 2;
     int nb_indices = nb_triangle * 3;
 
-    //printf("indices : %d\n", nb_indices);
-    
     //float *vertices = malloc(nb_vertices * sizeof(float));
     //unsigned int *indices = malloc(nb_indices * sizeof(unsigned int));
 
@@ -159,7 +123,7 @@ int opengl_Create_Terrain(int col, int line)
     vertices[1] = -1.0f;
     vertices[3] = (2.0f / col) - 1;
 
-    for(int i = 0; i < nb_vertices - 2; i+= 3)
+    /*for(int i = 0; i < nb_vertices - 2; i+= 3)
     {
         printf("Vertices --- i: %d, x: %f, y: %f, z: %f\n", i,  vertices[i], vertices[i + 1], vertices[i + 2]);
     }
@@ -167,7 +131,7 @@ int opengl_Create_Terrain(int col, int line)
     for(int i = 0; i < nb_indices - 2; i += 3)
     {
        printf("Indices --- i: %d, 1st: %u, 2nd: %u, 3rd; %u\n", i, indices[i], indices[i + 1], indices[i + 2]);
-    }
+    }*/
 
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
@@ -193,7 +157,7 @@ int opengl_Create_Terrain(int col, int line)
 
     // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
     // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    glBindVertexArray(0); 
+    glBindVertexArray(VAO); 
 
 
     // uncomment this call to draw in wireframe polygons.
@@ -208,53 +172,28 @@ int opengl_Create_Terrain(int col, int line)
         // input
         // -----
         processInput(window);
-
-        /*float radius = 10.0f;
-        float camX = sin(glfwGetTime()) * radius;
-        float camZ = cos(glfwGetTime()) * radius;
-        */
-
-        //vec3 eye =    {camX, 0.0f, camZ};
-        vec3 pos    = {10.0f, 10.0f, 8.0f};
-        vec3 up     = {0.0f, 1.0f, 0.0f};
-        vec3 fp     = {0.0f, 0.0f, 0.0f};
-        float ar    = 640.0f / 480.0f;
-        float angle = 1.13446;
-        float near  = 0.1f;
-        float far   = 100.0f;
-
-        mat4 view;
-        mat4 proj;
-        mat4 model;
-        glm_mat4_identity(model);
-        glm_lookat(pos, fp, up, view);
-        glm_perspective(angle, ar, near, far, proj);
-
-        glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        glUseProgram(shaderProgram);
-        
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        float timeValue = glfwGetTime();
+        float greenValue = sin(timeValue);
+        int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
-        // Update Shader here (no idea how to tho)
-        // use glUniformMatrix4fv to change something in the shader (no idea what)
+        mat4 transform;
+        vec3 rot = {0.0f, 0.0f, 1.0f};
+        glm_mat4_identity(transform);
+        //glm_translate(transform, trans);
+        glm_rotate(transform, (float)glfwGetTime(), rot);
+
+        glUseProgram(shaderProgram);
+        unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (const float*)transform);
         
-        // uses uniforms in the shader code to manipulate the vertices being drawn
-        // get uniform name with glGetUniformLocation(shaderProgram, "name of the Uniform")
-        // -> uniforms (informations in the shader) set the uniform value via glUniform and it'll change maybe
-        // might need to create a shader class in a near future
-
-        int pos = glGetUniformLocation(shaderProgram, "position" /*idk which one*/)
-        glUniformMatrix4fv(pos, 1, GL_FALSE, /*get the uniform for position idk which and set it to view*/)
-
         //glDrawArrays(GL_TRIANGLES, 0, 6);
         glDrawElements(GL_TRIANGLES, nb_indices, GL_UNSIGNED_INT, 0);
         
-        
-        
-        glUseProgram(0);
-        glBindVertexArray(0); // no need to unbind it every time 
+        //glBindVertexArray(0); // no need to unbind it every time 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
