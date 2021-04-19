@@ -14,12 +14,20 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+vec3 cameraPos = {0.0f, 0.0f, 3.0f};
+vec3 cameraFront = {0.0f, 0.0f, -1.0f};
+vec3 cameraUp = {0.0f, 1.0f, 0.0f};
+
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
 const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
-    "uniform mat4 transform;\n"
+    "uniform mat4 view;\n"
+    "uniform mat4 projection;\n"
     "void main()\n"
     "{\n"
-    "   gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   gl_Position = projection * view * vec4(aPos, 1.0);\n"
     "}\0";
 const char *fragmentShaderSource = "#version 330 core\n"
     "out vec4 FragColor;\n"
@@ -163,24 +171,76 @@ int opengl_Create_Terrain(int col, int line)
     // uncomment this call to draw in wireframe polygons.
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    glUseProgram(shaderProgram);
+
+    mat4 projection;
+    glm_mat4_identity(projection);
+    glm_perspective(glm_rad(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f, projection);
+    unsigned int perspLoc = glGetUniformLocation(shaderProgram, "projection");
+    glUniformMatrix4fv(perspLoc, 1, GL_FALSE, &projection[0][0]);
     
 
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
     {
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         // input
         // -----
         processInput(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        float timeValue = glfwGetTime();
-        float greenValue = sin(timeValue);
+        glUseProgram(shaderProgram);
+        mat4 view;
+        //mat4 model;
+
+        //glm_mat4_identity(model);
+        glm_mat4_identity(view);
+
+        /*float radius = 10.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+        vec3 eye = {camX, 0.0f, camZ};
+        vec3 dir = {0.0f, 0.0f, 0.0f};
+        vec3 up =  {0.0f, 1.0f, 0.0f};
+        */
+        vec3 camera2;
+
+        glm_vec3_add(cameraPos, cameraFront, camera2);
+
+        glm_lookat(cameraPos, camera2, cameraUp, view);
+
+
+        //vec3 rot = {0.5f, 1.0f, 0.0f};
+        //vec3 trans = {0.0f, 0.0f, -3.0f};
+
+        //glm_rotate(model, (float)glfwGetTime(), rot);
+        //glm_translate(view, trans);
+
+        //unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+        unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
+
+        //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &model[0][0]);
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+
+
+        float greenValue = 1;
         int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
         glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
-        mat4 transform;
+        /*mat4 model;
+        vec3 trans = {1.0f, 0.3f, 0.5f};
+        glm_mat4_identity(model);
+        glm_rotate(model, (float)glfwGetTime(), trans);
+        unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &model[0][0]);
+        */
+
+        /*mat4 transform;
         vec3 rot = {0.0f, 0.0f, 1.0f};
         glm_mat4_identity(transform);
         //glm_translate(transform, trans);
@@ -189,8 +249,10 @@ int opengl_Create_Terrain(int col, int line)
         glUseProgram(shaderProgram);
         unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (const float*)transform);
-        
+        */
+
         //glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, nb_indices, GL_UNSIGNED_INT, 0);
         
         //glBindVertexArray(0); // no need to unbind it every time 
@@ -221,10 +283,44 @@ void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, 1);
+
+    float cameraSpeed = 2.5 * deltaTime;
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        cameraPos[0] += cameraSpeed * cameraFront[0];
+        cameraPos[1] += cameraSpeed * cameraFront[1];
+        cameraPos[2] += cameraSpeed * cameraFront[2];
+    }
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        cameraPos[0] -= cameraSpeed * cameraFront[0];
+        cameraPos[1] -= cameraSpeed * cameraFront[1];
+        cameraPos[2] -= cameraSpeed * cameraFront[2];
+    }
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        vec3 dest;
+        glm_vec3_cross(cameraFront, cameraUp, dest);
+        glm_vec3_normalize(dest);
+        cameraPos[0] -= cameraSpeed * dest[0];
+        cameraPos[1] -= cameraSpeed * dest[1];
+        cameraPos[2] -= cameraSpeed * dest[2];
+    }
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        vec3 dest;
+        glm_vec3_cross(cameraFront, cameraUp, dest);
+        glm_vec3_normalize(dest);
+        cameraPos[0] += cameraSpeed * dest[0];
+        cameraPos[1] += cameraSpeed * dest[1];
+        cameraPos[2] += cameraSpeed * dest[2];
+    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
+
+
 
 void framebuffer_size_callback(GLFWwindow* window __attribute__((unused)), int width, int height)
 {
@@ -233,4 +329,8 @@ void framebuffer_size_callback(GLFWwindow* window __attribute__((unused)), int w
     glViewport(0, 0, width, height);
 }
 
+void setMat4(const char* name, mat4 mat, GLuint shaderProgram)
+{
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, name), 1, GL_FALSE, &mat[0][0]);
+}
 
