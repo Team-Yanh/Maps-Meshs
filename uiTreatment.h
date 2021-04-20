@@ -21,6 +21,7 @@ typedef struct DrawManagement
     guint paint_id;
     int w;
     int h;
+    struct UserInterface* ui;
 } DrawManagement;
 
 typedef struct UserInterface
@@ -37,6 +38,7 @@ typedef struct UserInterface
     GtkEntry* rgb_entries[3];
 } UserInterface;
 
+void remove_paint_pick_signals(UserInterface* ui);
 void on_img_open_btn_clicked(GtkButton* button, gpointer user_data);
 void on_treat_btn_clicked(unused GtkButton* button, gpointer user_data);
 void load_image(DrawManagement* dm, char* filename);

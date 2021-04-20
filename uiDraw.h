@@ -1,6 +1,22 @@
 #ifndef UIDRAW_H
 #define UIDRAW_H
 
+typedef struct Pos
+{
+    int x;
+    int y;
+} Pos;
+
+typedef struct Zone
+{
+    Pos init;
+    Pos ind;
+    Pos offSet;
+    int size;
+    int w;
+    int h;
+} Zone;
+
 void remove_paint_signal(DrawManagement* dm);
 void add_paint_signal(DrawManagement* dm);
 void switch_paint_signal(DrawManagement* dm);

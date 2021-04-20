@@ -4,11 +4,23 @@
 #include "uiDraw.h"
 #include "imageFilter.h"
 
+void remove_paint_pick_signals(UserInterface* ui)
+{
+    remove_paint_signal(&ui->draw_left);
+    remove_paint_signal(&ui->draw_right);
+
+    remove_pick_signal(&ui->draw_right);
+    remove_pick_signal(&ui->draw_left);
+}
+
 void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
 {
     // - Gets our variable ui
     UserInterface* ui = user_data;
     gchar* filename = NULL;
+
+    // - Disconnects all signals
+    remove_paint_pick_signals(ui);
 
     // - Display the dialog box file chooser;
     gtk_widget_show(GTK_WIDGET(ui->dlg_file_chooser));
@@ -35,8 +47,16 @@ void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
 void on_treat_btn_clicked(unused GtkButton* button, gpointer user_data)
 {
     DrawManagement* dm = user_data;
+    UserInterface* ui = dm->ui;
+
     char filename[] = "images/test1.png";
 
+    // - Disconnects all signals
+    remove_paint_pick_signals(ui);
+
+    // - Treat the image
+
+    // - Load the treated img
     load_image(dm, filename);
 }
 
@@ -60,6 +80,9 @@ void load_image(DrawManagement* dm, char* filename)
 void on_zoom(unused GtkScale* zoom_scale, gpointer user_data)
 {
     DrawManagement* dm = user_data;
+    UserInterface* ui = dm->ui;
+
+    remove_paint_pick_signals(ui);
 
     if (dm->pb != NULL)
         gtk_widget_queue_draw(GTK_WIDGET(dm->darea));
@@ -136,6 +159,7 @@ void uiTreatment()
     draw_l.color.b = 255;
     draw_l.pick_id = 0;
     draw_l.paint_id = 0;
+    draw_l.ui = ui;
 
     draw_r.darea = GTK_DRAWING_AREA(gtk_builder_get_object(builder,
             "draw_area_2"));
@@ -149,6 +173,7 @@ void uiTreatment()
     draw_r.color.b = 255;
     draw_r.pick_id = 0;
     draw_r.paint_id = 0;
+    draw_r.ui = ui;
 
     ui->draw_left = draw_l;
     ui->draw_right = draw_r;
