@@ -69,7 +69,7 @@ void add_pick_signal(DrawManagement* dm, UserInterface* ui)
     {
         dm->pick_id = g_signal_connect(dm->ebox, "button_press_event",
                 G_CALLBACK(color_pick), ui);
-        remove_paint_signal(dm);
+        remove_paintable(dm);
     }
 }
 

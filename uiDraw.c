@@ -4,41 +4,94 @@
 #include "uiColorPick.h"
 #include "uiDraw.h"
 
-void remove_paint_signal(DrawManagement* dm)
+void add_paintable(DrawManagement* dm)
 {
-    if (dm->paint_id > 0)
+    if (dm->paintable_id == 0 && dm->pb != NULL)
+        dm->paintable_id = g_signal_connect(dm->ebox, "button_press_event",
+               G_CALLBACK(begin_paint), dm);
+}
+
+void remove_paintable(DrawManagement* dm)
+{
+    if (dm->paintable_id != 0)
+        g_signal_handler_disconnect(dm->ebox, dm->paintable_id);
+
+    dm->paintable_id = 0;
+}
+
+void add_paint(DrawManagement* dm)
+{
+    if (dm->paint_id == 0 && dm->pb != NULL)
+        dm->paint_id = g_signal_connect(dm->ebox, "motion_notify_event",
+                G_CALLBACK(paint), dm);
+}
+
+void remove_paint(DrawManagement* dm)
+{
+    if (dm->paint_id != 0)
         g_signal_handler_disconnect(dm->ebox, dm->paint_id);
 
     dm->paint_id = 0;
 }
 
-void add_paint_signal(DrawManagement* dm)
+void add_release(DrawManagement* dm)
 {
-    if (dm->pb != NULL && dm->paint_id == 0)
-        dm->paint_id = g_signal_connect(dm->ebox, "button_press_event",
-                G_CALLBACK(paint), dm);
+    if (dm->release_id == 0 && dm->pb != NULL)
+        dm->release_id = g_signal_connect(dm->ebox, "button_release_event",
+                G_CALLBACK(end_paint), dm);
 }
 
-void switch_paint_signal(DrawManagement* dm)
+void remove_release(DrawManagement* dm)
 {
-    if (dm->paint_id == 0)
-    {
-        add_paint_signal(dm);
-        remove_pick_signal(dm);
-    }
+    if (dm->release_id != 0)
+        g_signal_handler_disconnect(dm->ebox, dm->release_id);
+
+    dm->release_id = 0;
+}
+
+void switch_paintable(DrawManagement* dm)
+{
+    if (dm->paintable_id == 0)
+        add_paintable(dm);
     else
-        remove_paint_signal(dm);
+        remove_paintable(dm);
 }
 
 void on_paint_btn_clicked(unused GtkButton* b, gpointer user_data)
 {
     UserInterface* ui = user_data;
 
-    switch_paint_signal(&ui->draw_left);
-    switch_paint_signal(&ui->draw_right);
+    switch_paintable(&ui->draw_left);
+    switch_paintable(&ui->draw_right);
 }
 
-void put_color(guchar* pixel, RGB color)
+void begin_paint(GtkEventBox* ebox, unused GdkEventButton* event, gpointer data)
+{
+    DrawManagement* dm = data;
+
+    // - Paint au click
+    paint(ebox, event, dm);
+
+    // - Ajoute le signal pour peindre
+    add_paint(dm);
+
+    // - Ajoute le signal pour retirer la fonction paint quand on relache
+    // - le bouton
+    add_release(dm);
+}
+
+void end_paint(unused GtkEventBox* eb, unused GdkEventButton* ev, gpointer data)
+{
+    DrawManagement* dm = data;
+
+    // - Retire le signal de release
+    remove_release(dm);
+
+    // - Retire le signal de paint
+    remove_paint(dm);
+}
+
+static void put_color(guchar* pixel, RGB color)
 {
     pixel[0] = color.r;
     pixel[1] = color.g;
@@ -67,7 +120,7 @@ void paint(unused GtkEventBox* ebox, GdkEventButton* event, gpointer user_data)
         ey /= zoom;
 
         // - Inits the zone to be colored
-        zone.size = gtk_adjustment_get_value(ui->size);
+        zone.size = gtk_adjustment_get_value(ui->size) - 1;
         zone.init.x = ex - zone.size;
         zone.init.y = ey - zone.size;
         zone.offSet.x = 0;

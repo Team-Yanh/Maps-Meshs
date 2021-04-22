@@ -6,8 +6,8 @@
 
 void remove_paint_pick_signals(UserInterface* ui)
 {
-    remove_paint_signal(&ui->draw_left);
-    remove_paint_signal(&ui->draw_right);
+    remove_paintable(&ui->draw_left);
+    remove_paintable(&ui->draw_right);
 
     remove_pick_signal(&ui->draw_right);
     remove_pick_signal(&ui->draw_left);
@@ -101,7 +101,7 @@ guchar* get_clicked_pixel(DrawManagement* dm, int x, int y)
     n_channels = gdk_pixbuf_get_n_channels(dm->pb);
     rowstride = gdk_pixbuf_get_rowstride(dm->pb);
 
-    if (x < width && y < height)
+    if (x >= 0 && x < width && y >= 0 && y < height)
     {
         // - Gets the pixels
         pixels = gdk_pixbuf_get_pixels(dm->pb);
@@ -161,6 +161,8 @@ void uiTreatment()
     draw_l.color.b = 255;
     draw_l.pick_id = 0;
     draw_l.paint_id = 0;
+    draw_l.paintable_id = 0;
+    draw_l.release_id = 0;
     draw_l.ui = ui;
 
     draw_r.darea = GTK_DRAWING_AREA(gtk_builder_get_object(builder,
@@ -175,6 +177,8 @@ void uiTreatment()
     draw_r.color.b = 255;
     draw_r.pick_id = 0;
     draw_r.paint_id = 0;
+    draw_r.paintable_id = 0;
+    draw_r.release_id = 0;
     draw_r.ui = ui;
 
     ui->draw_left = draw_l;

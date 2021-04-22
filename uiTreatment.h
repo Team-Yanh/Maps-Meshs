@@ -18,7 +18,9 @@ typedef struct DrawManagement
     GtkAdjustment* zoom;
     RGB color;
     guint pick_id;
+    guint paintable_id;
     guint paint_id;
+    guint release_id;
     int w;
     int h;
     struct UserInterface* ui;

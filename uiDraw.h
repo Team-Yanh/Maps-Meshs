@@ -17,9 +17,15 @@ typedef struct Zone
     int h;
 } Zone;
 
-void remove_paint_signal(DrawManagement* dm);
-void add_paint_signal(DrawManagement* dm);
-void switch_paint_signal(DrawManagement* dm);
+void add_paintable(DrawManagement* dm);
+void remove_paintable(DrawManagement* dm);
+void add_paint(DrawManagement* dm);
+void remove_paint(DrawManagement* dm);
+void add_release(DrawManagement* dm);
+void remove_release(DrawManagement* dm);
+void switch_paintable(DrawManagement* dm);
+void begin_paint(GtkEventBox* ebox, GdkEventButton* event, gpointer user_data);
+void end_paint(GtkEventBox* ebox, GdkEventButton* event, gpointer user_data);
 void on_paint_btn_clicked(GtkButton* b, gpointer user_data);
 void paint(GtkEventBox* ebox, GdkEventButton* event, gpointer user_data);
 void on_draw(GtkDrawingArea* darea, cairo_t* cr, gpointer user_data);
