@@ -10,6 +10,7 @@
 #include <math.h>
 #include "cglm/include/cglm/cglm.h"
 #include "shader.h"
+#include "shader_terrain.h"
 #include <stdbool.h>
 
 const unsigned int SCR_WIDTH = 800;
@@ -29,23 +30,7 @@ float fov = 45.0f;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-const char *vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "uniform mat4 view;\n"
-    "uniform mat4 projection;\n"
-    "uniform mat4 model;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
-    "}\0";
-const char *fragmentShaderSource = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "uniform vec4 ourColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = ourColor;\n"
-    "}\n\0";
-
+vec3 lightPos = {1.2f, 1.0f, 2.0f};
 
 int opengl_Create_Terrain(int col, int line)
 {
@@ -83,48 +68,8 @@ int opengl_Create_Terrain(int col, int line)
     
     glEnable(GL_DEPTH_TEST);
 
-    //Shader ourShader;
-    //ourShader.ID = new_Shader("shader/shader.vs", "shader/shader.fs");
-    
-    // build and compile our shader program
-    // ------------------------------------
+    unsigned int shaderProgram = shader_terrain();
 
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    // check for shader compile errors
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        printf("error during creating the vertex");
-    }
-    // fragment shader
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    // check for shader compile errors
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        printf("error during creating the fragment");
-    }
-    // link shaders
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    // check for linking errors
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        printf("error during creating shader");
-    }
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -163,7 +108,7 @@ int opengl_Create_Terrain(int col, int line)
     vertices[44] = 0.16f;
     vertices[47] = 0.0f;
 
-    for(int i = 0; i < nb_vertices - 2; i+= 3)
+    /*for(int i = 0; i < nb_vertices - 2; i+= 3)
     {
         printf("Vertices --- i: %d, x: %f, y: %f, z: %f\n", i,  vertices[i], vertices[i + 1], vertices[i + 2]);
     }
@@ -171,13 +116,18 @@ int opengl_Create_Terrain(int col, int line)
     for(int i = 0; i < nb_indices - 2; i += 3)
     {
        printf("Indices --- i: %d, 1st: %u, 2nd: %u, 3rd; %u\n", i, indices[i], indices[i + 1], indices[i + 2]);
-    }
+    }*/
 
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+
+    unsigned int lightCubeVAO;
+    glGenVertexArrays(1, &lightCubeVAO);
+    glBindVertexArray(lightCubeVAO);
+
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -203,7 +153,7 @@ int opengl_Create_Terrain(int col, int line)
     // uncomment this call to draw in wireframe polygons.
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    glUseProgram(shaderProgram);
+    use(shaderProgram);
 
     // render loop
     // -----------
@@ -216,10 +166,10 @@ int opengl_Create_Terrain(int col, int line)
         // input
         // -----
         processInput(window);
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.6f, 0.6f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
+        use(shaderProgram);
         mat4 view;
         mat4 model;
         glm_mat4_identity(model);
@@ -228,27 +178,22 @@ int opengl_Create_Terrain(int col, int line)
         vec3 camera2;
         vec3 rot = {1.0f, 0.0f, 0.0f};
 
-        //printf("CameraFront : %f, %f, %f \n", cameraFront[0], cameraFront[1], cameraFront[2]);
-
         glm_vec3_add(cameraPos, cameraFront, camera2);
 
         glm_lookat(cameraPos, camera2, cameraUp, view);
         glm_rotate(model, glm_rad(-55.0f), rot);
 
-        unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
-        unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &model[0][0]);
+        setMat4(shaderProgram, "view", view);
+        setMat4(shaderProgram, "model", model);
 
         mat4 projection;
         glm_mat4_identity(projection);
         glm_perspective(glm_rad(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f, projection);
-        unsigned int perspLoc = glGetUniformLocation(shaderProgram, "projection");
-        glUniformMatrix4fv(perspLoc, 1, GL_FALSE, &projection[0][0]);
-
-        float greenValue = 1;
-        int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+        
+        setMat4(shaderProgram, "projection", projection);
+        
+        vec4 color = {0.35f, 0.25f, 0.20f, 0.0f};
+        setVec4(shaderProgram, "ourColor", color);
 
         //glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(VAO);
@@ -328,12 +273,7 @@ void framebuffer_size_callback(GLFWwindow* window __attribute__((unused)), int w
     glViewport(0, 0, width, height);
 }
 
-void setMat4(const char* name, mat4 mat, GLuint shaderProgram)
-{
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, name), 1, GL_FALSE, &mat[0][0]);
-}
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+void mouse_callback(GLFWwindow* window __attribute__((unused)), double xpos, double ypos)
 {
     if(firstMouse)
     {
@@ -371,7 +311,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     cameraFront[2] = front[2];
 }
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void scroll_callback(GLFWwindow* window __attribute__((unused)), double xoffset __attribute((unused)), double yoffset)
 {
     fov -= (float)yoffset;
     if(fov < 1.0f)
