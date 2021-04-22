@@ -146,6 +146,8 @@ void uiTreatment()
     ui->rgb_entries[0] = GTK_ENTRY(gtk_builder_get_object(builder, "r_entry"));
     ui->rgb_entries[1] = GTK_ENTRY(gtk_builder_get_object(builder, "g_entry"));
     ui->rgb_entries[2] = GTK_ENTRY(gtk_builder_get_object(builder, "b_entry"));
+    ui->size = GTK_ADJUSTMENT(gtk_builder_get_object(builder,
+                "size_adjustment"));
 
     draw_l.darea = GTK_DRAWING_AREA(gtk_builder_get_object(builder,
             "draw_area_1"));

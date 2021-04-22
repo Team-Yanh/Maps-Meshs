@@ -36,6 +36,7 @@ typedef struct UserInterface
     GtkColorChooser* color_wheel_btn;
     GtkFileChooserDialog* dlg_file_chooser;
     GtkEntry* rgb_entries[3];
+    GtkAdjustment* size;
 } UserInterface;
 
 void remove_paint_pick_signals(UserInterface* ui);

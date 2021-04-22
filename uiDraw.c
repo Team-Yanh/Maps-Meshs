@@ -48,6 +48,7 @@ void put_color(guchar* pixel, RGB color)
 void paint(unused GtkEventBox* ebox, GdkEventButton* event, gpointer user_data)
 {
     DrawManagement* dm = user_data;
+    UserInterface* ui = dm->ui;
     guchar* pixel = NULL;
     int n_channels = gdk_pixbuf_get_n_channels(dm->pb);
     int rowstride = gdk_pixbuf_get_rowstride(dm->pb);
@@ -66,7 +67,7 @@ void paint(unused GtkEventBox* ebox, GdkEventButton* event, gpointer user_data)
         ey /= zoom;
 
         // - Inits the zone to be colored
-        zone.size = 10;
+        zone.size = gtk_adjustment_get_value(ui->size);
         zone.init.x = ex - zone.size;
         zone.init.y = ey - zone.size;
         zone.offSet.x = 0;
