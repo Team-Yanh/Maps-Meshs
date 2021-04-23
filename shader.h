@@ -36,5 +36,10 @@ void setVec4(unsigned int shader, const char* name, vec4 vec)
     glUniform4f(glGetUniformLocation(shader, name), vec[0], vec[1], vec[2], vec[3]);
 }
 
+void setVec3(unsigned int shader, const char* name, vec3 vec)
+{
+    glUniform3f(glGetUniformLocation(shader, name), vec[0], vec[1], vec[2]);
+}
+
 #endif
 

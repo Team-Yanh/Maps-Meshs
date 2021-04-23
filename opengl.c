@@ -69,7 +69,7 @@ int opengl_Create_Terrain(int col, int line)
     glEnable(GL_DEPTH_TEST);
 
     unsigned int shaderProgram = shader_terrain();
-
+    unsigned int shaderCube = shader_cube();
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -118,15 +118,57 @@ int opengl_Create_Terrain(int col, int line)
        printf("Indices --- i: %d, 1st: %u, 2nd: %u, 3rd; %u\n", i, indices[i], indices[i + 1], indices[i + 2]);
     }*/
 
+    float vertices_cube[] = {
+        -0.5f, -0.5f, -0.5f, 
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f, 
+        -0.5f, -0.5f, -0.5f, 
+
+        -0.5f, -0.5f,  0.5f, 
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f, 
+        -0.5f, -0.5f,  0.5f, 
+
+        -0.5f,  0.5f,  0.5f, 
+        -0.5f,  0.5f, -0.5f, 
+        -0.5f, -0.5f, -0.5f, 
+        -0.5f, -0.5f, -0.5f, 
+        -0.5f, -0.5f,  0.5f, 
+        -0.5f,  0.5f,  0.5f, 
+
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+
+        -0.5f, -0.5f, -0.5f, 
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f, 
+        -0.5f, -0.5f, -0.5f, 
+
+        -0.5f,  0.5f, -0.5f, 
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f, 
+        -0.5f,  0.5f, -0.5f, 
+    };
+
+
+
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-
-    unsigned int lightCubeVAO;
-    glGenVertexArrays(1, &lightCubeVAO);
-    glBindVertexArray(lightCubeVAO);
 
     glBindVertexArray(VAO);
 
@@ -138,6 +180,19 @@ int opengl_Create_Terrain(int col, int line)
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    unsigned int lightCubeVAO, lightCubeVBO;
+    glGenVertexArrays(1, &lightCubeVAO);
+    glGenBuffers(1, &lightCubeVBO);
+
+    glBindVertexArray(lightCubeVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, lightCubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_cube), vertices_cube, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
@@ -151,7 +206,7 @@ int opengl_Create_Terrain(int col, int line)
 
 
     // uncomment this call to draw in wireframe polygons.
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     use(shaderProgram);
 
@@ -166,10 +221,16 @@ int opengl_Create_Terrain(int col, int line)
         // input
         // -----
         processInput(window);
-        glClearColor(0.6f, 0.6f, 1.0f, 1.0f);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         use(shaderProgram);
+        vec3 object = {0.35f, 0.25f, 0.20f};
+        vec3 light = {1.0f, 1.0f, 1.0f};
+        setVec3(shaderProgram, "objectColor", object);
+        setVec3(shaderProgram, "lightColor", light);
+        //setVec3(shaderProgram, "lightPos", lightPos);
+
         mat4 view;
         mat4 model;
         glm_mat4_identity(model);
@@ -192,12 +253,24 @@ int opengl_Create_Terrain(int col, int line)
         
         setMat4(shaderProgram, "projection", projection);
         
-        vec4 color = {0.35f, 0.25f, 0.20f, 0.0f};
-        setVec4(shaderProgram, "ourColor", color);
+        //vec4 color = {0.35f, 0.25f, 0.20f, 0.0f};
+        //setVec4(shaderProgram, "ourColor", color);
 
         //glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, nb_indices, GL_UNSIGNED_INT, 0);
+        
+        use(shaderCube);
+        setMat4(shaderCube, "projection", projection);
+        setMat4(shaderCube, "view", view);
+        glm_mat4_identity(model);
+        glm_translate(model, lightPos);
+        vec3 scale = {0.2f, 0.2f, 0.2f};
+        glm_scale(model, scale);
+        setMat4(shaderCube, "model", model);
+
+        glBindVertexArray(lightCubeVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
         
         //glBindVertexArray(0); // no need to unbind it every time 
 

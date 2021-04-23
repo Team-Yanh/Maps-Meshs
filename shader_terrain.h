@@ -6,7 +6,8 @@
 #include "opengl.h"
 //#include "glm/include/cglm/cglm.h"
 
-int shader_terrain();
+unsigned int shader_cube();
+unsigned int shader_terrain();
 void checkCompileErrors(unsigned int shader, const char* type);
 
 #endif
