@@ -18,5 +18,6 @@ void enhanceBlack(Color *c);
 void keepTopoLine(Color *c);
 void keepTopoLineHSV(SDL_Surface *image, Color *topoColor);
 void setMonochromatic(SDL_Surface *image, Color *c);
+void blur(SDL_Surface **image, int blurLevel);
 
 void replaceColor(SDL_Surface *image, Color *c1, Color *c2);

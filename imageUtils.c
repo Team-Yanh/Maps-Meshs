@@ -140,3 +140,54 @@ void replaceColor(SDL_Surface *image, Color *c1, Color *c2)
     }
     freeColor(currentColor);
 }
+
+Color *getAverage(SDL_Surface *image, const int x, const int y, int blurLevel)
+{
+    Color *average = initColor(image->format);
+
+    long r = 0;
+    long g = 0;
+    long b = 0;
+    int cellCount = 0;
+
+    for(int i = x - blurLevel; i <= x + blurLevel; i++)
+    {
+        for(int j = y - blurLevel; j <= y + blurLevel; j++) // all pixels in grid around x,y
+        {
+            if(isValidCell(image, i, j))
+            {
+                cellCount++;
+                setPixel(average, getPixel(image, i, j));
+                r += average->rgb->r;
+                g += average->rgb->g;
+                b += average->rgb->b;
+            }
+        }
+    }
+
+    r /= cellCount;
+    g /= cellCount;
+    b /= cellCount;
+    setRGB(average, (Uint8)r, (Uint8)g, (Uint8)b);
+
+    return average;
+}
+
+void blur(SDL_Surface **image, int blurLevel)
+{
+    // copy image to result;
+    SDL_Surface *result = SDL_ConvertSurface(*image, (*image)->format, SDL_SWSURFACE);
+
+    Color *currentColor;
+    for(int i = 0; i < (*image)->w; i++)
+    {
+        for(int j = 0; j < (*image)->h; j++) // each pixel
+        {
+            currentColor = getAverage(*image, i, j, blurLevel);
+            putPixel(result, i, j, currentColor->pixel);
+            freeColor(currentColor);
+        }
+    }
+    SDL_FreeSurface(*image); // replace image by result
+    *image = result;
+}
