@@ -118,10 +118,11 @@ int isValidNeighbour(SDL_Surface *image, int x, int y)
     return res;
 }
 
-void colorCircles(SDL_Surface *image)
+int colorCircles(SDL_Surface *image)
 {
     int counter = 0;
     Queue *q = createQueue();
+
     Color *c = initColor(image->format);
     Color *currentColor = initColor(image->format);
     Color *circle = initColor(image->format);
@@ -130,9 +131,9 @@ void colorCircles(SDL_Surface *image)
     Color *blackMarked = initColor(image->format);
     setRGB(c, 200, 0, 0);
     setRGB(black, 0, 0, 0);
+    setRGB(white, 255, 255, 255);
     setRGB(blackMarked, 0, 255, 0);
     setRGB(circle, 255, 0, 0);
-    setRGB(white, 255, 255, 255);
 
     for(int i = 0; i < image->w; i++)
     {
@@ -151,14 +152,21 @@ void colorCircles(SDL_Surface *image)
 
     int x = 0;
     int y = 0;
-    while(!isEmpty(q))
-    {
-        dequeue(q, &x, &y);
-        colorZoneBFS(image, circle, x, y);
-        replaceColor(image, blackMarked, circle);
-    }
+    int result = 0;
 
     replaceColor(image, c, white);
+
+    if(!isEmpty(q)) // have circles
+    {
+        result = 1;
+        while(!isEmpty(q))
+        {
+            dequeue(q, &x, &y);
+            colorZoneBFS(image, circle, x, y);
+            replaceColor(image, blackMarked, circle);
+        }
+    }
+
     freeQueue(q);
     freeColor(c);
     freeColor(currentColor);
@@ -166,6 +174,8 @@ void colorCircles(SDL_Surface *image)
     freeColor(white);
     freeColor(black);
     freeColor(blackMarked);
+
+    return result;
 }
 
 void colorAllZonesFromCircles(SDL_Surface *image)
@@ -182,7 +192,17 @@ void colorAllZonesFromCircles(SDL_Surface *image)
     setRGB(c, 200, 0, 0);
     setRGB(white, 255, 255, 255);
 
-    colorCircles(image);
+    int isCircle = colorCircles(image);
+    if(isCircle == 0) // no circle
+    {
+        thickenColor(image, black);
+        isCircle = colorCircles(image);
+        if(isCircle == 0) // no circle after thickenning, color top left
+        {
+            colorZoneBFS(image, circle, 0, 0);
+            replaceColor(image, blackMarked, circle);
+        }
+    }
 
     while(isWhiteInImage(image)) //while we can, color adjacent circles with c
     {

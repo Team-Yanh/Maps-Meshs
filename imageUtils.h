@@ -6,7 +6,6 @@
 #include "queue.h"
 #include "imageFilter.h"
 
-void thickenColor(SDL_Surface *surface, Color *c);
 
 Uint32 distanceToColorHSV(Color *c, Color *c2);
 Uint32 distanceToColor(Color *c, Color *c2);
@@ -15,6 +14,7 @@ void invert(Color *c);
 void grayscale(Color *c);
 void stepColoring(Color *c);
 void enhanceBlack(Color *c);
+void thickenColor(SDL_Surface *surface, Color *c);
 void keepTopoLine(Color *c);
 void keepTopoLineHSV(SDL_Surface *image, Color *topoColor);
 void setMonochromatic(SDL_Surface *image, Color *c);
