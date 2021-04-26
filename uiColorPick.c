@@ -57,7 +57,13 @@ void remove_pick_signal(DrawManagement* dm)
 {
     // - Disconnects the signals of the colorpicker
     if (dm->pick_id > 0)
+    {
         g_signal_handler_disconnect(dm->ebox, dm->pick_id);
+
+        // - Sets default cursor
+        gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(dm->ui->window)),
+                dm->ui->cursors.def);
+    }
 
     dm->pick_id = 0;
 }
@@ -69,7 +75,13 @@ void add_pick_signal(DrawManagement* dm, UserInterface* ui)
     {
         dm->pick_id = g_signal_connect(dm->ebox, "button_press_event",
                 G_CALLBACK(color_pick), ui);
+
+        // - Removes paint signals
         remove_paintable(dm);
+
+        // - Modifies the cursor
+        gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(ui->window)),
+                ui->cursors.pick);
     }
 }
 

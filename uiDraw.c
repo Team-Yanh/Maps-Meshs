@@ -7,14 +7,26 @@
 void add_paintable(DrawManagement* dm)
 {
     if (dm->paintable_id == 0 && dm->pb != NULL)
+    {
         dm->paintable_id = g_signal_connect(dm->ebox, "button_press_event",
                G_CALLBACK(begin_paint), dm);
+
+        // - Modifies the cursos
+        gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(dm->ui->window)),
+                dm->ui->cursors.paint);
+    }
 }
 
 void remove_paintable(DrawManagement* dm)
 {
     if (dm->paintable_id != 0)
+    {
         g_signal_handler_disconnect(dm->ebox, dm->paintable_id);
+
+        // - Sets defualt cursor
+        gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(dm->ui->window)),
+                dm->ui->cursors.def);
+    }
 
     dm->paintable_id = 0;
 }

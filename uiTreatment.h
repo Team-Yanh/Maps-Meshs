@@ -9,6 +9,13 @@
 
 #include "imageFilter.h"
 
+typedef struct Cursors
+{
+    GdkCursor* def;
+    GdkCursor* pick;
+    GdkCursor* paint;
+} Cursors;
+
 typedef struct DrawManagement
 {
     GtkDrawingArea* darea;
@@ -39,6 +46,7 @@ typedef struct UserInterface
     GtkFileChooserDialog* dlg_file_chooser;
     GtkEntry* rgb_entries[3];
     GtkAdjustment* size;
+    Cursors cursors;
 } UserInterface;
 
 void remove_paint_pick_signals(UserInterface* ui);

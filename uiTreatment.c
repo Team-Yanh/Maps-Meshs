@@ -184,6 +184,11 @@ void uiTreatment()
     ui->draw_left = draw_l;
     ui->draw_right = draw_r;
 
+    GdkDisplay* disp = gdk_display_get_default();
+    ui->cursors.def = gdk_cursor_new_for_display(disp, GDK_LEFT_PTR);
+    ui->cursors.pick = gdk_cursor_new_for_display(disp, GDK_CROSSHAIR);
+    ui->cursors.paint = gdk_cursor_new_for_display(disp, GDK_PENCIL);
+
     // - Free bulder
     g_object_unref(builder);
 
@@ -213,6 +218,10 @@ void uiTreatment()
             G_CALLBACK(update_rgb_value), ui);
     g_signal_connect(GTK_COLOR_BUTTON(ui->color_wheel_btn), "color-set",
             G_CALLBACK(update_color_wheel_value), ui);
+
+    // - Sets initial cursor
+    gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(ui->window)),
+            ui->cursors.def);
 
     gtk_main();
 

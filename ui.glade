@@ -20,6 +20,7 @@
   <object class="GtkImage" id="paint_brush">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="pixel_size">30</property>
     <property name="icon_name">applications-painting</property>
   </object>
   <object class="GtkImage" id="pipette">
