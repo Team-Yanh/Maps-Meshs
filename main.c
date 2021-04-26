@@ -26,8 +26,14 @@ int main(int argc, char* argv[])
         err(EXIT_FAILURE, "Wrong number of argument: Requires only 2 (1 for the number of columns and one for the number of line)");
     int col = atoi(argv[1]);
     int line = atoi(argv[2]);
+    float height[] = {
+        0.5f, 0.5f, 0.5f, 0.5f,
+        0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f
+    };
 
-    opengl_Create_Terrain(col, line);
+    opengl_Create_Terrain(col, line, height);
 
     //SDL_Init(SDL_INIT_VIDEO);
 

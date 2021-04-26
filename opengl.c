@@ -32,7 +32,7 @@ float lastFrame = 0.0f;
 
 vec3 lightPos = {1.2f, 1.0f, 2.0f};
 
-int opengl_Create_Terrain(int col, int line)
+int opengl_Create_Terrain(int col, int line, float* height)
 {
     // glfw: initialize and configure
     // ------------------------------
@@ -91,24 +91,7 @@ int opengl_Create_Terrain(int col, int line)
     vertices[1] = -1.0f;
     vertices[3] = (2.0f / col) - 1;
    
-   
-    vertices[5] = 0.16f;
-    vertices[8] = 0.32f;
-    vertices[11] = 0.48f;
-    vertices[14] = 0.16f;
-    vertices[17] = 0.32f;
-    vertices[20] = 0.48f;
-    vertices[23] = 0.32f;
-    vertices[26] = 0.32f;
-    vertices[29] = 0.48f;
-    vertices[32] = 0.32f;
-    vertices[35] = 0.16f;
-    vertices[38] = 0.48f;
-    vertices[41] = 0.32f;
-    vertices[44] = 0.16f;
-    vertices[47] = 0.0f; */
-
-    /*for(int i = 0; i < nb_vertices - 2; i+= 3)
+    for(int i = 0; i < nb_vertices - 2; i+= 3)
     {
         printf("Vertices --- i: %d, x: %f, y: %f, z: %f\n", i,  vertices[i], vertices[i + 1], vertices[i + 2]);
     }
@@ -118,68 +101,40 @@ int opengl_Create_Terrain(int col, int line)
        printf("Indices --- i: %d, 1st: %u, 2nd: %u, 3rd; %u\n", i, indices[i], indices[i + 1], indices[i + 2]);
     }*/
 
-    float vertices_test[] = {
+    /*float vertices_test[] = {
         -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f,
          0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 0.0f,
         -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 0.0f,
         -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f,
          0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f,
          0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f
-    };
+    };*/
 
     int nb_triangle = col * line * 2;
     int nb_vertex = nb_triangle * 3;
     int nb_val = nb_vertex * 6;
 
     float vertex[nb_val];
+    
+    float newHeight[nb_vertex];
+    /*float height[] = {
+        0.5f, 0.5f, 0.5f, 0.5f,
+        0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f
+    };*/
 
-    set_terrain_normal(vertex, nb_val, col, line );
+    set_height(height, newHeight, col, (col + 1) * (line + 1));
+    /*for(int i = 0; i < nb_vertex; i += 3)
+    {
+        printf("%f, %f, %f\n", newHeight[i], newHeight[i + 1], newHeight[i + 2]);
+    }*/
+    set_terrain_normal(vertex, nb_val, col, line, newHeight);
 
-    for(int i = 0; i < nb_val; i += 6)
+    /*for(int i = 0; i < nb_val; i += 6)
     {
         printf("Vertex --- x:%f, y:%f, z:%f\n", vertex[i + 3], vertex[i + 4], vertex[i + 5]);
-    }
-
-    /*vec3 a;
-    a[0] = vertices_test[0];
-    a[1] = vertices_test[1];
-    a[2] = vertices_test[2];
-
-    vec3 b;
-    b[0] = vertices_test[6];
-    b[1] = vertices_test[7];
-    b[2] = vertices_test[8];
-
-    vec3 c;
-    c[0] = vertices_test[12];
-    c[1] = vertices_test[13];
-    c[2] = vertices_test[14];
-
-    vec3 ab;
-    ab[0] = b[0] - a[0];
-    ab[1] = b[1] - a[1];
-    ab[2] = b[2] - a[2];
-
-    vec3 ac;
-    ac[0] = c[0] - a[0];
-    ac[1] = c[1] - a[1];
-    ac[2] = c[2] - a[2];
-
-    vec3 res;
-    prod_vec(ab, ac, res);
-    printf("%f, %f, %f\n", res[0], res[1], res[2]);
-
-    vertices_test[3] = res[0];
-    vertices_test[4] = res[1];
-    vertices_test[5] = res[2];
-
-    vertices_test[9] = res[0];
-    vertices_test[10] = res[1];
-    vertices_test[11] = res[2];
-
-    vertices_test[15] = res[0];
-    vertices_test[16] = res[1];
-    vertices_test[17] = res[2];*/
+    }*/
 
     float vertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -283,8 +238,6 @@ int opengl_Create_Terrain(int col, int line)
     // -----------
     while (!glfwWindowShouldClose(window))
     {
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_test), vertices_test, GL_STATIC_DRAW);
-
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -308,7 +261,7 @@ int opengl_Create_Terrain(int col, int line)
         glm_mat4_identity(view);
 
         vec3 camera2;
-        vec3 rot = {1.0f, 0.0f, 0.0f};
+        vec3 rot = {3.0f, 0.0f, 0.0f};
 
         glm_vec3_add(cameraPos, cameraFront, camera2);
 
@@ -481,17 +434,41 @@ void prod_vec(vec3 a, vec3 b, vec3 res)
     res[2] = z;
 }
 
-void set_terrain_normal(float* vertex, int nb_vertex, int col, int line)
+void set_height(float* height, float* newHeight, int col, int nb_vertex)
 {
-    int test = 0;
+    int count_col = 0;
+    int count = 0;
+    for(int i = 0; i < nb_vertex - (col + 2); i ++)
+    {
+        if(count_col == col)
+        {
+            count_col = 0;
+            i ++;
+        }
+        //pour chaque point, créer la hauteur des 2 triangles correspondant.
+        newHeight[count]     = height[i];
+        newHeight[count + 1] = height[i + 1];
+        newHeight[count + 2] = height[i + col + 1];
+        
+        newHeight[count + 3] = height[i + col + 2];
+        newHeight[count + 4] = height[i + col + 1];
+        newHeight[count + 5] = height[i + 1];
+        count += 6;
+        count_col ++;
+    } 
+}
 
+void set_terrain_normal(float* vertex, int nb_val, int col, int line, float* newHeight)
+{
     float col_add = 2.0f / col;
     float line_add = 2.0f / line;
 
     int count_col = 0;
     int count_line = 0;
 
-    for(int i = 0; i < nb_vertex; i+= 36)
+    int cHeight = 0;
+
+    for(int i = 0; i < nb_val; i+= 36)
     {
         int n = i;
         if(count_col == col)
@@ -505,44 +482,47 @@ void set_terrain_normal(float* vertex, int nb_vertex, int col, int line)
             {
                 vertex[n] = count_col * col_add -1;
                 vertex[n + 1] = count_line * line_add -1;
-                vertex[n + 2] = 0.0f;
-                if(test == 2)
+                vertex[n + 2] = newHeight[cHeight];
+                /*if(test == 2)
                 {
                     vertex[n + 2] = 0.5f;
                     test += 1;
-                }
+                }*/
 
                 vertex[n + 6] = (count_col + 1) * col_add - 1;
                 vertex[n + 7] = count_line * line_add - 1;
-                vertex[n + 8] = 0.0f;
-                if(test < 3)
+                vertex[n + 8] = newHeight[cHeight + 1];
+                /*if(test < 3)
                 {
                     vertex[n + 8] = 0.5f;
                     test += 1;
-                }
+                }*/
 
                 vertex[n + 12] = count_col * col_add - 1;
                 vertex[n + 13] = (count_line + 1) * line_add - 1;
-                vertex[n + 14] = 0.0f;
+                vertex[n + 14] = newHeight[cHeight + 2];
+
+                cHeight += 3;
             }
             else
             {
                 vertex[n] = (count_col + 1) * col_add - 1;
                 vertex[n + 1] = (count_line + 1) * line_add - 1;
-                vertex[n + 2] = 0.0f;
+                vertex[n + 2] = newHeight[cHeight];
 
                 vertex[n + 6] = count_col * col_add - 1;
                 vertex[n + 7] = (count_line + 1) * line_add - 1;
-                vertex[n + 8] = 0.0f;
+                vertex[n + 8] = newHeight[cHeight + 1];
 
                 vertex[n + 12] = (count_col + 1) * col_add - 1;
                 vertex[n + 13] = count_line * line_add - 1;
-                vertex[n + 14] = 0.0f;
-                if(test < 3)
+                vertex[n + 14] = newHeight[cHeight + 2];
+                /*if(test < 3)
                 {
                     vertex[n + 14] = 0.5f;
                     test += 1;
-                }
+                }*/
+                cHeight += 3;
             }
             vec3 a;
             a[0] = vertex[n];
