@@ -133,7 +133,7 @@ int colorCircles(SDL_Surface *image)
     setRGB(black, 0, 0, 0);
     setRGB(white, 255, 255, 255);
     setRGB(blackMarked, 0, 255, 0);
-    setRGB(circle, 255, 0, 0);
+    setRGB(circle, 254, 254, 254);
 
     for(int i = 0; i < image->w; i++)
     {
@@ -178,8 +178,12 @@ int colorCircles(SDL_Surface *image)
     return result;
 }
 
-void colorAllZonesFromCircles(SDL_Surface *image)
+int colorAllZonesFromCircles(SDL_Surface *image)
 {
+    int nbColors = 1;
+
+    printf("Finding summits...\n");
+
     Color *currentColor = initColor(image->format);
     Color *circle = initColor(image->format);
     Color *c = initColor(image->format);
@@ -188,8 +192,8 @@ void colorAllZonesFromCircles(SDL_Surface *image)
     Color *blackMarked = initColor(image->format);
     setRGB(black, 0, 0, 0);
     setRGB(blackMarked, 0, 255, 0);
-    setRGB(circle, 255, 0, 0);
-    setRGB(c, 200, 0, 0);
+    setRGB(circle, 254, 254, 254);
+    setRGB(c, 253, 253, 253);
     setRGB(white, 255, 255, 255);
 
     int isCircle = colorCircles(image);
@@ -203,6 +207,8 @@ void colorAllZonesFromCircles(SDL_Surface *image)
             replaceColor(image, blackMarked, circle);
         }
     }
+
+    printf("Coloring...\n");
 
     while(isWhiteInImage(image)) //while we can, color adjacent circles with c
     {
@@ -236,8 +242,9 @@ void colorAllZonesFromCircles(SDL_Surface *image)
                 }
             }
         }
+        nbColors++;
         setRGB(circle, c->rgb->r, c->rgb->g, c->rgb->b);
-        setHSV(c, c->hsv->h + 20, c->hsv->s, c->hsv->v);
+        setRGB(c, c->rgb->r - 1, c->rgb->g - 1, c->rgb->b - 1);
     }
 
     freeColor(currentColor);
@@ -246,8 +253,32 @@ void colorAllZonesFromCircles(SDL_Surface *image)
     freeColor(white);
     freeColor(black);
     freeColor(blackMarked);
+
+    printf("nbColors : %d\n", nbColors);
+    return nbColors;
 }
 
+void normalize(SDL_Surface *image, int nbColors)
+{
+    int step = 255/nbColors;
+
+    Color *c = initColor(image->format);
+    Color *currentColor = initColor(image->format);
+    setRGB(c, 0, 0, 0);
+    setRGB(currentColor, 255 - nbColors, 255 - nbColors, 255 - nbColors);
+    // start at 254 : circle color
+
+    for(int i = nbColors; i > 0; i--)
+    {
+        replaceColor(image, currentColor, c);
+        setRGB(c, c->rgb->r + step, c->rgb->g + step, c->rgb->b + step);
+        setRGB(currentColor, currentColor->rgb->r + 1,
+               currentColor->rgb->g + 1, currentColor->rgb->b + 1);
+    }
+
+    freeColor(currentColor);
+    freeColor(c);
+}
 
 void colorZoneDFS(SDL_Surface *image, Color *c, int x, int y)
 {
