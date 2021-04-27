@@ -127,6 +127,9 @@ void uiTreatment()
     UserInterface* ui = g_slice_new(UserInterface);
     DrawManagement draw_l;
     DrawManagement draw_r;
+    ColorManagement topo;
+    ColorManagement river;
+    ColorManagement draw;
 
     // - Managing error
     builder = gtk_builder_new_from_file("ui.glade");
@@ -136,13 +139,9 @@ void uiTreatment()
     ui->img_open_btn= GTK_BUTTON(gtk_builder_get_object(builder,
                 "img_open_btn"));
     ui->treat_btn = GTK_BUTTON(gtk_builder_get_object(builder, "treat_btn"));
-    ui->color_picker_btn = GTK_BUTTON(
-            gtk_builder_get_object(builder, "color_picker_btn"));
     ui->paint_btn = GTK_BUTTON(gtk_builder_get_object(builder, "paint_btn"));
     ui->dlg_file_chooser = GTK_FILE_CHOOSER_DIALOG(
             gtk_builder_get_object(builder, "dlg_file_chooser"));
-    ui->color_wheel_btn = GTK_COLOR_CHOOSER(gtk_builder_get_object(
-            builder, "color_wheel_btn"));
     ui->rgb_entries[0] = GTK_ENTRY(gtk_builder_get_object(builder, "r_entry"));
     ui->rgb_entries[1] = GTK_ENTRY(gtk_builder_get_object(builder, "g_entry"));
     ui->rgb_entries[2] = GTK_ENTRY(gtk_builder_get_object(builder, "b_entry"));
@@ -181,8 +180,34 @@ void uiTreatment()
     draw_r.release_id = 0;
     draw_r.ui = ui;
 
+    topo.color = GTK_COLOR_CHOOSER(gtk_builder_get_object(builder,
+                "topo_color"));
+    river.color = GTK_COLOR_CHOOSER(gtk_builder_get_object(builder,
+                "river_color"));
+    draw.color = GTK_COLOR_CHOOSER(gtk_builder_get_object(builder,
+                "draw_color"));
+
+    topo.btn= GTK_BUTTON(gtk_builder_get_object(builder,
+                "topo_btn"));
+    river.btn= GTK_BUTTON(gtk_builder_get_object(builder,
+                "river_btn"));
+    draw.btn= GTK_BUTTON(gtk_builder_get_object(builder,
+                "draw_btn"));
+
+    topo.ui = ui;
+    river.ui = ui;
+    draw.ui = ui;
+
+    topo.rgb_entry = 0;
+    river.rgb_entry = 0;
+    draw.rgb_entry = 1;
+
     ui->draw_left = draw_l;
     ui->draw_right = draw_r;
+
+    ui->topo = topo;
+    ui->river = river;
+    ui->draw = draw;
 
     GdkDisplay* disp = gdk_display_get_default();
     ui->cursors.def = gdk_cursor_new_for_display(disp, GDK_LEFT_PTR);
@@ -196,8 +221,12 @@ void uiTreatment()
     g_signal_connect(ui->window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     g_signal_connect(ui->img_open_btn, "clicked",
             G_CALLBACK(on_img_open_btn_clicked), ui);
-    g_signal_connect(ui->color_picker_btn, "clicked",
-            G_CALLBACK(on_color_picker_btn_clicked), ui);
+    g_signal_connect(ui->topo.btn, "clicked",
+            G_CALLBACK(on_color_picker_btn_clicked), &ui->topo);
+    g_signal_connect(ui->river.btn, "clicked",
+            G_CALLBACK(on_color_picker_btn_clicked), &ui->river);
+    g_signal_connect(ui->draw.btn, "clicked",
+            G_CALLBACK(on_color_picker_btn_clicked), &ui->draw);
     g_signal_connect(ui->draw_left.scale, "value-changed",
             G_CALLBACK(on_zoom), &ui->draw_left);
     g_signal_connect(ui->draw_right.scale, "value-changed",
@@ -216,7 +245,7 @@ void uiTreatment()
             G_CALLBACK(update_rgb_value), ui);
     g_signal_connect(GTK_EDITABLE(ui->rgb_entries[2]), "changed",
             G_CALLBACK(update_rgb_value), ui);
-    g_signal_connect(GTK_COLOR_BUTTON(ui->color_wheel_btn), "color-set",
+    g_signal_connect(GTK_COLOR_BUTTON(ui->draw.color), "color-set",
             G_CALLBACK(update_color_wheel_value), ui);
 
     // - Sets initial cursor

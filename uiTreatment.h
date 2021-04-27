@@ -9,6 +9,14 @@
 
 #include "imageFilter.h"
 
+typedef struct ColorManagement
+{
+    GtkColorChooser* color;
+    GtkButton* btn;
+    struct UserInterface* ui;
+    int rgb_entry;
+} ColorManagement;
+
 typedef struct Cursors
 {
     GdkCursor* def;
@@ -42,7 +50,9 @@ typedef struct UserInterface
     GtkButton* paint_btn;
     DrawManagement draw_left;
     DrawManagement draw_right;
-    GtkColorChooser* color_wheel_btn;
+    ColorManagement topo;
+    ColorManagement river;
+    ColorManagement draw;
     GtkFileChooserDialog* dlg_file_chooser;
     GtkEntry* rgb_entries[3];
     GtkAdjustment* size;
