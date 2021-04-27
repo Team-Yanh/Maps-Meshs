@@ -191,3 +191,32 @@ void blur(SDL_Surface **image, int blurLevel)
     SDL_FreeSurface(*image); // replace image by result
     *image = result;
 }
+
+float *heightList(SDL_Surface *image, int nbRows, int nbCols)
+{
+    int rowsStep = image->h / nbRows;
+    int colsStep = image->w / nbCols;
+    int x = 0;
+    int y = 0;
+
+    printf("nbRows %d, nbCols %d, rowsStep %d, colsStep %d\n", nbRows, nbCols, rowsStep, colsStep);
+    Color *currentColor = initColor(image->format);
+
+    float *result = malloc(nbRows * nbCols * sizeof(float));
+
+    for(int i = 0; i < nbRows; i++) // get all values
+    {
+        for(int j = 0; j < nbCols; j++)
+        {
+            x = colsStep * j;
+            y = image->h - 1 - rowsStep * i;
+            setPixel(currentColor, getPixel(image, x, y));
+            result[j + nbCols * i] = ((float)currentColor->rgb->r) / 255.0;
+            //printf("%.1f ", result[j + nbCols * i]);
+        }
+        //printf("\n");
+    }
+
+    freeColor(currentColor);
+    return result;
+}

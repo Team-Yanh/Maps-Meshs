@@ -19,5 +19,6 @@ void keepTopoLine(Color *c);
 void keepTopoLineHSV(SDL_Surface *image, Color *topoColor);
 void setMonochromatic(SDL_Surface *image, Color *c);
 void blur(SDL_Surface **image, int blurLevel);
+float *heightList(SDL_Surface *image, int nbRows, int nbCols);
 
 void replaceColor(SDL_Surface *image, Color *c1, Color *c2);

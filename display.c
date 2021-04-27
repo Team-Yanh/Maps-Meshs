@@ -20,6 +20,50 @@ void updateScreen(SDL_Surface *screen, SDL_Surface *image)
     waitForClick();
 }
 
+void tempMain()
+{
+    int formats = IMG_INIT_JPG | IMG_INIT_PNG;
+    int imageInit = IMG_Init(formats);
+    if((imageInit&formats) != formats)
+        errx(1, "Couldnt init SDL_Image");
+
+    SDL_Surface *image;
+
+    image = IMG_Load("images/out2.png");
+    if(image == NULL)
+        errx(1, "Couldnt load image");
+    SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
+            SDL_HWSURFACE | SDL_DOUBLEBUF);
+
+    Color *black = initColor(image->format);
+    Color *red = initColor(image->format);
+    setRGB(black, 0, 0, 0);
+    setRGB(red, 255, 0, 0);
+    /*
+    int nbColors = colorAllZonesFromCircles(image);
+    //thickenColor(image, black);
+    //colorCircles(image);
+    printf("Normalizing...\n");
+    normalize(image, nbColors);
+    printf("Bluring...\n");
+    blur(&image, 8);
+    */
+
+    int nbRows = image->h / 10;
+    int nbCols = image->w / 10;
+    float *heightlist = heightList(image, nbRows, nbCols);
+    free(heightlist);
+    updateScreen(screen, image);
+
+    SDL_SaveBMP(image, "images/out.bmp");
+
+    freeColor(black);
+    freeColor(red);
+
+    SDL_FreeSurface(image);
+    SDL_FreeSurface(screen);
+}
+
 void display_images()
 {
     int formats = IMG_INIT_JPG | IMG_INIT_PNG;
@@ -34,7 +78,7 @@ void display_images()
         errx(1, "Couldnt load image");
     SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
             SDL_HWSURFACE | SDL_DOUBLEBUF);
-    
+
 
     Color *black = initColor(image->format);
     Color *white = initColor(image->format);
@@ -47,8 +91,8 @@ void display_images()
     setRGB(red, 255, 0, 0);
     setRGB(green, 0, 255, 0);
     setRGB(orange, 255, 165, 0);
-    setRGB(topoColor, 217, 200, 170);    
-    
+    setRGB(topoColor, 217, 200, 170);
+
 
     updateScreen(screen, image);
     keepTopoLineHSV(image, topoColor);
@@ -60,6 +104,7 @@ void display_images()
     screen = SDL_SetVideoMode(image->w, image->h, 32,
             SDL_HWSURFACE | SDL_DOUBLEBUF);
     updateScreen(screen, image);
+
 
     image = IMG_Load("images/out.png");
     if(image == NULL)
@@ -121,7 +166,7 @@ void display_images_hugo()
 
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
-    
+
     waitForClick();
 
     SDL_SaveBMP(image, "images/out.bmp");
