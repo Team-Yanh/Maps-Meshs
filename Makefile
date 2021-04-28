@@ -8,7 +8,7 @@ LDLIBS = $(shell pkg-config --libs SDL_image) -lm
 
 FLAGS = $(CFLAGS) $(GTKFLAGS) $(LDLIBS) $(LDFLAGS)
 
-OBJ = vector.o queue.o map.o indices.o glad.o opengl.o shader_terrain.o setTerrain.o CompleteLine.o colorPicker.o imageFilter.o imageUtils.o imageColoring.o display.o
+OBJ = vector.o queue.o map.o indices.o glad.o opengl.o shader_terrain.o CompleteLine.o colorPicker.o imageFilter.o imageUtils.o imageColoring.o display.o
 
 all: main
 

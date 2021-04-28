@@ -11,7 +11,6 @@
 #include "cglm/include/cglm/cglm.h"
 #include "shader.h"
 #include "shader_terrain.h"
-#include "setTerrain.h"
 #include <stdbool.h>
 
 const unsigned int SCR_WIDTH = 800;
@@ -424,7 +423,7 @@ void scroll_callback(GLFWwindow* window __attribute__((unused)), double xoffset 
         fov = 45.0f;
 }
 
-/*void prod_vec(vec3 a, vec3 b, vec3 res)
+void prod_vec(vec3 a, vec3 b, vec3 res)
 {
     float x = (a[1] * b[2]) - (a[2] * b[1]);
     float y = (a[2] * b[0]) - (a[0] * b[2]);
@@ -484,20 +483,20 @@ void set_terrain_normal(float* vertex, int nb_val, int col, int line, float* new
                 vertex[n] = count_col * col_add -1;
                 vertex[n + 1] = count_line * line_add -1;
                 vertex[n + 2] = newHeight[cHeight];
-                *if(test == 2)
+                /*if(test == 2)
                 {
                     vertex[n + 2] = 0.5f;
                     test += 1;
-                }
+                }*/
 
                 vertex[n + 6] = (count_col + 1) * col_add - 1;
                 vertex[n + 7] = count_line * line_add - 1;
                 vertex[n + 8] = newHeight[cHeight + 1];
-                *if(test < 3)
+                /*if(test < 3)
                 {
                     vertex[n + 8] = 0.5f;
                     test += 1;
-                }
+                }*/
 
                 vertex[n + 12] = count_col * col_add - 1;
                 vertex[n + 13] = (count_line + 1) * line_add - 1;
@@ -518,11 +517,11 @@ void set_terrain_normal(float* vertex, int nb_val, int col, int line, float* new
                 vertex[n + 12] = (count_col + 1) * col_add - 1;
                 vertex[n + 13] = count_line * line_add - 1;
                 vertex[n + 14] = newHeight[cHeight + 2];
-                *if(test < 3)
+                /*if(test < 3)
                 {
                     vertex[n + 14] = 0.5f;
                     test += 1;
-                }
+                }*/
                 cHeight += 3;
             }
             vec3 a;
@@ -570,4 +569,4 @@ void set_terrain_normal(float* vertex, int nb_val, int col, int line, float* new
         }
         count_col += 1;
     }
-}*/
+}
