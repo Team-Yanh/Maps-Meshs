@@ -22,6 +22,57 @@ void updateScreen(SDL_Surface *screen, SDL_Surface *image)
     waitForClick();
 }
 
+void tempMain()
+{
+    int formats = IMG_INIT_JPG | IMG_INIT_PNG;
+    int imageInit = IMG_Init(formats);
+    if((imageInit&formats) != formats)
+        errx(1, "Couldnt init SDL_Image");
+
+    SDL_Surface *image;
+
+    image = IMG_Load("images/out2.png");
+    if(image == NULL)
+        errx(1, "Couldnt load image");
+    SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
+            SDL_HWSURFACE | SDL_DOUBLEBUF);
+
+    Color *black = initColor(image->format);
+    Color *red = initColor(image->format);
+    setRGB(black, 0, 0, 0);
+    setRGB(red, 255, 0, 0);
+    /*
+    int nbColors = colorAllZonesFromCircles(image);
+    //thickenColor(image, black);
+    //colorCircles(image);
+    printf("Normalizing...\n");
+    normalize(image, nbColors);
+    printf("Bluring...\n");
+    blur(&image, 8);
+    */
+
+    int nbRows = image->h / 10;
+    int nbCols = image->w / 10;
+    float *heightlist = heightList(image, nbRows, nbCols);
+
+    int col = nbCols - 1;
+    int line = nbRows - 1;
+
+    opengl_Create_Terrain(col, line, heightlist);
+
+
+    free(heightlist);
+    updateScreen(screen, image);
+
+    SDL_SaveBMP(image, "images/out.bmp");
+
+    freeColor(black);
+    freeColor(red);
+
+    SDL_FreeSurface(image);
+    SDL_FreeSurface(screen);
+}
+
 void display_images()
 {
     int formats = IMG_INIT_JPG | IMG_INIT_PNG;
@@ -34,7 +85,7 @@ void display_images()
     image = IMG_Load("images/test1.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
-    SDL_Surface* screen = SDL_SetVideoMode(1200, 800, 32,
+    SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
             SDL_HWSURFACE | SDL_DOUBLEBUF);
 
     Color *black = initColor(image->format);
@@ -55,15 +106,11 @@ void display_images()
     keepTopoLineHSV(image, topoColor);
     updateScreen(screen, image);
 
-    SDL_FreeSurface(image);
-
     image = IMG_Load("images/test4.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
 
     updateScreen(screen, image);
-
-    SDL_FreeSurface(image);
 
     image = IMG_Load("images/out.png");
     if(image == NULL)

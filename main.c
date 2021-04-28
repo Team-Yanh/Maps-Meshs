@@ -20,25 +20,29 @@
 #include "opengl.h"
 #include "display.h"
 
-int main(int argc, char* argv[])
+int main(void)
 {
-    if(argc != 3)
-        err(EXIT_FAILURE, "Wrong number of argument: Requires only 2 (1 for the number of columns and one for the number of line)");
-    int col = atoi(argv[1]);
-    int line = atoi(argv[2]);
-    float height[] = {
-        0.5f, 0.5f, 0.5f, 0.5f,
-        0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f
-    };
+    //if(argc != 3)
+        //err(EXIT_FAILURE, "Wrong number of argument: Requires only 2 (1 for the number of columns and one for the number of line)");
+    //int col = atoi(argv[1]);
+    //int line = atoi(argv[2]);
+    //float height[] = {
+        //0.5f, 0.5f, 0.5f, 0.5f,
+        //0.0f, 0.0f, 0.0f, 0.0f,
+        //0.0f, 0.0f, 0.0f, 0.0f,
+        //0.0f, 0.0f, 0.0f, 0.0f
+    //};
 
-    opengl_Create_Terrain(col, line, height);
+    //opengl_Create_Terrain(col, line, height);
 
     //SDL_Init(SDL_INIT_VIDEO);
 
     //display_images();
     //display_images_hugo();
+    
+    SDL_Init(SDL_INIT_VIDEO);
+
+    tempMain();
 
     //SDL_Quit();
 
