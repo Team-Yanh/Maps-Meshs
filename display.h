@@ -7,6 +7,7 @@
 #include "imageUtils.h"
 #include "imageColoring.h"
 #include "CompleteLine.h"
+#include "opengl.h"
 
 void tempMain();
 void display_images();

@@ -60,7 +60,6 @@ void tempMain()
 
     opengl_Create_Terrain(col, line, heightlist);
 
-
     free(heightlist);
     updateScreen(screen, image);
 
@@ -109,12 +108,16 @@ void display_images()
     image = IMG_Load("images/test4.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
+    screen = SDL_SetVideoMode(image->w, image->h, 32,
+            SDL_HWSURFACE | SDL_DOUBLEBUF);
 
     updateScreen(screen, image);
 
     image = IMG_Load("images/out.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
+    screen = SDL_SetVideoMode(image->w, image->h, 32,
+            SDL_HWSURFACE | SDL_DOUBLEBUF);
 
     updateScreen(screen, image);
 

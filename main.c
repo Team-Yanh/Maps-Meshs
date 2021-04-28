@@ -44,7 +44,7 @@ int main(void)
 
     tempMain();
 
-    //SDL_Quit();
+    SDL_Quit();
 
     //colorPicker();
 
