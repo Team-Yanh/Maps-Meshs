@@ -13,12 +13,12 @@
 #include "imageFilter.h"
 #include "imageUtils.h"
 #include "imageColoring.h"
-#include "colorPicker.h"
 #include "CompleteLine.h"
 #include "indices.h"
 #include "map.h"
 #include "opengl.h"
 #include "display.h"
+#include "uiTreatment.h"
 
 int main(void)
 {
@@ -28,6 +28,6 @@ int main(void)
 
     SDL_Quit();
 
-
+    uiTreatment();
     return 0;
 }
