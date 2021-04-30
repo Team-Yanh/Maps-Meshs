@@ -56,6 +56,7 @@ typedef struct UserInterface
     GtkFileChooserDialog* dlg_file_chooser;
     GtkEntry* rgb_entries[3];
     GtkAdjustment* size;
+    GtkAdjustment* threshold;
     Cursors cursors;
 } UserInterface;
 

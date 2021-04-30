@@ -44,20 +44,44 @@ void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
     gtk_widget_hide(GTK_WIDGET(ui->dlg_file_chooser));
 }
 
+/*
+static RGB converts_gdkrgba_to_rgb(GdkRGBA* color)
+{
+    RGB rgb;
+
+    rgb.r = color->red * 255;
+    rgb.g = color->green * 255;
+    rgb.b = color->blue * 255;
+
+    return rgb;
+}
+*/
+
 void on_treat_btn_clicked(unused GtkButton* button, gpointer user_data)
 {
-    DrawManagement* dm = user_data;
-    UserInterface* ui = dm->ui;
-
+    UserInterface* ui = user_data;
+    //GdkRGBA river_color, topo_color;
+    //RGB river_rgb, topo_rgb;
+    //double threshold = 1.0;
     char filename[] = "images/test1.png";
 
     // - Disconnects all signals
     remove_paint_pick_signals(ui);
 
-    // - Treat the image
+    // - Gets river and topologic line colors
+    //gtk_color_chooser_get_rgba(ui->river.color, &river_color);
+    //gtk_color_chooser_get_rgba(ui->topo.color, &topo_color);
 
-    // - Load the treated img
-    load_image(dm, filename);
+    //river_rgb = converts_gdkrgba_to_rgb(&river_color);
+    //topo_rgb = converts_gdkrgba_to_rgb(&topo_color);
+
+    // - Gets threshold value
+    //threshold = gtk_adjustment_get_value(ui->threshold);
+
+    // - Treats the image
+
+    // - Loads the treated img
+    load_image(&ui->draw_right, filename);
 }
 
 void load_image(DrawManagement* dm, char* filename)
@@ -147,6 +171,8 @@ void uiTreatment()
     ui->rgb_entries[2] = GTK_ENTRY(gtk_builder_get_object(builder, "b_entry"));
     ui->size = GTK_ADJUSTMENT(gtk_builder_get_object(builder,
                 "size_adjustment"));
+    ui->threshold = GTK_ADJUSTMENT(gtk_builder_get_object(builder,
+                "threshold"));
 
     draw_l.darea = GTK_DRAWING_AREA(gtk_builder_get_object(builder,
             "draw_area_1"));
@@ -236,7 +262,7 @@ void uiTreatment()
     g_signal_connect(ui->draw_right.darea, "draw", G_CALLBACK(on_draw),
             &ui->draw_right);
     g_signal_connect(ui->treat_btn, "clicked", G_CALLBACK(on_treat_btn_clicked),
-            &ui->draw_right);
+            ui);
     g_signal_connect(ui->paint_btn, "clicked", G_CALLBACK(on_paint_btn_clicked),
             ui);
     g_signal_connect(GTK_EDITABLE(ui->rgb_entries[0]), "changed",
