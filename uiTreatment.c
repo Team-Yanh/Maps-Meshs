@@ -44,7 +44,7 @@ void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
     gtk_widget_hide(GTK_WIDGET(ui->dlg_file_chooser));
 }
 
-/*
+
 static RGB converts_gdkrgba_to_rgb(GdkRGBA* color)
 {
     RGB rgb;
@@ -55,32 +55,35 @@ static RGB converts_gdkrgba_to_rgb(GdkRGBA* color)
 
     return rgb;
 }
-*/
+
 
 void on_treat_btn_clicked(unused GtkButton* button, gpointer user_data)
 {
     UserInterface* ui = user_data;
-    //GdkRGBA river_color, topo_color;
-    //RGB river_rgb, topo_rgb;
-    //double threshold = 1.0;
-    char filename[] = "images/test1.png";
+    GdkRGBA river_color, topo_color;
+    RGB river_rgb, topo_rgb;
+    double threshold = 1.0; // [0.1 , 5]
 
     // - Disconnects all signals
     remove_paint_pick_signals(ui);
 
     // - Gets river and topologic line colors
-    //gtk_color_chooser_get_rgba(ui->river.color, &river_color);
-    //gtk_color_chooser_get_rgba(ui->topo.color, &topo_color);
+    gtk_color_chooser_get_rgba(ui->river.color, &river_color);
+    gtk_color_chooser_get_rgba(ui->topo.color, &topo_color);
 
-    //river_rgb = converts_gdkrgba_to_rgb(&river_color);
-    //topo_rgb = converts_gdkrgba_to_rgb(&topo_color);
+    river_rgb = converts_gdkrgba_to_rgb(&river_color);
+    topo_rgb = converts_gdkrgba_to_rgb(&topo_color);
 
     // - Gets threshold value
-    //threshold = gtk_adjustment_get_value(ui->threshold);
+    threshold = gtk_adjustment_get_value(ui->threshold);
 
+    // apply paint change
+    char filename[] = "images/outtest.png";
+    gdk_pixbuf_save(ui->draw_left.pb, filename, "png", NULL, NULL);
     // - Treats the image
 
     // - Loads the treated img
+    
     load_image(&ui->draw_right, filename);
 }
 
