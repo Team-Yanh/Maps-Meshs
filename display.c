@@ -64,6 +64,8 @@ void tempMain()
 
     SDL_FreeSurface(image);
     SDL_FreeSurface(screen);
+
+    //FindAllExtremity(image);
 }
 
 void display_images()

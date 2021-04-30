@@ -3,10 +3,6 @@
 #include <err.h>
 #include <math.h>
 
-#include <gtk/gtk.h>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <GL/glut.h>
 #include <SDL/SDL.h>
 
 #include "SDL/SDL_image.h"
@@ -29,5 +25,6 @@ int main(void)
     SDL_Quit();
 
     uiTreatment();
+
     return 0;
 }
