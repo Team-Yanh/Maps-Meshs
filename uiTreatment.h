@@ -48,6 +48,7 @@ typedef struct UserInterface
     GtkButton* treat_btn;
     GtkButton* color_picker_btn;
     GtkButton* paint_btn;
+    GtkButton* restart_btn;
     DrawManagement draw_left;
     DrawManagement draw_right;
     ColorManagement topo;
@@ -63,6 +64,7 @@ typedef struct UserInterface
 void remove_paint_pick_signals(UserInterface* ui);
 void on_img_open_btn_clicked(GtkButton* button, gpointer user_data);
 void on_treat_btn_clicked(unused GtkButton* button, gpointer user_data);
+void on_restart_btn_clicked(unused GtkButton* button, gpointer user_data);
 void load_image(DrawManagement* dm, char* filename);
 void on_zoom(unused GtkScale* zoom_scale, gpointer user_data);
 guchar* get_clicked_pixel(DrawManagement* dm, int x, int y);

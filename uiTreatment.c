@@ -164,6 +164,8 @@ void uiTreatment()
                 "img_open_btn"));
     ui->treat_btn = GTK_BUTTON(gtk_builder_get_object(builder, "treat_btn"));
     ui->paint_btn = GTK_BUTTON(gtk_builder_get_object(builder, "paint_btn"));
+    ui->restart_btn = GTK_BUTTON(gtk_builder_get_object(builder,
+                "restart_btn"));
     ui->dlg_file_chooser = GTK_FILE_CHOOSER_DIALOG(
             gtk_builder_get_object(builder, "dlg_file_chooser"));
     ui->rgb_entries[0] = GTK_ENTRY(gtk_builder_get_object(builder, "r_entry"));
