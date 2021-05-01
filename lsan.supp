@@ -11,3 +11,4 @@ leak:librsvg-2.so
 leak:libX11.so
 leak:locale-archive
 leak:gtk.gresource
+

@@ -22,6 +22,61 @@ void updateScreen(SDL_Surface *screen, SDL_Surface *image)
     waitForClick();
 }
 
+void tempMain()
+{
+    int formats = IMG_INIT_JPG | IMG_INIT_PNG;
+    int imageInit = IMG_Init(formats);
+    if((imageInit&formats) != formats)
+        errx(1, "Couldnt init SDL_Image");
+
+    SDL_Surface *image;
+
+    image = IMG_Load("images/test4cp.png");
+    if(image == NULL)
+        errx(1, "Couldnt load image");
+    SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
+            SDL_HWSURFACE | SDL_DOUBLEBUF);
+
+    Color *black = initColor(image->format);
+    Color *red = initColor(image->format);
+    setRGB(black, 0, 0, 0);
+    setRGB(red, 255, 0, 0);
+
+    // fix topolines
+
+    /*
+    int nbColors = colorAllZonesFromCircles(image);
+    //thickenColor(image, black);
+    //colorCircles(image);
+    printf("Normalizing...\n");
+    normalize(image, nbColors);
+    printf("Bluring...\n");
+    blur(&image, 8);
+    */
+
+    /*
+    int nbRows = image->h / 10;
+    int nbCols = image->w / 10;
+    float *heightlist = heightList(image, nbRows, nbCols);
+    free(heightlist);
+    */
+
+    thickenColor(image, black);
+    thickenColor(image, black);
+    //FindAllExtremity(image); // only black and white pixels
+    updateScreen(screen, image);
+
+    // Don't forget to decolor
+
+    SDL_SaveBMP(image, "images/out.bmp");
+
+    freeColor(black);
+    freeColor(red);
+
+    SDL_FreeSurface(image);
+    SDL_FreeSurface(screen);
+}
+
 void display_images()
 {
     int formats = IMG_INIT_JPG | IMG_INIT_PNG;
@@ -52,7 +107,7 @@ void display_images()
 
 
     updateScreen(screen, image);
-    keepTopoLineHSV(image, topoColor);
+    keepTopoLineHSV(image, topoColor, 1.0);
     updateScreen(screen, image);
 
     SDL_FreeSurface(image);

@@ -3,6 +3,8 @@
 #include "uiColorPick.h"
 #include "uiDraw.h"
 #include "imageFilter.h"
+#include "imageColoring.h"
+#include "imageUtils.h"
 
 void remove_paint_pick_signals(UserInterface* ui)
 {
@@ -44,7 +46,7 @@ void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
     gtk_widget_hide(GTK_WIDGET(ui->dlg_file_chooser));
 }
 
-/*
+
 static RGB converts_gdkrgba_to_rgb(GdkRGBA* color)
 {
     RGB rgb;
@@ -55,30 +57,39 @@ static RGB converts_gdkrgba_to_rgb(GdkRGBA* color)
 
     return rgb;
 }
-*/
+
 
 void on_treat_btn_clicked(unused GtkButton* button, gpointer user_data)
 {
     UserInterface* ui = user_data;
-    //GdkRGBA river_color, topo_color;
-    //RGB river_rgb, topo_rgb;
-    //double threshold = 1.0;
-    char filename[] = "images/test1.png";
+    GdkRGBA river_color, topo_color;
+    RGB river_rgb, topo_rgb;
+    double threshold = 1.0; // [0.1 , 5]
 
     // - Disconnects all signals
     remove_paint_pick_signals(ui);
 
     // - Gets river and topologic line colors
-    //gtk_color_chooser_get_rgba(ui->river.color, &river_color);
-    //gtk_color_chooser_get_rgba(ui->topo.color, &topo_color);
+    gtk_color_chooser_get_rgba(ui->river.color, &river_color);
+    gtk_color_chooser_get_rgba(ui->topo.color, &topo_color);
 
-    //river_rgb = converts_gdkrgba_to_rgb(&river_color);
-    //topo_rgb = converts_gdkrgba_to_rgb(&topo_color);
+    river_rgb = converts_gdkrgba_to_rgb(&river_color);
+    topo_rgb = converts_gdkrgba_to_rgb(&topo_color);
 
     // - Gets threshold value
-    //threshold = gtk_adjustment_get_value(ui->threshold);
+    threshold = gtk_adjustment_get_value(ui->threshold);
 
+    // apply paint change and save image
+    char filename[] = "images/result.bmp";
+    gdk_pixbuf_save(ui->draw_left.pb, filename, "bmp", NULL, NULL);
     // - Treats the image
+
+    keepColorAndSave(filename, "images/river.bmp", river_rgb, threshold); //river
+    keepColorAndSave(filename, filename, topo_rgb, threshold); // topoLine
+
+    //FindAllExtremityAndSave(filename, filename); // not working
+
+    makeHeightMap(filename, filename);
 
     // - Loads the treated img
     load_image(&ui->draw_right, filename);

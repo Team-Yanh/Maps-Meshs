@@ -7,10 +7,9 @@ unsigned int* Array_Indices(int col, int line, unsigned int* indices)
 {
     int count_col = 0;
     int count_line = 0;
-    int nb_indices = ((col + 1) * line + (col - 1)) * 3;
-    unsigned int nb_vertex = (col + 1) * line ;
+    unsigned int nb_vertex = (col + 1) * (line + 1) - (col + 1);
     int i = 0;
-    for(unsigned int count_vertex = 0; count_vertex < nb_vertex && i < nb_indices; count_vertex ++)
+    for(unsigned int count_vertex = 0; count_vertex < nb_vertex; count_vertex ++)
     {
         //handle all 3 vertice of the triangle at once
         if(count_col == col && count_line != line - 1)
@@ -30,8 +29,7 @@ unsigned int* Array_Indices(int col, int line, unsigned int* indices)
             count_col ++;
             i += 3;    
                 
-            if(count_line == line - 1 && i < nb_indices)
-
+            if(count_line == line - 1)
             {//draw the last line of triangles with the one before
                 indices[i] = count_vertex + 1;       //top right
                 indices[i + 1] = count_vertex + col + 1; //bottom left
