@@ -31,7 +31,7 @@ void tempMain()
 
     SDL_Surface *image;
 
-    image = IMG_Load("images/out2.png");
+    image = IMG_Load("images/test4cp.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
     SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
@@ -41,6 +41,9 @@ void tempMain()
     Color *red = initColor(image->format);
     setRGB(black, 0, 0, 0);
     setRGB(red, 255, 0, 0);
+
+    // fix topolines
+
     /*
     int nbColors = colorAllZonesFromCircles(image);
     //thickenColor(image, black);
@@ -51,11 +54,19 @@ void tempMain()
     blur(&image, 8);
     */
 
+    /*
     int nbRows = image->h / 10;
     int nbCols = image->w / 10;
     float *heightlist = heightList(image, nbRows, nbCols);
     free(heightlist);
+    */
+
+    thickenColor(image, black);
+    thickenColor(image, black);
+    //FindAllExtremity(image); // only black and white pixels
     updateScreen(screen, image);
+
+    // Don't forget to decolor
 
     SDL_SaveBMP(image, "images/out.bmp");
 
@@ -64,8 +75,6 @@ void tempMain()
 
     SDL_FreeSurface(image);
     SDL_FreeSurface(screen);
-
-    //FindAllExtremity(image);
 }
 
 void display_images()
@@ -98,7 +107,7 @@ void display_images()
 
 
     updateScreen(screen, image);
-    keepTopoLineHSV(image, topoColor);
+    keepTopoLineHSV(image, topoColor, 1.0);
     updateScreen(screen, image);
 
     SDL_FreeSurface(image);

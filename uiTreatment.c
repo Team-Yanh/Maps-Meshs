@@ -3,6 +3,8 @@
 #include "uiColorPick.h"
 #include "uiDraw.h"
 #include "imageFilter.h"
+#include "imageColoring.h"
+#include "imageUtils.h"
 
 void remove_paint_pick_signals(UserInterface* ui)
 {
@@ -77,13 +79,19 @@ void on_treat_btn_clicked(unused GtkButton* button, gpointer user_data)
     // - Gets threshold value
     threshold = gtk_adjustment_get_value(ui->threshold);
 
-    // apply paint change
-    char filename[] = "images/outtest.png";
-    gdk_pixbuf_save(ui->draw_left.pb, filename, "png", NULL, NULL);
+    // apply paint change and save image
+    char filename[] = "images/result.bmp";
+    gdk_pixbuf_save(ui->draw_left.pb, filename, "bmp", NULL, NULL);
     // - Treats the image
 
+    keepColorAndSave(filename, "images/river.bmp", river_rgb, threshold); //river
+    keepColorAndSave(filename, filename, topo_rgb, threshold); // topoLine
+
+    //FindAllExtremityAndSave(filename, filename); // not working
+
+    makeHeightMap(filename, filename);
+
     // - Loads the treated img
-    
     load_image(&ui->draw_right, filename);
 }
 

@@ -226,7 +226,7 @@ void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
             Uint8 g2;
             Uint8 b2;
             SDL_GetRGB(clsPixel,format,&r2,&g2,&b2);
-            if(Distance(closest,Ex2)>Distance(Ex2,temp2) && Distance(Ex2,temp2) < 15 && (r != r2 || g != g2 || b != b2))
+            if(Distance(closest,Ex2) > Distance(Ex2,temp2) && /*Distance(Ex2,temp2) < 15 && */ (r != r2 || g != g2 || b != b2))
             {
                 closest = temp2;
                 clsi = i;
