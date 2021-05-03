@@ -21,7 +21,7 @@ int main()
 
     SDL_Surface *image;
 
-    image = IMG_Load("images/test5.png");
+    image = IMG_Load("images/test4.png");
 
     if(image == NULL)
         errx(1, "Couldnt load image");
@@ -34,6 +34,8 @@ int main()
     //FindAllExtremity(image);
     //Point p1 = {0,0};
     //Point p2 = {100,100};
+    Color *black = initColor(image->format);
+    setRGB(black,0,0,0);
 
     /*struct vector *List = vector_new(1);
     Point *p1 = malloc(sizeof(Point));
@@ -49,12 +51,12 @@ int main()
 
     vector_free(List);
     */
-
     FindAllExtremity(image);
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
     SDL_Delay(5000);
     SDL_SaveBMP(image, "images/out.bmp");
+    freeColor(black);
 
     SDL_FreeSurface(image);
     SDL_FreeSurface(screen);
