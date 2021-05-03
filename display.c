@@ -31,7 +31,7 @@ void tempMain()
 
     SDL_Surface *image;
 
-    image = IMG_Load("images/test4cp.png");
+    image = IMG_Load("images/test1.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
     SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
@@ -64,10 +64,10 @@ void tempMain()
     thickenColor(image, black);
     thickenColor(image, black);
     //FindAllExtremity(image); // only black and white pixels
-    updateScreen(screen, image);
 
     // Don't forget to decolor
-
+    blur(&image, 8);
+    updateScreen(screen, image);
     SDL_SaveBMP(image, "images/out.bmp");
 
     freeColor(black);

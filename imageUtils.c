@@ -148,27 +148,29 @@ int hasNeighbours(SDL_Surface *image, int i, int j)
 {
     Color *black = initColor(image->format);
     setRGB(black, 0, 0, 0);
+    int result = 0;
+
     if(isValidCellAndColor(image, i - 1, j - 1, black))
-        return 1;
+        result = 1;
     if(isValidCellAndColor(image, i - 1, j, black))
-        return 1;
+        result = 1;
     if(isValidCellAndColor(image, i - 1, j + 1, black))
-        return 1;
-    
+        result = 1;
+
     if(isValidCellAndColor(image, i, j - 1, black))
-        return 1;
+        result = 1;
     if(isValidCellAndColor(image, i, j + 1, black))
-        return 1;
-    
+        result = 1;
+
     if(isValidCellAndColor(image, i + 1, j - 1, black))
-        return 1;
+        result = 1;
     if(isValidCellAndColor(image, i + 1, j, black))
-        return 1;
+        result = 1;
     if(isValidCellAndColor(image, i + 1, j + 1, black))
-        return 1;
-    
+        result = 1;
+
     freeColor(black);
-    return 0;
+    return result;
 }
 
 void removeIsolatedPixels(SDL_Surface *image)
