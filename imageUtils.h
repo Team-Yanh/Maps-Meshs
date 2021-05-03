@@ -4,6 +4,7 @@
 #include "SDL/SDL_image.h"
 #include <math.h>
 #include <err.h>
+#include <pthread.h>
 #include "queue.h"
 #include "imageFilter.h"
 
