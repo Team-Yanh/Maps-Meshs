@@ -1,5 +1,20 @@
 #include "CompleteLine.h"
-
+int iswhite(SDL_Surface *surface, int x, int y)
+{
+    if (!(x < 0 || x >= surface->w || y < 0 || y >= surface->h))
+    {
+	Uint32 pixel = getPixel(surface,x,y);
+        SDL_PixelFormat *format = surface->format;
+        Uint8 r;
+        Uint8 g;
+        Uint8 b;
+        SDL_GetRGB(pixel,format,&r,&g,&b);
+	if(r == 255 && g == 255 && b == 255)
+		return 1;
+	return 0;
+    }
+    return 1;
+}
 
 int isMarkedCell(SDL_Surface *surface, int x, int y)
 {
@@ -50,11 +65,9 @@ void FindAllExtremity(SDL_Surface *image)
 void FindExtremity(SDL_Surface *image,struct vector *v,Point point,int color)
 {
     //init la queue et enqueu le point de depart
-	SDL_PixelFormat *format = image->format;
-
     Queue *q = createQueue();
     enqueue(q,point.x,point.y);
-    int isEx ,x2 , y2, nbadj,nb;
+    int isEx ,x2 , y2, nbadjnm,nb,nbadj;
     nb= 0;
     Color *red = initColor(image->format);
     setRGB(red,255,0,color);
@@ -66,7 +79,8 @@ void FindExtremity(SDL_Surface *image,struct vector *v,Point point,int color)
     while(!isEmpty(q))
     {
         nb ++;
-        nbadj =0;
+	nbadj = 0;
+        nbadjnm =0;
         isEx = 1;
         dequeue(q,&point.x,&point.y);
         for(int j = -1; j<=1;j++)
@@ -75,24 +89,16 @@ void FindExtremity(SDL_Surface *image,struct vector *v,Point point,int color)
             y2 = j + point.y;
             if(isMarkedCell(image,x2,y2))
             {
-		Uint32 pixel = getPixel(image,x2,y2);
-            	Uint8 r;
-            	Uint8 g;
-            	Uint8 b;
-            	SDL_GetRGB(pixel,format,&r,&g,&b);
-		//printf("r : %d\n g : %d\n b : %d\n",r,g,b);
-                nbadj ++;
+                nbadjnm ++;
                 putPixel(image , x2,y2,mark->pixel);
                 isEx = 0;
                 enqueue(q,x2,y2);
-		pixel = getPixel(image,x2,y2);
-            	SDL_GetRGB(pixel,format,&r,&g,&b);
-		//printf("r : %d\n g : %d\n b : %d\n",r,g,b);
-
-		//printf("r : %d\n g : %d\n b : %d\n",mark->rgb->r,mark->rgb->g,mark->rgb->b);
-
-
             }
+
+	    if(!iswhite(image,x2,y2) && j!=0)
+	    {
+		nbadj++;
+	    }
         }
         for(int i = -1;i <= 1; i++)
         {
@@ -100,15 +106,19 @@ void FindExtremity(SDL_Surface *image,struct vector *v,Point point,int color)
             y2 = point.y;
             if(isMarkedCell(image,x2,y2))
             {
-                //marque le pixel
-                nbadj++;
+                nbadjnm++;
                 putPixel(image , x2,y2,mark->pixel);
                 isEx = 0;
                 enqueue(q,x2,y2);
             }
+	    if(!iswhite(image,x2,y2) && i!= 0)
+	    {
+		    nbadj++;
+	    }
         }
 
-        if(isEx == 1 || (nb == 1 && nbadj == 1))
+	printf("%d\n",nbadj);
+        if((isEx == 1 && nbadj == 1)|| (nb == 1 && nbadjnm == 1))
         {
             if(!(point.x == 0 || point.x == image->w - 1 || point.y == 0 || point.y == image->h - 1))
             {
@@ -243,16 +253,17 @@ void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
             Uint8 g2;
             Uint8 b2;
             SDL_GetRGB(clsPixel,format,&r2,&g2,&b2);
-            if(Distance(closest,Ex2)>Distance(Ex2,temp2) && Distance(Ex2,temp2) < 15 && (r != r2 || g != g2 || b != b2))
+            if(Distance(closest,Ex2)>Distance(Ex2,temp2) && Distance(Ex2,temp2) < 100 && (r != r2 || g != g2 || b != b2))
             {
                 closest = temp2;
                 clsi = i;
             }
             i++;
         }
-        //DrawLine(image,Ex,closest);
         if(clsi != -1)
         {
+
+        	//DrawLine(image,Ex,closest);
             vector_remove(ListEx,clsi,&temp);
             free(temp);
         }

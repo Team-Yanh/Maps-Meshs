@@ -21,7 +21,7 @@ int main()
 
     SDL_Surface *image;
 
-    image = IMG_Load("images/test4.png");
+    image = IMG_Load("images/test2.png");
 
     if(image == NULL)
         errx(1, "Couldnt load image");
