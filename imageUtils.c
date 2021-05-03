@@ -226,14 +226,14 @@ Color *getAverage(SDL_Surface *image, const int x, const int y, int blurLevel)
     return average;
 }
 
-struct blurArgs{
+typedef struct blurArgs{
     pthread_t id;
     SDL_Surface *src;
     SDL_Surface *dst;
     int blurLevel;
     int begin;
     int end;
-};
+}blurArgs;
 
 void *blurWorker(void *myArgs)
 {
@@ -264,14 +264,12 @@ void blur(SDL_Surface **image, int blurLevel)
     int widthSlice = (*image)->w / nbThreads;
     for(int i = 0; i < nbThreads; i++)
     {
-        blurArgs args;
-        threadPool[i] = args;
-        args.src = *image;
-        args.dst = result;
-        args.blurLevel = blurLevel;
-        args.begin = widthSlice * i;
-        args.end = args.begin + widthSlice;
-        pthread_create(&args.id, NULL, blurWorker, (void *)&args);
+        threadPool[i].src = *image;
+        threadPool[i].dst = result;
+        threadPool[i].blurLevel = blurLevel;
+        threadPool[i].begin = widthSlice * i;
+        threadPool[i].end = widthSlice * (i + 1);
+        pthread_create(&threadPool[i].id, NULL, blurWorker, &threadPool[i]);
     }
     /*
     Color *currentColor;
