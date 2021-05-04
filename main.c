@@ -20,14 +20,8 @@
 
 int main(void)
 {
-    
     SDL_Init(SDL_INIT_VIDEO);
 
-    //tempMain();
-
     SDL_Quit();
-    
-    uiTreatment();
-
-    return 0;
+   return 0;
 }
