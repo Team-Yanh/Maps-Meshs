@@ -21,6 +21,7 @@
 int main(void)
 {
     SDL_Init(SDL_INIT_VIDEO);
+
     // - Partie I [UI - Mathieu]
     uiTreatment();
 
@@ -35,6 +36,8 @@ int main(void)
     display_images_hugo();
 
     // - Partie IV [Rendu 3D - Nico]
+    display_terrain();
 
+    SDL_Quit();
     return 0;
 }
