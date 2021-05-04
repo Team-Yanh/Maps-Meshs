@@ -11,6 +11,9 @@
 #include "cglm/include/cglm/cglm.h"
 #include "shader.h"
 #include "shader_terrain.h"
+#include "imageUtils.h"
+#include <SDL/SDL.h>
+#include "SDL/SDL_image.h"
 #include <stdbool.h>
 
 const unsigned int SCR_WIDTH = 800;
@@ -569,4 +572,23 @@ void set_terrain_normal(float* vertex, int nb_val, int col, int line, float* new
         }
         count_col += 1;
     }
+}
+
+
+void display_terrain()
+{
+    SDL_Surface *image;
+
+    image = IMG_Load("images/out2.png");
+
+    int nbRows = image->h / 10;
+    int nbCols = image->w / 10;
+    float *heightlist = heightList(image, nbRows, nbCols);
+
+    int col = nbCols - 1;
+    int line = nbRows - 1;
+
+    opengl_Create_Terrain(col, line, heightlist);
+
+    free(heightlist);
 }

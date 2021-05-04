@@ -41,10 +41,12 @@ int main(void)
     //display_images_hugo();
     
     SDL_Init(SDL_INIT_VIDEO);
+    
+    display_terrain();    
+    
 
-    tempMain();
 
-    //SDL_Quit();
+    SDL_Quit();
 
     //colorPicker();
 
