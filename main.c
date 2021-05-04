@@ -20,6 +20,7 @@
 
 int main(void)
 {
+    SDL_Init(SDL_INIT_VIDEO);
     // - Partie I [UI - Mathieu]
     uiTreatment();
 
@@ -31,10 +32,12 @@ int main(void)
     // - Liaison des parties
 
     // - Partie III [Traitement - Hugo]
-    //display_images_hugo();
+    display_images_hugo();
 
     // - Partie IV [Rendu 3D - Nico]
     display_terrain();
+
+    //SDL_Quit();
 
     return 0;
 }

@@ -684,6 +684,7 @@
     </child>
   </object>
   <object class="GtkFileChooserDialog" id="dlg_file_chooser">
+    <property name="use-header-bar">0</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Open Image</property>
     <property name="type_hint">dialog</property>
@@ -743,5 +744,10 @@
       <action-widget response="-5">btn_open</action-widget>
       <action-widget response="-6">btn_close</action-widget>
     </action-widgets>
+    <child internal-child="accessible">
+      <object class="AtkObject" id="dlg_file_chooser-atkobject">
+        <property name="AtkObject::accessible-role" translatable="yes">file-chooser</property>
+      </object>
+    </child>
   </object>
 </interface>
