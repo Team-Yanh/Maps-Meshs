@@ -20,8 +20,21 @@
 
 int main(void)
 {
-   SDL_Init(SDL_INIT_VIDEO);
+    SDL_Init(SDL_INIT_VIDEO);
+    // - Partie I [UI - Mathieu]
+    uiTreatment();
 
-   SDL_Quit();
-   return 0;
+    // - Partie II [Traitement - Tim]
+    // - Blurring
+    // - Listes des hauteurs
+    // - Opti
+    // - Multithreading
+    // - Liaison des parties
+
+    // - Partie III [Traitement - Hugo]
+    display_images_hugo();
+
+    // - Partie IV [Rendu 3D - Nico]
+
+    return 0;
 }
