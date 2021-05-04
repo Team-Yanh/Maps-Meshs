@@ -58,6 +58,12 @@ void tempMain()
     int nbRows = image->h / 10;
     int nbCols = image->w / 10;
     float *heightlist = heightList(image, nbRows, nbCols);
+
+    int col = nbCols - 1;
+    int line = nbRows - 1;
+
+    opengl_Create_Terrain(col, line, heightlist);
+
     free(heightlist);
     */
 
@@ -89,7 +95,7 @@ void display_images()
     image = IMG_Load("images/test1.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
-    SDL_Surface* screen = SDL_SetVideoMode(1200, 800, 32,
+    SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
             SDL_HWSURFACE | SDL_DOUBLEBUF);
 
     Color *black = initColor(image->format);
@@ -110,11 +116,11 @@ void display_images()
     keepTopoLineHSV(image, topoColor, 1.0);
     updateScreen(screen, image);
 
-    SDL_FreeSurface(image);
-
     image = IMG_Load("images/test4.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
+    screen = SDL_SetVideoMode(image->w, image->h, 32,
+            SDL_HWSURFACE | SDL_DOUBLEBUF);
 
     updateScreen(screen, image);
 
@@ -123,6 +129,8 @@ void display_images()
     image = IMG_Load("images/out.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
+    screen = SDL_SetVideoMode(image->w, image->h, 32,
+            SDL_HWSURFACE | SDL_DOUBLEBUF);
 
     updateScreen(screen, image);
 

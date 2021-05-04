@@ -6,8 +6,7 @@ LDFLAGS = -static-libasan -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lGLU -
 
 LDLIBS = $(shell pkg-config --libs SDL_image) -lm
 FLAGS = $(CFLAGS) $(GTKFLAGS) $(LDLIBS) $(LDFLAGS)
-OBJ = vector.o queue.o map.o indices.o glad.o opengl.o CompleteLine.o uiColorPick.o imageFilter.o imageUtils.o imageColoring.o display.o uiTreatment.o uiDraw.o
-
+OBJ = vector.o queue.o map.o indices.o glad.o opengl.o shader_terrain.o CompleteLine.o uiColorPick.o imageFilter.o imageUtils.o imageColoring.o display.o uiTreatment.o uiDraw.o
 
 all: main
 
