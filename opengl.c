@@ -580,11 +580,13 @@ void display_terrain()
 {
     SDL_Surface *image;
 
-    image = IMG_Load("images/out2.png");
+    image = IMG_Load("images/out.bmp");
 
     int nbRows = image->h / 10;
     int nbCols = image->w / 10;
     float *heightlist = heightList(image, nbRows, nbCols);
+
+    SDL_FreeSurface(image);
 
     int col = nbCols - 1;
     int line = nbRows - 1;

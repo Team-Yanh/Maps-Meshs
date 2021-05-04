@@ -168,7 +168,7 @@ void display_images_hugo()
 
     SDL_Surface *image;
 
-    image = IMG_Load("images/test5.png");
+    image = IMG_Load("images/test4cp.png");
 
     if(image == NULL)
         errx(1, "Couldnt load image");

@@ -286,6 +286,8 @@ void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
                 draw = 1;
             }
         }
+        if(i == -1)
+            i = 1;
         if(clsi != -1)
         {
 
