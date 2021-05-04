@@ -117,7 +117,6 @@ void FindExtremity(SDL_Surface *image,struct vector *v,Point point,int color)
 	    }
         }
 
-	printf("%d\n",nbadj);
         if((isEx == 1 && nbadj == 1)|| (nb == 1 && nbadjnm == 1))
         {
             if(!(point.x == 0 || point.x == image->w - 1 || point.y == 0 || point.y == image->h - 1))
@@ -217,56 +216,84 @@ void DrawLine(SDL_Surface *image,Point *p1,Point *p2)
     freeColor(black);
 
 }
+Point *closestPoint(SDL_Surface *image,struct vector* ListEx,Point *Ex,int *clsip)
+{
+    SDL_PixelFormat *format = image->format;
+    int clsi = -1;
+    Point clo;
+    void *temp;
+    Point *temp2;
+    Uint32 clsPixel;
+    Uint32 ExPixel = getPixel(image,Ex->x,Ex->y);
+    Uint8 r;
+    Uint8 g;
+    Uint8 b;
+    SDL_GetRGB(ExPixel,format,&r,&g,&b);
+    clo = ClosestWall(image,Ex);
+    Point *closest = &clo;
+    size_t i = 1;
+    while(i <= ListEx->size )
+    {
+        vector_get(ListEx,i,&temp);
+        temp2 = (Point *)temp;
+        clsPixel = getPixel(image,temp2->x,temp2->y);
+        Uint8 r2;
+        Uint8 g2;
+        Uint8 b2;
+        SDL_GetRGB(clsPixel,format,&r2,&g2,&b2);
+        if(Distance(closest,Ex)>Distance(Ex,temp2) && Distance(Ex,temp2) < 100 && (r != r2 || g != g2 || b != b2))
+        {
+            closest = temp2;
+            clsi = i;
+        }
+        i++;
+    }
+    *clsip = clsi;
+    return closest;
+}
 void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
 { 
     //prendre un elem de la liste
     void *Ex;
     void *temp;
-    Point *temp2;
+    Point *closest2;
     Point *closest ;
     Point *Ex2;
-    Uint32 ExPixel;
-    Uint32 clsPixel;
-    SDL_PixelFormat *format = image->format;
-    size_t i ;
+    int draw = 0;
+    int i ;
     int clsi = -1;
+    int clsi2;
     while(ListEx->size != 0)
     {
-        clsi = -1;
-        Point clo;
-        vector_pop(ListEx,&Ex);
-        Ex2 = (Point *)Ex;
-        ExPixel = getPixel(image,Ex2->x,Ex2->y);
-        Uint8 r;
-        Uint8 g;
-        Uint8 b;
-        SDL_GetRGB(ExPixel,format,&r,&g,&b);
-        clo = ClosestWall(image,Ex2);
-        closest = &clo;
         i = 1;
-        while(i <= ListEx->size )
-        {
-            vector_get(ListEx,i,&temp);
-            temp2 = (Point *)temp;
-            clsPixel = getPixel(image,temp2->x,temp2->y);
-            Uint8 r2;
-            Uint8 g2;
-            Uint8 b2;
-            SDL_GetRGB(clsPixel,format,&r2,&g2,&b2);
-            if(Distance(closest,Ex2)>Distance(Ex2,temp2) && Distance(Ex2,temp2) < 100 && (r != r2 || g != g2 || b != b2))
+        printf("size : %lu\n",ListEx->size);
+        vector_get(ListEx,i,&Ex);
+        Ex2 = (Point *)Ex;
+        closest = closestPoint(image,ListEx,Ex2,&clsi);
+        while (!draw)
+        {    
+            closest2 = closestPoint(image,ListEx,closest,&clsi2);
+            if(closest2 != Ex2)
             {
-                closest = temp2;
-                clsi = i;
+                Ex2 = closest;
+                closest = closest2;
+                i = clsi;
+                clsi = clsi2; 
             }
-            i++;
+            else
+            {
+
+                draw = 1;
+            }
         }
         if(clsi != -1)
         {
 
-        	//DrawLine(image,Ex,closest);
+            DrawLine(image,Ex2,closest);
             vector_remove(ListEx,clsi,&temp);
             free(temp);
         }
+        vector_remove(ListEx,i,&Ex);
         free(Ex);
     }
     //chercher le point le plus proche a une distance x et min 

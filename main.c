@@ -20,8 +20,8 @@
 
 int main(void)
 {
-    SDL_Init(SDL_INIT_VIDEO);
+   SDL_Init(SDL_INIT_VIDEO);
 
-    SDL_Quit();
+   SDL_Quit();
    return 0;
 }
