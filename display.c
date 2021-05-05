@@ -95,15 +95,21 @@ void display_images()
     image = IMG_Load("images/test4.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
-    updateScreen(screen, image);
 
-    image = IMG_Load("images/out2.bmp");
-    if(image == NULL)
-        errx(1, "Couldnt load image");
     SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
             SDL_HWSURFACE | SDL_DOUBLEBUF);
 
     updateScreen(screen, image);
+
+    SDL_FreeSurface(image);
+
+    image = IMG_Load("images/out2.bmp");
+    if(image == NULL)
+        errx(1, "Couldnt load image");
+
+    updateScreen(screen, image);
+
+    SDL_FreeSurface(image);
 
     /*
     Color *black = initColor(image->format);
@@ -162,7 +168,6 @@ void display_images()
     freeColor(orange);
     freeColor(topoColor);
     */
-    SDL_FreeSurface(image);
     SDL_FreeSurface(screen);
 }
 
