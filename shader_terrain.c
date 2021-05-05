@@ -118,18 +118,12 @@ void checkCompileErrors(unsigned int shader, const char* type)
     {
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
         if(!success)
-        {
             glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-            printf("error during creating the shader");
-        }
     }
     else
     {
         glGetProgramiv(shader, GL_LINK_STATUS, &success);
         if(!success)
-        {
             glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-            printf("error during creating the program");
-        }
     }
 }
