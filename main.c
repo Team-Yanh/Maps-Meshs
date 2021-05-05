@@ -26,6 +26,8 @@ int main(void)
 
     // - Partie II [Traitement - Tim]
     // - Blurring
+
+    display_images();
     // - Listes des hauteurs
     // - Opti
     // - Multithreading
