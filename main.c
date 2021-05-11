@@ -9,7 +9,7 @@
 #include "imageFilter.h"
 #include "imageUtils.h"
 #include "imageColoring.h"
-#include "CompleteLine.h"
+#include "imageLinear.h"
 
 int main()
 {
@@ -21,7 +21,7 @@ int main()
 
     SDL_Surface *image;
 
-    image = IMG_Load("images/test2.png");
+    image = IMG_Load("images/draw.png");
 
     if(image == NULL)
         errx(1, "Couldnt load image");
@@ -30,29 +30,16 @@ int main()
             SDL_HWSURFACE | SDL_DOUBLEBUF);
 
     SDL_Rect rcDest = {0, 0, 0, 0};
-    /*
-    //FindAllExtremity(image);
-    //Point p1 = {0,0};
-    //Point p2 = {100,100};
-    Color *black = initColor(image->format);
-    setRGB(black,0,0,0);
 
-    struct vector *List = vector_new(1);
     Point *p1 = malloc(sizeof(Point));
     Point *p2 = malloc(sizeof(Point));
-    p1->x = 500;
-    p1->y = 530;
-    p2->x = 500;
-    p2->y = 500;
-    vector_push(List,p1);
-    vector_push(List,p2);
-    LinkExtremity(image,List);
-    //DrawLine(image,&p1,&p2);
+    p1->x = 100;
+    p1->y = 10;
+    p2->x = 115;
+    p2->y = 300;
 
-    vector_free(List);
-    */
+    interpol(image,p1,p2);
     
-    FindAllExtremity(image);
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);
     SDL_Delay(5000);

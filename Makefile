@@ -5,7 +5,7 @@ LDLIBS = $(shell pkg-config --libs SDL_image) -lm
 
 FLAGS = $(CFLAGS) $(GTKFLAGS) $(LDLIBS) $(LDFLAGS)
 
-OBJ = vector.o queue.o CompleteLine.o imageFilter.o imageUtils.o imageColoring.o
+OBJ = vector.o queue.o imageLinear.o imageFilter.o imageUtils.o imageColoring.o
 
 all: main
 
@@ -25,7 +25,7 @@ test.o: queue.o imageFilter.o test.c
 queue.o : queue.h queue.c
 vector.o: vector.c vector.h 
 
-CompleteLine.o: vector.o CompleteLine.c CompleteLine.h
+imageLinear.o: vector.o imageLinear.c imageLinear.h
 imageFilter.o : imageFilter.h imageFilter.c
 imageUtils.o:  queue.o imageFilter.o imageUtils.h imageUtils.c 
 imageColoring.o:  queue.o imageFilter.o imageUtils.o imageColoring.h imageColoring.c
