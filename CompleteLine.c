@@ -219,19 +219,30 @@ void DrawLine(SDL_Surface *image,Point *p1,Point *p2)
 Point *closestPoint(SDL_Surface *image,struct vector* ListEx,Point *Ex,int *clsip)
 {
     SDL_PixelFormat *format = image->format;
-    int clsi = -1;
-    Point clo;
-    void *temp;
-    Point *temp2;
-    Uint32 clsPixel;
     Uint32 ExPixel = getPixel(image,Ex->x,Ex->y);
     Uint8 r;
     Uint8 g;
     Uint8 b;
     SDL_GetRGB(ExPixel,format,&r,&g,&b);
+
+    int clsi = -1;
+    int treshold = 30;
+
+    Point clo;
+    void *temp;
+    Point *temp2;
+
+    Uint32 clsPixel;
     clo = ClosestWall(image,Ex);
     Point *closest = &clo;
+    if (Distance(Ex,closest) < treshold)
+    {
+        clsi = -2;
+    }
+
     size_t i = 1;
+
+
     while(i <= ListEx->size )
     {
         vector_get(ListEx,i,&temp);
@@ -241,7 +252,7 @@ Point *closestPoint(SDL_Surface *image,struct vector* ListEx,Point *Ex,int *clsi
         Uint8 g2;
         Uint8 b2;
         SDL_GetRGB(clsPixel,format,&r2,&g2,&b2);
-        if(Distance(closest,Ex)>Distance(Ex,temp2) && Distance(Ex,temp2) < 100 && (r != r2 || g != g2 || b != b2))
+        if(Distance(closest,Ex)>Distance(Ex,temp2) && Distance(Ex,temp2) < treshold && (r != r2 || g != g2 || b != b2))
         {
             closest = temp2;
             clsi = i;
@@ -249,6 +260,7 @@ Point *closestPoint(SDL_Surface *image,struct vector* ListEx,Point *Ex,int *clsi
         i++;
     }
     *clsip = clsi;
+
     return closest;
 }
 void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
@@ -263,10 +275,9 @@ void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
     int i ;
     int clsi = -1;
     int clsi2;
-    while(ListEx->size != 0)
+    while(ListEx->size > 1)
     {
         i = 1;
-        printf("size : %lu\n",ListEx->size);
         vector_get(ListEx,i,&Ex);
         Ex2 = (Point *)Ex;
         closest = closestPoint(image,ListEx,Ex2,&clsi);
@@ -286,12 +297,16 @@ void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
                 draw = 1;
             }
         }
+        
         if(clsi != -1)
         {
 
             DrawLine(image,Ex2,closest);
-            vector_remove(ListEx,clsi,&temp);
-            free(temp);
+            if(clsi != -2)
+            {
+                vector_remove(ListEx,clsi,&temp);
+                free(temp);
+            }
         }
         vector_remove(ListEx,i,&Ex);
         free(Ex);

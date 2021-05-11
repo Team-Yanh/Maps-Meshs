@@ -9,7 +9,7 @@
 #include "imageFilter.h"
 #include "imageUtils.h"
 #include "imageColoring.h"
-#include "imageLinear.h"
+#include "CompleteLine.h"
 
 int main()
 {
@@ -21,7 +21,7 @@ int main()
 
     SDL_Surface *image;
 
-    image = IMG_Load("images/draw.png");
+    image = IMG_Load("images/test2.png");
 
     if(image == NULL)
         errx(1, "Couldnt load image");
@@ -31,14 +31,16 @@ int main()
 
     SDL_Rect rcDest = {0, 0, 0, 0};
 
+    /*
     Point *p1 = malloc(sizeof(Point));
     Point *p2 = malloc(sizeof(Point));
     p1->x = 100;
-    p1->y = 10;
-    p2->x = 115;
-    p2->y = 300;
+    p1->y = 100;
+    p2->x = 215;
+    p2->y = 120;
+    */
 
-    interpol(image,p1,p2);
+    FindAllExtremity(image);
     
     SDL_BlitSurface(image, NULL, screen, &rcDest);
     SDL_Flip(screen);

@@ -2,7 +2,7 @@
 
 int calculY(Point *p1,Point *p2,int x3)
 {
-    return p1->y + ((p2->y - p1->y)/ (p2->x - p1->x)) * (x3 - p1->x);
+    return p1->y + ((p2->y - p1->y) * (x3 - p1->x)/ (p2->x - p1->x));
 }
 
 int CalculYpoly(struct vector *v,int x3)
