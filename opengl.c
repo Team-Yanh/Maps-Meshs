@@ -269,7 +269,7 @@ int opengl_Create_Terrain(int col, int line, float* height)
         glm_vec3_add(cameraPos, cameraFront, camera2);
 
         glm_lookat(cameraPos, camera2, cameraUp, view);
-        glm_rotate(model, glm_rad(-55.0f), rot);
+        glm_rotate(model, glm_rad(-65.0f), rot);
 
         setMat4(shaderProgram, "view", view);
         setMat4(shaderProgram, "model", model);
@@ -364,6 +364,18 @@ void processInput(GLFWwindow *window)
         cameraPos[0] += cameraSpeed * dest[0];
         cameraPos[1] += cameraSpeed * dest[1];
         cameraPos[2] += cameraSpeed * dest[2];
+    }
+    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    {
+        cameraPos[0] += cameraSpeed * cameraUp[0];
+        cameraPos[1] += cameraSpeed * cameraUp[1];
+        cameraPos[2] += cameraSpeed * cameraUp[2];
+    }
+    if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    {
+        cameraPos[0] -= cameraSpeed * cameraUp[0];
+        cameraPos[1] -= cameraSpeed * cameraUp[1];
+        cameraPos[2] -= cameraSpeed * cameraUp[2];
     }
 }
 
