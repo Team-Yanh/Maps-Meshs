@@ -146,7 +146,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">3</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child>
@@ -186,7 +186,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">4</property>
+                <property name="position">5</property>
               </packing>
             </child>
             <child>
@@ -225,7 +225,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">5</property>
+                <property name="position">6</property>
               </packing>
             </child>
             <child>
@@ -290,7 +290,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">6</property>
+                <property name="position">7</property>
               </packing>
             </child>
             <child>
@@ -355,7 +355,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">7</property>
+                <property name="position">8</property>
               </packing>
             </child>
             <child>
@@ -420,7 +420,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">8</property>
+                <property name="position">9</property>
               </packing>
             </child>
             <child>
@@ -549,7 +549,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">9</property>
+                <property name="position">10</property>
               </packing>
             </child>
           </object>
@@ -563,31 +563,76 @@
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
             <child>
-              <object class="GtkScrolledWindow">
+              <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="hexpand">True</property>
-                <property name="vexpand">True</property>
-                <property name="hadjustment">area_scale_1</property>
-                <property name="shadow_type">in</property>
+                <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkViewport">
+                  <object class="GtkScrolledWindow">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                    <property name="hadjustment">area_scale_1</property>
+                    <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkEventBox" id="event_box_1">
+                      <object class="GtkViewport">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkDrawingArea" id="draw_area_1">
+                          <object class="GtkEventBox" id="event_box_1">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can_focus">True</property>
+                            <child>
+                              <object class="GtkDrawingArea" id="draw_area_1">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                              </object>
+                            </child>
                           </object>
                         </child>
                       </object>
                     </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                    <property name="hadjustment">area_scale_2</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkViewport">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkEventBox" id="event_box_2">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkDrawingArea" id="draw_area_2">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
                 </child>
               </object>
               <packing>
@@ -597,36 +642,41 @@
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow">
+              <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="hexpand">True</property>
-                <property name="vexpand">True</property>
-                <property name="hadjustment">area_scale_2</property>
-                <property name="shadow_type">in</property>
+                <property name="can_focus">False</property>
+                <property name="homogeneous">True</property>
                 <child>
-                  <object class="GtkViewport">
+                  <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <child>
-                      <object class="GtkEventBox" id="event_box_2">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <child>
-                          <object class="GtkDrawingArea" id="draw_area_2">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
+                    <property name="label" translatable="yes">Image to treat</property>
+                    <property name="justify">center</property>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Image treated</property>
+                    <property name="justify">center</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
                 </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>
@@ -684,7 +734,6 @@
     </child>
   </object>
   <object class="GtkFileChooserDialog" id="dlg_file_chooser">
-    <property name="use-header-bar">0</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Open Image</property>
     <property name="type_hint">dialog</property>

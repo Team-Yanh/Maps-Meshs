@@ -30,6 +30,9 @@ void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
     // - Blocks in a main loop until dialog emits response signal
     if (gtk_dialog_run(GTK_DIALOG(ui->dlg_file_chooser)) == GTK_RESPONSE_OK)
     {
+        // - Resets treatment step
+        ui->step = -1;
+
         // - Gets the file name that were choosen
         filename = gtk_file_chooser_get_filename(
                 GTK_FILE_CHOOSER(ui->dlg_file_chooser));
@@ -37,7 +40,7 @@ void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
         // - If the filename exists
         if (filename != NULL)
         {
-            load_image(&ui->draw_left, filename);
+            load_image_from_file(&ui->draw_left, filename);
             g_free(filename);
         }
     }
@@ -45,7 +48,6 @@ void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
     // - Hide dialog file chooser
     gtk_widget_hide(GTK_WIDGET(ui->dlg_file_chooser));
 }
-
 
 static RGB converts_gdkrgba_to_rgb(GdkRGBA* color)
 {
@@ -58,44 +60,123 @@ static RGB converts_gdkrgba_to_rgb(GdkRGBA* color)
     return rgb;
 }
 
-
-void on_treat_btn_clicked(unused GtkButton* button, gpointer user_data)
+void on_treat_and_next(unused GtkButton* button, gpointer user_data)
 {
     UserInterface* ui = user_data;
-    GdkRGBA river_color, topo_color;
-    RGB river_rgb, topo_rgb;
-    double threshold = 1.0; // [0.1 , 5]
 
-    // - Disconnects all signals
     remove_paint_pick_signals(ui);
 
+    if (ui->draw_left.pb != NULL)
+    {
+        ui->step++;
+
+        if (ui->step > 0)
+            switch_dm(ui);
+
+        treat(button, ui);
+    }
+}
+
+void on_treat_and_repeat(unused GtkButton* button, gpointer user_data)
+{
+    UserInterface* ui = user_data;
+
+    remove_paint_pick_signals(ui);
+
+    if (ui->draw_left.pb != NULL)
+        treat(button, ui);
+}
+
+void treat(unused GtkButton* button, gpointer user_data)
+{
+    UserInterface* ui = user_data;
+    //GdkRGBA river_color;
+    GdkRGBA topo_color;
+    //RGB river_rgb;
+    RGB topo_rgb;
+
+    double threshold = 1.0; // [0.1 , 5]
+
+    int formats = IMG_INIT_JPG | IMG_INIT_PNG;
+    int imageInit = IMG_Init(formats);
+    Color *color = NULL;
+    Color *black = NULL;
+    SDL_Surface* image;
+    char filename[] = "wip.bmp";
+
+    // - Save the image form the left area
+    gdk_pixbuf_save(ui->draw_left.pb, filename, "bmp", NULL, NULL);
+
+    if ((imageInit&formats) != formats)
+        errx(1, "Couldn't init SDL_Image");
+
+    image = IMG_Load(filename);
+    if (image == NULL)
+        errx(1, "Couldn load image");
+
     // - Gets river and topologic line colors
-    gtk_color_chooser_get_rgba(ui->river.color, &river_color);
+    //gtk_color_chooser_get_rgba(ui->river.color, &river_color);
     gtk_color_chooser_get_rgba(ui->topo.color, &topo_color);
 
-    river_rgb = converts_gdkrgba_to_rgb(&river_color);
+    //river_rgb = converts_gdkrgba_to_rgb(&river_color);
     topo_rgb = converts_gdkrgba_to_rgb(&topo_color);
 
     // - Gets threshold value
     threshold = gtk_adjustment_get_value(ui->threshold);
 
-    // apply paint change and save image
-    char filename[] = "images/result.bmp";
-    gdk_pixbuf_save(ui->draw_left.pb, filename, "bmp", NULL, NULL);
-    // - Treats the image
+    color = initColor(image->format);
+    setRGB(color, topo_rgb.r, topo_rgb.g, topo_rgb.b);
+    black = initColor(image->format);
+    setRGB(black, 0, 0, 0);
 
-    keepColorAndSave(filename, "images/river.bmp", river_rgb, threshold); //river
-    keepColorAndSave(filename, filename, topo_rgb, threshold); // topoLine
+    switch(ui->step)
+    {
+        case 0:
+            printf("Filtering topologic lines...\n");
+            keepTopoLineHSV(image, color, threshold);
+            break;
+
+        case 1:
+            printf("Setting monochromatic...\n");
+            setMonochromatic(image, black);
+            break;
+
+        case 2:
+            printf("Removing isolated pixels...\n");
+            removeIsolatedPixels(image);
+            break;
+
+        case 3:
+            printf("Thikenning colors...\n");
+            thickenColor(image, black);
+            break;
+
+        case 4:
+            printf("Making height map...\n");
+            makeHeightMap(filename, filename);
+            break;
+
+        default:
+            break;
+    }
+
+    SDL_SaveBMP(image, filename);
+
+    // - Treats the image
+    //keepColorAndSave(filename, "images/river.bmp", river_rgb, threshold); //river
+    //keepColorAndSave(filename, filename, topo_rgb, threshold); // topoLine
 
     //FindAllExtremityAndSave(filename, filename); // not working
 
-    makeHeightMap(filename, filename);
-
     // - Loads the treated img
-    load_image(&ui->draw_right, filename);
+    load_image_from_file(&ui->draw_right, filename);
+
+    freeColor(color);
+    freeColor(black);
+    SDL_FreeSurface(image);
 }
 
-void load_image(DrawManagement* dm, char* filename)
+void load_image_from_file(DrawManagement* dm, char* filename)
 {
     // - Load the new image to draw
     dm->pb = gdk_pixbuf_new_from_file(filename, NULL);
@@ -104,6 +185,25 @@ void load_image(DrawManagement* dm, char* filename)
 
     // - Triggers scrollbars
     gtk_widget_set_size_request(GTK_WIDGET(dm->darea), dm->w, dm->h);
+
+    // - Send a draw signal to redraw the entire area
+    gtk_widget_queue_draw(GTK_WIDGET(dm->darea));
+
+    // - Sets the scale to 1
+    gtk_adjustment_set_value(dm->zoom, 1.0);
+}
+
+void load_image_from_pixbuf(DrawManagement* dm, GdkPixbuf* pb)
+{
+    dm->pb = pb;
+    if (pb != NULL)
+    {
+        dm->w = gdk_pixbuf_get_width(dm->pb);
+        dm->h = gdk_pixbuf_get_height(dm->pb);
+
+        // - Triggers scrollbars
+        gtk_widget_set_size_request(GTK_WIDGET(dm->darea), dm->w, dm->h);
+    }
 
     // - Send a draw signal to redraw the entire area
     gtk_widget_queue_draw(GTK_WIDGET(dm->darea));
@@ -151,6 +251,15 @@ guchar* get_clicked_pixel(DrawManagement* dm, int x, int y)
     }
 
     return pixel;
+}
+
+void switch_dm(UserInterface* ui)
+{
+    GdkPixbuf* temp;
+
+    temp = ui->draw_right.pb;
+    load_image_from_pixbuf(&ui->draw_right, ui->draw_left.pb);
+    load_image_from_pixbuf(&ui->draw_left, temp);
 }
 
 void uiTreatment()
@@ -253,6 +362,8 @@ void uiTreatment()
     ui->cursors.pick = gdk_cursor_new_for_display(disp, GDK_CROSSHAIR);
     ui->cursors.paint = gdk_cursor_new_for_display(disp, GDK_PENCIL);
 
+    ui->step = -1;
+
     // - Free bulder
     g_object_unref(builder);
 
@@ -274,7 +385,8 @@ void uiTreatment()
             &ui->draw_left);
     g_signal_connect(ui->draw_right.darea, "draw", G_CALLBACK(on_draw),
             &ui->draw_right);
-    g_signal_connect(ui->treat_btn, "clicked", G_CALLBACK(on_treat_btn_clicked),
+    g_signal_connect(ui->treat_btn, "clicked",G_CALLBACK(on_treat_and_next),ui);
+    g_signal_connect(ui->restart_btn, "clicked",G_CALLBACK(on_treat_and_repeat),
             ui);
     g_signal_connect(ui->paint_btn, "clicked", G_CALLBACK(on_paint_btn_clicked),
             ui);

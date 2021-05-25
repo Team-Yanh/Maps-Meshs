@@ -56,18 +56,22 @@ typedef struct UserInterface
     ColorManagement draw;
     GtkFileChooserDialog* dlg_file_chooser;
     GtkEntry* rgb_entries[3];
-    GtkAdjustment* size;
-    GtkAdjustment* threshold;
+    GtkAdjustment* size; GtkAdjustment* threshold;
     Cursors cursors;
+    int step;
 } UserInterface;
 
 void remove_paint_pick_signals(UserInterface* ui);
 void on_img_open_btn_clicked(GtkButton* button, gpointer user_data);
-void on_treat_btn_clicked(unused GtkButton* button, gpointer user_data);
+void on_treat_and_next(unused GtkButton* button, gpointer user_data);
+void on_treat_and_repeat(unused GtkButton* button, gpointer user_data);
+void treat(unused GtkButton* button, gpointer user_data);
 void on_restart_btn_clicked(unused GtkButton* button, gpointer user_data);
-void load_image(DrawManagement* dm, char* filename);
+void load_image_from_file(DrawManagement* dm, char* filename);
+void load_image_from_pixbuf(DrawManagement* dm, GdkPixbuf* pb);
 void on_zoom(unused GtkScale* zoom_scale, gpointer user_data);
 guchar* get_clicked_pixel(DrawManagement* dm, int x, int y);
+void switch_dm(UserInterface* ui);
 void uiTreatment();
 
 #endif

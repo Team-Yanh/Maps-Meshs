@@ -73,6 +73,8 @@ void on_paint_btn_clicked(unused GtkButton* b, gpointer user_data)
 {
     UserInterface* ui = user_data;
 
+    remove_paint_pick_signals(ui);
+
     switch_paintable(&ui->draw_left);
     switch_paintable(&ui->draw_right);
 }

@@ -87,9 +87,6 @@ void add_pick_signal(DrawManagement* dm, ColorManagement* cm)
         dm->pick_id = g_signal_connect(dm->ebox, "button_press_event",
                 G_CALLBACK(color_pick), cm);
 
-        // - Removes paint signals
-        remove_paintable(dm);
-
         // - Modifies the cursor
         gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(ui->window)),
                 ui->cursors.pick);
@@ -100,6 +97,8 @@ void on_color_picker_btn_clicked(unused GtkButton* button, gpointer user_data)
 {
     ColorManagement* cm = user_data;
     UserInterface* ui = cm->ui;
+
+    remove_paint_pick_signals(ui);
 
     // - Connects the signals
     add_pick_signal(&ui->draw_left, cm);
