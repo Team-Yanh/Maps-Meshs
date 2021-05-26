@@ -71,7 +71,10 @@ void on_treat_and_next(unused GtkButton* button, gpointer user_data)
         ui->step++;
 
         if (ui->step > 0)
+        {
+            load_image_from_file(&ui->draw_right, "topo.bmp");
             switch_dm(ui);
+        }
 
         treat(button, ui);
     }
@@ -83,97 +86,125 @@ void on_treat_and_repeat(unused GtkButton* button, gpointer user_data)
 
     remove_paint_pick_signals(ui);
 
-    if (ui->draw_left.pb != NULL)
+    if (ui->step > -1 && ui->draw_left.pb != NULL)
         treat(button, ui);
+}
+
+Image* initImage(GdkRGBA* rgba, char* filename)
+{
+    Image* img = calloc(sizeof(Image), 1);
+    img->name = filename;
+
+    img->surface = IMG_Load(filename);
+    if (img->surface == NULL)
+        errx(1, "Couldn't load image");
+
+    img->rgba = *rgba;
+    img->rgb = converts_gdkrgba_to_rgb(&img->rgba);
+    img->color = initColor(img->surface->format);
+    setRGB(img->color, img->rgb.r, img->rgb.g, img->rgb.b);
+
+    return img;
+}
+
+void on_topo_switch_clicked(unused GtkButton* btn, gpointer user_data)
+{
+    UserInterface* ui = user_data;
+
+    if (ui->draw_right.pb != NULL)
+        load_image_from_file(&ui->draw_right, "topo.bmp");
+}
+
+void on_river_switch_clicked(unused GtkButton* btn, gpointer user_data)
+{
+    UserInterface* ui = user_data;
+
+    if (ui->draw_right.pb != NULL)
+        load_image_from_file(&ui->draw_right, "river.bmp");
 }
 
 void treat(unused GtkButton* button, gpointer user_data)
 {
     UserInterface* ui = user_data;
-    //GdkRGBA river_color;
-    GdkRGBA topo_color;
-    //RGB river_rgb;
-    RGB topo_rgb;
-
+    GdkRGBA river_rgba;
+    GdkRGBA topo_rgba;
     double threshold = 1.0; // [0.1 , 5]
-
-    int formats = IMG_INIT_JPG | IMG_INIT_PNG;
-    int imageInit = IMG_Init(formats);
-    Color *color = NULL;
     Color *black = NULL;
-    SDL_Surface* image;
-    char filename[] = "wip.bmp";
-
-    // - Save the image form the left area
-    gdk_pixbuf_save(ui->draw_left.pb, filename, "bmp", NULL, NULL);
-
-    if ((imageInit&formats) != formats)
-        errx(1, "Couldn't init SDL_Image");
-
-    image = IMG_Load(filename);
-    if (image == NULL)
-        errx(1, "Couldn load image");
+    Image* river = NULL;
+    Image* topo = NULL;
 
     // - Gets river and topologic line colors
-    //gtk_color_chooser_get_rgba(ui->river.color, &river_color);
-    gtk_color_chooser_get_rgba(ui->topo.color, &topo_color);
+    gtk_color_chooser_get_rgba(ui->river.color, &river_rgba);
+    gtk_color_chooser_get_rgba(ui->topo.color, &topo_rgba);
 
-    //river_rgb = converts_gdkrgba_to_rgb(&river_color);
-    topo_rgb = converts_gdkrgba_to_rgb(&topo_color);
+    // - Save the image form the left area
+    if(ui->step == 0)
+    {
+        gdk_pixbuf_save(ui->draw_left.pb, "topo.bmp", "bmp", NULL, NULL);
+        gdk_pixbuf_save(ui->draw_left.pb, "river.bmp", "bmp", NULL, NULL);
+    }
 
-    // - Gets threshold value
+    // - Inits image structs
+    river = initImage(&river_rgba, "river.bmp");
+    topo = initImage(&topo_rgba, "topo.bmp");
+
+        // - Gets threshold value
     threshold = gtk_adjustment_get_value(ui->threshold);
 
-    color = initColor(image->format);
-    setRGB(color, topo_rgb.r, topo_rgb.g, topo_rgb.b);
-    black = initColor(image->format);
+    // - Inits black color
+    black = initColor(topo->surface->format);
     setRGB(black, 0, 0, 0);
 
     switch(ui->step)
     {
         case 0:
             printf("Filtering topologic lines...\n");
-            keepTopoLineHSV(image, color, threshold);
+            keepTopoLineHSV(topo->surface, topo->color, threshold);
+            setMonochromatic(topo->surface, black);
+
+            printf("Filtering river...\n");
+            keepTopoLineHSV(river->surface, river->color, threshold);
+            setMonochromatic(river->surface, black);
             break;
 
         case 1:
-            printf("Setting monochromatic...\n");
-            setMonochromatic(image, black);
+            printf("Removing topologic lines isolated pixels...\n");
+            removeIsolatedPixels(topo->surface);
+
+            printf("Removing river isolated pixels...\n");
+            removeIsolatedPixels(river->surface);
             break;
 
         case 2:
-            printf("Removing isolated pixels...\n");
-            removeIsolatedPixels(image);
+            printf("Thickenning topologic lines colors...\n");
+            thickenColor(topo->surface, black);
+
+            printf("Thickenning river colors...\n");
+            thickenColor(river->surface, black);
             break;
 
         case 3:
-            printf("Thikenning colors...\n");
-            thickenColor(image, black);
-            break;
-
-        case 4:
-            printf("Making height map...\n");
-            makeHeightMap(filename, filename);
+            printf("Making height map from topologic lines...\n");
+            makeHeightMap(topo->name, topo->name);
             break;
 
         default:
             break;
     }
 
-    SDL_SaveBMP(image, filename);
-
-    // - Treats the image
-    //keepColorAndSave(filename, "images/river.bmp", river_rgb, threshold); //river
-    //keepColorAndSave(filename, filename, topo_rgb, threshold); // topoLine
-
-    //FindAllExtremityAndSave(filename, filename); // not working
+    SDL_SaveBMP(topo->surface, topo->name);
+    SDL_SaveBMP(river->surface, river->name);
 
     // - Loads the treated img
-    load_image_from_file(&ui->draw_right, filename);
+    load_image_from_file(&ui->draw_right, topo->name);
 
-    freeColor(color);
+    SDL_FreeSurface(topo->surface);
+    SDL_FreeSurface(river->surface);
+    freeColor(topo->color);
+    freeColor(river->color);
+    free(topo);
+    free(river);
     freeColor(black);
-    SDL_FreeSurface(image);
 }
 
 void load_image_from_file(DrawManagement* dm, char* filename)
@@ -286,6 +317,10 @@ void uiTreatment()
     ui->paint_btn = GTK_BUTTON(gtk_builder_get_object(builder, "paint_btn"));
     ui->restart_btn = GTK_BUTTON(gtk_builder_get_object(builder,
                 "restart_btn"));
+    ui->topo_switch = GTK_BUTTON(gtk_builder_get_object(builder,
+                "topo_switch"));
+    ui->river_switch = GTK_BUTTON(gtk_builder_get_object(builder,
+                "river_switch"));
     ui->dlg_file_chooser = GTK_FILE_CHOOSER_DIALOG(
             gtk_builder_get_object(builder, "dlg_file_chooser"));
     ui->rgb_entries[0] = GTK_ENTRY(gtk_builder_get_object(builder, "r_entry"));
@@ -377,6 +412,10 @@ void uiTreatment()
             G_CALLBACK(on_color_picker_btn_clicked), &ui->river);
     g_signal_connect(ui->draw.btn, "clicked",
             G_CALLBACK(on_color_picker_btn_clicked), &ui->draw);
+    g_signal_connect(ui->topo_switch, "clicked",
+            G_CALLBACK(on_topo_switch_clicked), ui);
+    g_signal_connect(ui->river_switch, "clicked",
+            G_CALLBACK(on_river_switch_clicked), ui);
     g_signal_connect(ui->draw_left.scale, "value-changed",
             G_CALLBACK(on_zoom), &ui->draw_left);
     g_signal_connect(ui->draw_right.scale, "value-changed",

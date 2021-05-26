@@ -9,6 +9,15 @@
 
 #include "imageFilter.h"
 
+typedef struct Image
+{
+    char* name;
+    SDL_Surface* surface;
+    GdkRGBA rgba;
+    RGB rgb;
+    Color* color;
+} Image;
+
 typedef struct ColorManagement
 {
     GtkColorChooser* color;
@@ -49,6 +58,8 @@ typedef struct UserInterface
     GtkButton* color_picker_btn;
     GtkButton* paint_btn;
     GtkButton* restart_btn;
+    GtkButton* topo_switch;
+    GtkButton* river_switch;
     DrawManagement draw_left;
     DrawManagement draw_right;
     ColorManagement topo;
@@ -65,6 +76,7 @@ void remove_paint_pick_signals(UserInterface* ui);
 void on_img_open_btn_clicked(GtkButton* button, gpointer user_data);
 void on_treat_and_next(unused GtkButton* button, gpointer user_data);
 void on_treat_and_repeat(unused GtkButton* button, gpointer user_data);
+Image* initImage(GdkRGBA* rgba, char* filename);
 void treat(unused GtkButton* button, gpointer user_data);
 void on_restart_btn_clicked(unused GtkButton* button, gpointer user_data);
 void load_image_from_file(DrawManagement* dm, char* filename);
