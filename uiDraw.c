@@ -3,6 +3,134 @@
 #include "uiTreatment.h"
 #include "uiColorPick.h"
 #include "uiDraw.h"
+#include "CompleteLine.h"
+
+void on_link_btn_clicked(unused GtkButton* b, gpointer user_data)
+{
+    UserInterface* ui = user_data;
+
+    remove_signals(ui);
+
+    add_link(&ui->draw_left);
+    add_link(&ui->draw_right);
+}
+
+void add_link(DrawManagement* dm)
+{
+    if (dm->link_id == 0 && dm->pb != NULL)
+    {
+        dm->link_id = g_signal_connect(dm->ebox, "button_press_event",
+                G_CALLBACK(on_click_link), dm);
+        // - Modifies the cursos
+        gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(dm->ui->window)),
+                dm->ui->cursors.pick);
+    }
+}
+
+void reset_points(Point* points)
+{
+    points[0].x = -1;
+    points[0].y = -1;
+    points[1].x = -1;
+    points[1].y = -1;
+}
+
+void remove_link(DrawManagement* dm)
+{
+    if (dm->link_id != 0)
+    {
+        g_signal_handler_disconnect(dm->ebox, dm->link_id);
+
+        gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(dm->ui->window)),
+                dm->ui->cursors.def);
+    }
+
+    dm->link_id = 0;
+}
+
+static int calculY(Point *p1, Point* p2, int x3)
+{
+    return p1->y + ((p2->y - p1->y)/(p2->x - p1->x)) * (x3 - p1->x);
+}
+
+static void interpol(DrawManagement* dm, Point* p1, Point* p2)
+{
+    int x3 = 0, y3 = 0;
+    guchar* pixel = NULL;
+    guchar* pixels = NULL;
+    int rowstride = 0, n_channels = 0;
+    int borne = 0;
+
+    n_channels = gdk_pixbuf_get_n_channels(dm->pb);
+    rowstride = gdk_pixbuf_get_rowstride(dm->pb);
+    pixels = gdk_pixbuf_get_pixels(dm->pb);
+
+    if (p1->x < p2->x)
+    {
+        x3 = p1->x + 1;
+        borne = p2->x;
+    }
+
+    else
+    {
+        x3 = p2->x + 1;
+        borne = p1->x;
+    }
+
+    while(x3 < borne)
+    {
+        y3 = calculY(p1,p2,x3);
+
+        pixel = pixels + y3 * rowstride + x3 * n_channels;
+        put_color(pixel, dm->color);
+
+        pixel = pixels + (y3+1) * rowstride + x3 * n_channels;
+        put_color(pixel, dm->color);
+
+        pixel = pixels + (y3-1) * rowstride + x3 * n_channels;
+        put_color(pixel, dm->color);
+
+        x3 ++;
+    }
+}
+
+void on_click_link(unused GtkEventBox* ebox, GdkEventButton* event, gpointer user_data)
+{
+    DrawManagement* dm = user_data;
+    UserInterface* ui = dm->ui;
+
+    double zoom = gtk_adjustment_get_value(dm->zoom);
+    int ex = event->x, ey = event->y;
+    int width = dm->w * zoom;
+    int height = dm->h * zoom;
+    int index = 0;
+
+    printf("%d, %d\n", ex, ey);
+
+    if (ex >= 0 && ex < width && ey >= 0 && ey < height)
+    {
+        if (ui->points[0].x != -1)
+            index++;
+
+        ui->points[index].x = ex / zoom;
+        ui->points[index].y = ey / zoom;
+
+        printf("P1: (%d, %d) and P2: (%d, %d)\n", ui->points[0].x, ui->points[0].y, ui->points[1].x, ui->points[1].y);
+
+        if (ui->points[1].x != -1)
+        {
+            interpol(dm, &ui->points[0], &ui->points[1]);
+            gtk_widget_queue_draw(GTK_WIDGET(dm->darea));
+            remove_link(dm);
+            reset_points(ui->points);
+        }
+
+        else if (&ui->draw_left == dm)
+            remove_link(&ui->draw_right);
+        else
+            remove_link(&ui->draw_left);
+    }
+}
 
 void add_paintable(DrawManagement* dm)
 {
@@ -73,7 +201,7 @@ void on_paint_btn_clicked(unused GtkButton* b, gpointer user_data)
 {
     UserInterface* ui = user_data;
 
-    remove_paint_pick_signals(ui);
+    remove_signals(ui);
 
     switch_paintable(&ui->draw_left);
     switch_paintable(&ui->draw_right);
@@ -105,7 +233,7 @@ void end_paint(unused GtkEventBox* eb, unused GdkEventButton* ev, gpointer data)
     remove_paint(dm);
 }
 
-static void put_color(guchar* pixel, RGB color)
+void put_color(guchar* pixel, RGB color)
 {
     pixel[0] = color.r;
     pixel[1] = color.g;

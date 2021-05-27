@@ -8,6 +8,7 @@
 #endif
 
 #include "imageFilter.h"
+#include "CompleteLine.h"
 
 typedef struct Image
 {
@@ -45,6 +46,7 @@ typedef struct DrawManagement
     guint paintable_id;
     guint paint_id;
     guint release_id;
+    guint link_id;
     int w;
     int h;
     struct UserInterface* ui;
@@ -60,6 +62,7 @@ typedef struct UserInterface
     GtkButton* restart_btn;
     GtkButton* topo_switch;
     GtkButton* river_switch;
+    GtkButton* link_btn;
     DrawManagement draw_left;
     DrawManagement draw_right;
     ColorManagement topo;
@@ -70,9 +73,10 @@ typedef struct UserInterface
     GtkAdjustment* size; GtkAdjustment* threshold;
     Cursors cursors;
     int step;
+    Point points[2];
 } UserInterface;
 
-void remove_paint_pick_signals(UserInterface* ui);
+void remove_signals(UserInterface* ui);
 void on_img_open_btn_clicked(GtkButton* button, gpointer user_data);
 void on_treat_and_next(unused GtkButton* button, gpointer user_data);
 void on_treat_and_repeat(unused GtkButton* button, gpointer user_data);

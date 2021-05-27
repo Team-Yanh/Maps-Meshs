@@ -98,7 +98,7 @@ void on_color_picker_btn_clicked(unused GtkButton* button, gpointer user_data)
     ColorManagement* cm = user_data;
     UserInterface* ui = cm->ui;
 
-    remove_paint_pick_signals(ui);
+    remove_signals(ui);
 
     // - Connects the signals
     add_pick_signal(&ui->draw_left, cm);

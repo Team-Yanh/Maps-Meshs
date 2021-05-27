@@ -6,13 +6,18 @@
 #include "imageColoring.h"
 #include "imageUtils.h"
 
-void remove_paint_pick_signals(UserInterface* ui)
+void remove_signals(UserInterface* ui)
 {
     remove_paintable(&ui->draw_left);
     remove_paintable(&ui->draw_right);
 
     remove_pick_signal(&ui->draw_right);
     remove_pick_signal(&ui->draw_left);
+
+    remove_link(&ui->draw_left);
+    remove_link(&ui->draw_right);
+
+    reset_points(ui->points);
 }
 
 void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
@@ -22,7 +27,7 @@ void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
     gchar* filename = NULL;
 
     // - Disconnects all signals
-    remove_paint_pick_signals(ui);
+    remove_signals(ui);
 
     // - Display the dialog box file chooser;
     gtk_widget_show(GTK_WIDGET(ui->dlg_file_chooser));
@@ -64,7 +69,7 @@ void on_treat_and_next(unused GtkButton* button, gpointer user_data)
 {
     UserInterface* ui = user_data;
 
-    remove_paint_pick_signals(ui);
+    remove_signals(ui);
 
     if (ui->draw_left.pb != NULL)
     {
@@ -84,7 +89,7 @@ void on_treat_and_repeat(unused GtkButton* button, gpointer user_data)
 {
     UserInterface* ui = user_data;
 
-    remove_paint_pick_signals(ui);
+    remove_signals(ui);
 
     if (ui->step > -1 && ui->draw_left.pb != NULL)
         treat(button, ui);
@@ -248,7 +253,7 @@ void on_zoom(unused GtkScale* zoom_scale, gpointer user_data)
     DrawManagement* dm = user_data;
     UserInterface* ui = dm->ui;
 
-    remove_paint_pick_signals(ui);
+    remove_signals(ui);
 
     if (dm->pb != NULL)
         gtk_widget_queue_draw(GTK_WIDGET(dm->darea));
@@ -321,6 +326,7 @@ void uiTreatment()
                 "topo_switch"));
     ui->river_switch = GTK_BUTTON(gtk_builder_get_object(builder,
                 "river_switch"));
+    ui->link_btn = GTK_BUTTON(gtk_builder_get_object(builder, "link_btn"));
     ui->dlg_file_chooser = GTK_FILE_CHOOSER_DIALOG(
             gtk_builder_get_object(builder, "dlg_file_chooser"));
     ui->rgb_entries[0] = GTK_ENTRY(gtk_builder_get_object(builder, "r_entry"));
@@ -345,6 +351,7 @@ void uiTreatment()
     draw_l.paint_id = 0;
     draw_l.paintable_id = 0;
     draw_l.release_id = 0;
+    draw_l.link_id = 0;
     draw_l.ui = ui;
 
     draw_r.darea = GTK_DRAWING_AREA(gtk_builder_get_object(builder,
@@ -361,6 +368,7 @@ void uiTreatment()
     draw_r.paint_id = 0;
     draw_r.paintable_id = 0;
     draw_r.release_id = 0;
+    draw_r.link_id = 0;
     draw_r.ui = ui;
 
     topo.color = GTK_COLOR_CHOOSER(gtk_builder_get_object(builder,
@@ -397,6 +405,11 @@ void uiTreatment()
     ui->cursors.pick = gdk_cursor_new_for_display(disp, GDK_CROSSHAIR);
     ui->cursors.paint = gdk_cursor_new_for_display(disp, GDK_PENCIL);
 
+    ui->points[0].x = -1;
+    ui->points[1].x = -1;
+    ui->points[0].y = -1;
+    ui->points[1].y = -1;
+
     ui->step = -1;
 
     // - Free bulder
@@ -416,6 +429,8 @@ void uiTreatment()
             G_CALLBACK(on_topo_switch_clicked), ui);
     g_signal_connect(ui->river_switch, "clicked",
             G_CALLBACK(on_river_switch_clicked), ui);
+    g_signal_connect(ui->link_btn, "clicked",
+            G_CALLBACK(on_link_btn_clicked), ui);
     g_signal_connect(ui->draw_left.scale, "value-changed",
             G_CALLBACK(on_zoom), &ui->draw_left);
     g_signal_connect(ui->draw_right.scale, "value-changed",
