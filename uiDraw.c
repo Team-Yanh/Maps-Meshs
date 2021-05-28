@@ -41,6 +41,7 @@ void remove_link(DrawManagement* dm)
     {
         g_signal_handler_disconnect(dm->ebox, dm->link_id);
 
+        if (dm->ui->draw_right.link_id == 0 || dm->ui->draw_left.link_id == 0)
         gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(dm->ui->window)),
                 dm->ui->cursors.def);
     }
@@ -55,11 +56,12 @@ static int calculY(Point *p1, Point* p2, int x3)
 
 static void interpol(DrawManagement* dm, Point* p1, Point* p2)
 {
-    int x3 = 0, y3 = 0;
+    int x3 = 0, y3 = 0, yav = 0;
     guchar* pixel = NULL;
     guchar* pixels = NULL;
     int rowstride = 0, n_channels = 0;
     int borne = 0;
+    int borney = 0;
 
     n_channels = gdk_pixbuf_get_n_channels(dm->pb);
     rowstride = gdk_pixbuf_get_rowstride(dm->pb);
@@ -69,12 +71,14 @@ static void interpol(DrawManagement* dm, Point* p1, Point* p2)
     {
         x3 = p1->x + 1;
         borne = p2->x;
+        yav = p1->y;
     }
 
     else
     {
         x3 = p2->x + 1;
         borne = p1->x;
+        yav = p2->y;
     }
 
     while(x3 < borne)
@@ -84,12 +88,22 @@ static void interpol(DrawManagement* dm, Point* p1, Point* p2)
         pixel = pixels + y3 * rowstride + x3 * n_channels;
         put_color(pixel, dm->color);
 
-        pixel = pixels + (y3+1) * rowstride + x3 * n_channels;
-        put_color(pixel, dm->color);
+        if (yav > y3)
+        {
+            borney = yav;
+            yav = y3;
+        }
+        else
+            borney = y3;
 
-        pixel = pixels + (y3-1) * rowstride + x3 * n_channels;
-        put_color(pixel, dm->color);
+        while (yav < borney)
+        {
+            pixel = pixels + yav * rowstride + x3 * n_channels;
+            put_color(pixel, dm->color);
+            yav++;
+        }
 
+        yav = y3;
         x3 ++;
     }
 }
@@ -105,8 +119,6 @@ void on_click_link(unused GtkEventBox* ebox, GdkEventButton* event, gpointer use
     int height = dm->h * zoom;
     int index = 0;
 
-    printf("%d, %d\n", ex, ey);
-
     if (ex >= 0 && ex < width && ey >= 0 && ey < height)
     {
         if (ui->points[0].x != -1)
@@ -114,8 +126,6 @@ void on_click_link(unused GtkEventBox* ebox, GdkEventButton* event, gpointer use
 
         ui->points[index].x = ex / zoom;
         ui->points[index].y = ey / zoom;
-
-        printf("P1: (%d, %d) and P2: (%d, %d)\n", ui->points[0].x, ui->points[0].y, ui->points[1].x, ui->points[1].y);
 
         if (ui->points[1].x != -1)
         {
