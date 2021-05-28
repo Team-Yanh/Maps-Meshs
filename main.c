@@ -23,11 +23,11 @@ int main(void)
     
     SDL_Init(SDL_INIT_VIDEO);
 
-    //tempMain();
+    tempMain();
 
     SDL_Quit();
     
-    uiTreatment();
+    //uiTreatment();
 
     return 0;
 }

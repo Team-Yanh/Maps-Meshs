@@ -24,7 +24,7 @@ void blur(SDL_Surface **image, int blurLevel);
 void removeIsolatedPixels(SDL_Surface *image);
 float *heightList(SDL_Surface *image, int nbRows, int nbCols);
 
-void replaceColor(SDL_Surface *image, Color *c1, Color *c2);
+int replaceColor(SDL_Surface *image, Color *c1, Color *c2);
 
 void keepColorAndSave(char *filenameSource, char *filenameDest, RGB c, double threshold); //topoline or river
 void FindAllExtremityAndSave(char *filenameSource, char *filenameDest);

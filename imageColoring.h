@@ -5,6 +5,7 @@
 
 int colorZoneBFS(SDL_Surface *image, Color *c, int x, int y);
 int colorCircles(SDL_Surface *image); // return 0 if no circles
+int colorRivers(SDL_Surface *image); // return 0 if no river
 int colorAllZonesFromCircles(SDL_Surface *image); // return nbcolor used
 
 void normalize(SDL_Surface *image, int nbColors);

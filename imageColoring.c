@@ -162,8 +162,13 @@ int colorCircles(SDL_Surface *image)
         while(!isEmpty(q))
         {
             dequeue(q, &x, &y);
-            colorZoneBFS(image, circle, x, y);
-            replaceColor(image, blackMarked, circle);
+            setPixel(currentColor, getPixel(image, x, y));
+            if(!isSameColor(circle, currentColor))
+            {
+                colorZoneBFS(image, circle, x, y);
+                replaceColor(image, blackMarked, circle);
+            }
+
         }
     }
 
@@ -178,6 +183,87 @@ int colorCircles(SDL_Surface *image)
     return result;
 }
 
+int colorRivers(SDL_Surface *image)
+{
+    SDL_Surface *riverImage = IMG_Load("images/river.bmp");
+    if(riverImage == NULL) // river.bmp doesnt exist
+        return 0;
+
+    Color *currentColor = initColor(image->format);
+    Color *riverColor = initColor(image->format);
+    Color *white = initColor(image->format);
+    Color *black = initColor(image->format);
+    Color *blackMarked = initColor(image->format);
+    setRGB(black, 0, 0, 0);
+    setRGB(white, 255, 255, 255);
+    setRGB(riverColor, 3, 3, 3);
+    setRGB(blackMarked, 0, 255, 0);
+
+    int nbRivers = 0;
+    Queue *q = createQueue();
+
+    // check a rectangle around the border
+    
+    // check 3 pixel heigh top and bottom lines
+    for(int i = 0; i < image->w; i++)
+    {
+        for(int j = 0; j < 3; j++)
+        {
+            setPixel(currentColor, getPixel(riverImage, i, j)); // top row
+            if(isSameColor(black, currentColor)) // On a river
+                enqueue(q, i, j);
+
+            setPixel(currentColor, getPixel(riverImage, i, riverImage->h - 1 - j)); // bottom row
+            if(isSameColor(black, currentColor))
+                enqueue(q, i, riverImage->h - 1 - j);
+        }
+    }
+    // check 3 pixel wide right and left columns
+    for(int i = 0; i < image->h; i++)
+    {
+        for(int j = 0; j < 3; j++)
+        {
+            setPixel(currentColor, getPixel(riverImage, j, i)); // left column
+            if(isSameColor(black, currentColor)) // On a river
+                enqueue(q, j, i);
+                
+
+            setPixel(currentColor, getPixel(riverImage, riverImage->w - 1 - j, i)); // right col
+            if(isSameColor(black, currentColor))
+                enqueue(q, riverImage->w - 1 - j, i);
+        }
+    }
+
+    int x = 0;
+    int y = 0;
+
+    if(!isEmpty(q))
+    {
+        while(!isEmpty(q))
+        {
+            dequeue(q, &x, &y);
+            //printf("River at (x,y): (%d, %d)\n", x, y);
+            setPixel(currentColor, getPixel(image, x, y));
+            if(!isSameColor(riverColor, currentColor))
+            {
+                nbRivers++;
+                colorZoneBFS(image, riverColor, x, y);
+                replaceColor(image, blackMarked, riverColor);
+            }
+        }
+    }
+
+    freeQueue(q);
+    freeColor(currentColor);
+    freeColor(riverColor);
+    freeColor(white);
+    freeColor(black);
+    freeColor(blackMarked);
+
+    return nbRivers;
+}
+
+
 int colorAllZonesFromCircles(SDL_Surface *image)
 {
     int nbColors = 1;
@@ -187,6 +273,8 @@ int colorAllZonesFromCircles(SDL_Surface *image)
     Color *currentColor = initColor(image->format);
     Color *circle = initColor(image->format);
     Color *c = initColor(image->format);
+    Color *river = initColor(image->format);
+    Color *riverUp = initColor(image->format);
     Color *white = initColor(image->format);
     Color *black = initColor(image->format);
     Color *blackMarked = initColor(image->format);
@@ -194,6 +282,8 @@ int colorAllZonesFromCircles(SDL_Surface *image)
     setRGB(blackMarked, 0, 255, 0);
     setRGB(circle, 254, 254, 254);
     setRGB(c, 253, 253, 253);
+    setRGB(river, 3, 3, 3);
+    setRGB(riverUp, 4, 4, 4);
     setRGB(white, 255, 255, 255);
 
     int isCircle = colorCircles(image);
@@ -208,48 +298,106 @@ int colorAllZonesFromCircles(SDL_Surface *image)
         }
     }
 
+    int nbRivers = colorRivers(image);
+    if(nbRivers > 0)
+        nbColors++;
+
+
     printf("Coloring...\n");
 
-    while(isWhiteInImage(image)) //while we can, color adjacent circles with c
+    int circleDrawn = 0;
+    int riverDrawn = 0;
+
+    while(isWhiteInImage(image)) //while we can, color adjacent circles with c or riverUp
     {
+        circleDrawn = 0;
+        riverDrawn = 0;
         for(int i = 0; i < image->w; i++)
         {
             for(int j = 0; j < image->h; j++)
             {
+                // color adjacent circle colors (coloring downward)
                 setPixel(currentColor, getPixel(image, i, j));
                 if(isSameColor(circle, currentColor))
                 {
                     if(isValidCellAndColor(image, i-1, j, white))
                     {
+                        circleDrawn = 1;
                         colorZoneBFS(image, c, i-1, j);
                         replaceColor(image, blackMarked, c);
                     }
                     if(isValidCellAndColor(image, i+1, j, white))
                     {
+                        circleDrawn = 1;
                         colorZoneBFS(image, c, i+1, j);
                         replaceColor(image, blackMarked, c);
                     }
                     if(isValidCellAndColor(image, i, j-1, white))
                     {
+                        circleDrawn = 1;
                         colorZoneBFS(image, c, i, j-1);
                         replaceColor(image, blackMarked, c);
                     }
                     if(isValidCellAndColor(image, i, j+1, white))
                     {
+                        circleDrawn = 1;
                         colorZoneBFS(image, c, i, j+1);
                         replaceColor(image, blackMarked, c);
                     }
                 }
+
+                // color adjacent river colors (coloring upward)
+                setPixel(currentColor, getPixel(image, i, j));
+                if(isSameColor(river, currentColor))
+                {
+                    if(isValidCellAndColor(image, i-1, j, white))
+                    {
+                        riverDrawn = 1;
+                        colorZoneBFS(image, riverUp, i-1, j);
+                        replaceColor(image, blackMarked, riverUp);
+                    }
+                    if(isValidCellAndColor(image, i+1, j, white))
+                    {
+                        riverDrawn = 1;
+                        colorZoneBFS(image, riverUp, i+1, j);
+                        replaceColor(image, blackMarked, riverUp);
+                    }
+                    if(isValidCellAndColor(image, i, j-1, white))
+                    {
+                        riverDrawn = 1;
+                        colorZoneBFS(image, riverUp, i, j-1);
+                        replaceColor(image, blackMarked, riverUp);
+                    }
+                    if(isValidCellAndColor(image, i, j+1, white))
+                    {
+                        riverDrawn = 1;
+                        colorZoneBFS(image, riverUp, i, j+1);
+                        replaceColor(image, blackMarked, riverUp);
+                    }
+                }
+
             }
         }
-        nbColors++;
+
+        if(circleDrawn)
+            nbColors++;
+        if(riverDrawn)
+            nbColors++;
+        
+        int colorDiff = 1;
+
         setRGB(circle, c->rgb->r, c->rgb->g, c->rgb->b);
-        setRGB(c, c->rgb->r - 1, c->rgb->g - 1, c->rgb->b - 1);
+        setRGB(c, c->rgb->r - colorDiff, c->rgb->g - colorDiff, c->rgb->b - colorDiff);
+
+        setRGB(river, riverUp->rgb->r, riverUp->rgb->g, riverUp->rgb->b);
+        setRGB(riverUp, riverUp->rgb->r + colorDiff, riverUp->rgb->g + colorDiff, riverUp->rgb->b + colorDiff);
     }
 
     freeColor(currentColor);
     freeColor(circle);
     freeColor(c);
+    freeColor(river);
+    freeColor(riverUp);
     freeColor(white);
     freeColor(black);
     freeColor(blackMarked);
@@ -260,20 +408,33 @@ int colorAllZonesFromCircles(SDL_Surface *image)
 
 void normalize(SDL_Surface *image, int nbColors)
 {
+    printf("Normalizing...1/2\n");
     int step = 255/nbColors;
 
     Color *c = initColor(image->format);
     Color *currentColor = initColor(image->format);
-    setRGB(c, 0, 0, 0);
-    setRGB(currentColor, 255 - nbColors, 255 - nbColors, 255 - nbColors);
-    // start at 254 : circle color
+    setRGB(c, 1, 1, 1);
+    setRGB(currentColor, 3, 3, 3);
+    // start at: 1,1,1
 
-    for(int i = nbColors; i > 0; i--)
+    while(currentColor->rgb->r < 255) // squash all colors so they are all adjacent
+    {
+        if(replaceColor(image, currentColor, c))
+            setRGB(c, c->rgb->r + 1, c->rgb->g + 1, c->rgb->b + 1);
+        setRGB(currentColor, currentColor->rgb->r + 1, currentColor->rgb->g + 1, currentColor->rgb->b + 1);
+    }
+
+    setRGB(currentColor, 1 + nbColors, 1 + nbColors, 1 + nbColors);
+    setRGB(c, 255, 255, 255);
+
+    // color from top to bottom
+    printf("Normalizing... 2/2\n");
+    for(int i = 0; i < nbColors + 1; i++)
     {
         replaceColor(image, currentColor, c);
-        setRGB(c, c->rgb->r + step, c->rgb->g + step, c->rgb->b + step);
-        setRGB(currentColor, currentColor->rgb->r + 1,
-               currentColor->rgb->g + 1, currentColor->rgb->b + 1);
+
+        setRGB(currentColor, currentColor->rgb->r - 1, currentColor->rgb->g - 1, currentColor->rgb->b - 1);
+        setRGB(c, c->rgb->r - step, c->rgb->g - step, c->rgb->b - step);
     }
 
     freeColor(currentColor);
@@ -396,4 +557,3 @@ void colorAllZonesNaive(SDL_Surface *image)
     freeColor(white);
     freeColor(currentColor);
 }
-

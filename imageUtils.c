@@ -129,8 +129,9 @@ void setMonochromatic(SDL_Surface *image, Color *c)
     freeColor(currentColor);
 }
 
-void replaceColor(SDL_Surface *image, Color *c1, Color *c2)
+int replaceColor(SDL_Surface *image, Color *c1, Color *c2)
 {
+    int hasColor = 0;
     Color *currentColor = initColor(image->format);
     for(int i = 0; i < image->w; i++)
     {
@@ -138,10 +139,15 @@ void replaceColor(SDL_Surface *image, Color *c1, Color *c2)
         {
             setPixel(currentColor, getPixel(image, i, j));
             if(isSameColor(currentColor, c1))
+            {
+                hasColor = 1;
                 putPixel(image, i, j, c2->pixel);
+            }
         }
     }
     freeColor(currentColor);
+
+    return hasColor;
 }
 
 int hasNeighbours(SDL_Surface *image, int i, int j)
