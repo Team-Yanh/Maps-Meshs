@@ -23,18 +23,5 @@ int main(void)
     // - Partie I [UI - Mathieu]
     uiTreatment();
 
-    /*
-    // - Partie II [Traitement - Tim]
-    SDL_Init(SDL_INIT_VIDEO);
-    display_images();
-
-    // - Partie III [Traitement - Hugo]
-    display_images_hugo();
-    SDL_Quit();
-
-    // - Partie IV [Rendu 3D - Nico]
-    display_terrain();
-    */
-
     return 0;
 }
