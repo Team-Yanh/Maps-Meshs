@@ -31,7 +31,7 @@ void tempMain()
 
     SDL_Surface *image;
 
-    image = IMG_Load("images/test1.png");
+    image = IMG_Load("images/test4.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
     SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
@@ -67,12 +67,15 @@ void tempMain()
     free(heightlist);
     */
 
-    thickenColor(image, black);
-    thickenColor(image, black);
+    //thickenColor(image, black);
+    //thickenColor(image, black);
     //FindAllExtremity(image); // only black and white pixels
 
     // Don't forget to decolor
-    blur(&image, 8);
+    //blur(&image, 8);
+    int nbColors = colorAllZonesFromCircles(image);
+    updateScreen(screen, image);
+    normalize(image, nbColors);
     updateScreen(screen, image);
     SDL_SaveBMP(image, "images/out.bmp");
 

@@ -138,6 +138,7 @@ void setPixel(Color *c, Uint32 pixel)
     c->rgb->r = r;
     c->rgb->g = g;
     c->rgb->b = b;
+    c->pixel = SDL_MapRGB(c->format, r, g, b);
     free(c->hsv);
     c->hsv = RGBToHSV(c->rgb);
 }

@@ -20,7 +20,6 @@
 
 int main(void)
 {
-    // - Partie I [UI - Mathieu]
     uiTreatment();
 
     return 0;
