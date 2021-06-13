@@ -5,6 +5,7 @@
 #include "imageFilter.h"
 #include "imageColoring.h"
 #include "imageUtils.h"
+#include "opengl.h"
 
 void remove_signals(UserInterface* ui)
 {
@@ -146,7 +147,6 @@ void treat(unused GtkButton* button, gpointer user_data)
     Color *black = NULL;
     Image* river = NULL;
     Image* topo = NULL;
-    int end = 0;
 
     // - Gets river and topologic line colors
     gtk_color_chooser_get_rgba(ui->river.color, &river_rgba);
@@ -216,7 +216,7 @@ void treat(unused GtkButton* button, gpointer user_data)
         case 4:
             printf("Making height map from topologic lines...\n");
             makeHeightMap(topo->name, "height_map.bmp");
-            end = 1;
+            display_terrain("height_map.bmp");
             break;
 
         default:
@@ -237,9 +237,6 @@ void treat(unused GtkButton* button, gpointer user_data)
     free(topo);
     free(river);
     freeColor(black);
-
-    if (end)
-        gtk_main_quit();
 }
 
 void load_image_from_file(DrawManagement* dm, char* filename)
