@@ -150,6 +150,25 @@ int replaceColor(SDL_Surface *image, Color *c1, Color *c2)
     return hasColor;
 }
 
+void lerpColor(Color *result, Color *leftColor, Color *rightColor, double f)
+{
+    Uint8 r = (Uint8)((double)leftColor->rgb->r * (1.0 - f))
+                    + ((double)rightColor->rgb->r * f);
+    Uint8 g = (Uint8)((double)leftColor->rgb->g * (1.0 - f))
+                    + ((double)rightColor->rgb->g * f);
+    Uint8 b = (Uint8)((double)leftColor->rgb->b * (1.0 - f))
+                    + ((double)rightColor->rgb->b * f);
+    setRGB(result, r, g, b);
+}
+
+void averageColors(Color *color, Color *color2, Color *result)
+{
+    uint16_t r = color->rgb->r + color2->rgb->r;
+    uint16_t g = color->rgb->g + color2->rgb->g;
+    uint16_t b = color->rgb->b + color2->rgb->b;
+    setRGB(result, r / 2, g / 2, b / 2);
+}
+
 int hasNeighbours(SDL_Surface *image, int i, int j)
 {
     Color *black = initColor(image->format);

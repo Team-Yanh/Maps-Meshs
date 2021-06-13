@@ -29,9 +29,8 @@ void tempMain()
     if((imageInit&formats) != formats)
         errx(1, "Couldnt init SDL_Image");
 
-    SDL_Surface *image;
-
-    image = IMG_Load("images/test4.png");
+    SDL_Surface *image = IMG_Load("images/valley.bmp");
+    SDL_Surface *image2 = IMG_Load("images/checker2.png");
     if(image == NULL)
         errx(1, "Couldnt load image");
     SDL_Surface* screen = SDL_SetVideoMode(image->w, image->h, 32,
@@ -42,48 +41,22 @@ void tempMain()
     setRGB(black, 0, 0, 0);
     setRGB(red, 255, 0, 0);
 
-    // fix topolines
+    int blurValue = 10;
+    SDL_Surface *vImage = addVBorders(image, blurValue);
+    SDL_Surface *hImage = addHBorders(image, blurValue);
+    averageImages(vImage, hImage);
+    SDL_FreeSurface(vImage);
+    SDL_FreeSurface(image);
+    updateScreen(screen, hImage);
+    SDL_SaveBMP(hImage, "images/out.bmp");
 
-    /*
-    int nbColors = colorAllZonesFromCircles(image);
-    //thickenColor(image, black);
-    //colorCircles(image);
-    printf("Normalizing...\n");
-    normalize(image, nbColors);
-    printf("Bluring...\n");
-    blur(&image, 8);
-    */
-
-    /*
-    int nbRows = image->h / 10;
-    int nbCols = image->w / 10;
-    float *heightlist = heightList(image, nbRows, nbCols);
-
-    int col = nbCols - 1;
-    int line = nbRows - 1;
-
-    opengl_Create_Terrain(col, line, heightlist);
-
-    free(heightlist);
-    */
-
-    //thickenColor(image, black);
-    //thickenColor(image, black);
-    //FindAllExtremity(image); // only black and white pixels
-
-    // Don't forget to decolor
-    //blur(&image, 8);
-    int nbColors = colorAllZonesFromCircles(image);
-    updateScreen(screen, image);
-    normalize(image, nbColors);
-    updateScreen(screen, image);
-    SDL_SaveBMP(image, "images/out.bmp");
 
     freeColor(black);
     freeColor(red);
 
-    SDL_FreeSurface(image);
+    SDL_FreeSurface(image2);
     SDL_FreeSurface(screen);
+    SDL_FreeSurface(hImage);
 }
 
 void display_images()
@@ -150,17 +123,6 @@ void display_images()
             SDL_HWSURFACE | SDL_DOUBLEBUF);
 
     updateScreen(screen, image);
-
-    //colorCircles(image);
-    //updateScreen(screen, image);
-    //colorAllZonesFromCircles(image);
-    //updateScreen(screen, image);
-
-    //colorCircles(image);
-    //replaceColor(image, green, black);
-    //colorAllZonesFromCircles(image);
-    //setMonochromatic(image, red);
-    //thickenColor(image, black);
 
     SDL_SaveBMP(image, "images/out.bmp");
 
