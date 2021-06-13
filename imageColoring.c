@@ -185,7 +185,7 @@ int colorCircles(SDL_Surface *image)
 
 int colorRivers(SDL_Surface *image)
 {
-    SDL_Surface *riverImage = IMG_Load("images/river.bmp");
+    SDL_Surface *riverImage = IMG_Load("river.bmp");
     if(riverImage == NULL) // river.bmp doesnt exist
         return 0;
 

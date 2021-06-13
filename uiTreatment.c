@@ -75,13 +75,16 @@ void on_treat_and_next(unused GtkButton* button, gpointer user_data)
 
     if (ui->draw_left.pb != NULL)
     {
-        ui->step++;
-
         if (ui->type == RIVER)
             load_image_from_file(&ui->draw_right, "topo.bmp");
 
-        if (ui->step > 0)
-            switch_dm(ui);
+        if (ui->step < 4)
+        {
+            ui->step++;
+
+            if (ui->step > 0)
+                switch_dm(ui);
+        }
 
         treat(button, ui);
     }
@@ -227,7 +230,10 @@ void treat(unused GtkButton* button, gpointer user_data)
     SDL_SaveBMP(river->surface, river->name);
 
     // - Loads the treated img
-    load_image_from_file(&ui->draw_right, topo->name);
+    if (ui->step == 4)
+        load_image_from_file(&ui->draw_right, "height_map.bmp");
+    else
+        load_image_from_file(&ui->draw_right, topo->name);
     ui->type = TOPO;
 
     SDL_FreeSurface(topo->surface);
