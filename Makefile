@@ -1,5 +1,5 @@
 CC= gcc
-CFLAGS = -fsanitize=address -Wall -Wextra -g 
+CFLAGS = -Wall -Wextra -g 
 GTKFLAGS = `pkg-config --cflags gtk+-3.0` -Wall -O3 `pkg-config --libs gtk+-3.0`
 OGLFLAGS = -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl
 LDFLAGS = -static-libasan -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lGLU -lm
