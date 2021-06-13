@@ -82,7 +82,7 @@ int vector_remove(struct vector *v, size_t i, void **x)
     }
     v->size --;
     *x = v->data[i-1];
-    for(size_t j = i - 1; j < v->size;j ++){
+    for(size_t j = i - 1; j < v->size; j++){
         v->data[j] = v->data[j+1];
     }
     return 1;

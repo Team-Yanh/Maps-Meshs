@@ -10,6 +10,13 @@
 #include "imageFilter.h"
 #include "CompleteLine.h"
 
+typedef enum Type
+{
+    RIVER,
+    TOPO,
+    NONE,
+} Type;
+
 typedef struct Image
 {
     char* name;
@@ -72,8 +79,9 @@ typedef struct UserInterface
     GtkEntry* rgb_entries[3];
     GtkAdjustment* size; GtkAdjustment* threshold;
     Cursors cursors;
-    int step;
     Point points[2];
+    int step;
+    Type type;
 } UserInterface;
 
 void remove_signals(UserInterface* ui);

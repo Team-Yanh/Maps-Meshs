@@ -209,7 +209,6 @@ void DrawLine(SDL_Surface *image,Point *p1,Point *p2)
                 y1 ++;
             }
         }
-        
     }
     if(isValidCell(image,x1,y1))
         putPixel(image , x1,y1,black->pixel);
@@ -272,17 +271,18 @@ void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
     Point *closest ;
     Point *Ex2;
     int draw = 0;
-    int i ;
+    int i;
     int clsi = -1;
-    int clsi2;
+    int clsi2 = -1;
+
     while(ListEx->size > 1)
     {
         i = 1;
         vector_get(ListEx,i,&Ex);
         Ex2 = (Point *)Ex;
         closest = closestPoint(image,ListEx,Ex2,&clsi);
-        while (!draw)
-        {    
+        while (!draw && clsi != -1 && clsi != -2)
+        {
             closest2 = closestPoint(image,ListEx,closest,&clsi2);
             if(closest2 != Ex2)
             {
@@ -301,13 +301,14 @@ void LinkExtremity(SDL_Surface *image,struct vector* ListEx)
         if(clsi != -1)
         {
 
-            DrawLine(image,Ex2,closest);
             if(clsi != -2)
             {
+                DrawLine(image,Ex2,closest);
                 vector_remove(ListEx,clsi,&temp);
                 free(temp);
             }
         }
+
         vector_remove(ListEx,i,&Ex);
         free(Ex);
     }

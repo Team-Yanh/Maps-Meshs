@@ -785,6 +785,7 @@
     </child>
   </object>
   <object class="GtkFileChooserDialog" id="dlg_file_chooser">
+    <property name="use-header-bar">0</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Open Image</property>
     <property name="type_hint">dialog</property>

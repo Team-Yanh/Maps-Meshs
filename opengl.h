@@ -12,6 +12,6 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void prod_vec(vec3 a, vec3 b, vec3 res);
 void set_height(float* height, float* newHeight, int col, int nb_vertex);
 void set_terrain_normal(float* vertex, int nb_vertex, int col, int line, float* newHeight);
-void display_terrain();
+void display_terrain(char* filename);
 
 #endif

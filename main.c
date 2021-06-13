@@ -22,6 +22,7 @@ int main(void)
 {
     // - Partie I [UI - Mathieu]
     uiTreatment();
+    display_terrain("height_map.bmp");
 
     return 0;
 }

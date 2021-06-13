@@ -576,11 +576,11 @@ void set_terrain_normal(float* vertex, int nb_val, int col, int line, float* new
 }
 
 
-void display_terrain()
+void display_terrain(char* filename)
 {
     SDL_Surface *image;
 
-    image = IMG_Load("images/out2.bmp");
+    image = IMG_Load(filename);
 
     int nbRows = image->h / 10;
     int nbCols = image->w / 10;

@@ -37,6 +37,7 @@ void on_img_open_btn_clicked(unused GtkButton* button, gpointer user_data)
     {
         // - Resets treatment step
         ui->step = -1;
+        ui->type = TOPO;
 
         // - Gets the file name that were choosen
         filename = gtk_file_chooser_get_filename(
@@ -75,11 +76,11 @@ void on_treat_and_next(unused GtkButton* button, gpointer user_data)
     {
         ui->step++;
 
-        if (ui->step > 0)
-        {
+        if (ui->type == RIVER)
             load_image_from_file(&ui->draw_right, "topo.bmp");
+
+        if (ui->step > 0)
             switch_dm(ui);
-        }
 
         treat(button, ui);
     }
@@ -116,16 +117,24 @@ void on_topo_switch_clicked(unused GtkButton* btn, gpointer user_data)
 {
     UserInterface* ui = user_data;
 
-    if (ui->draw_right.pb != NULL)
+    if (ui->draw_right.pb != NULL && ui->type == RIVER)
+    {
+        ui->type = TOPO;
+        gdk_pixbuf_save(ui->draw_right.pb, "river.bmp", "bmp", NULL, NULL);
         load_image_from_file(&ui->draw_right, "topo.bmp");
+    }
 }
 
 void on_river_switch_clicked(unused GtkButton* btn, gpointer user_data)
 {
     UserInterface* ui = user_data;
 
-    if (ui->draw_right.pb != NULL)
+    if (ui->draw_right.pb != NULL && ui->type == TOPO)
+    {
+        ui->type = RIVER;
+        gdk_pixbuf_save(ui->draw_right.pb, "topo.bmp", "bmp", NULL, NULL);
         load_image_from_file(&ui->draw_right, "river.bmp");
+    }
 }
 
 void treat(unused GtkButton* button, gpointer user_data)
@@ -137,6 +146,7 @@ void treat(unused GtkButton* button, gpointer user_data)
     Color *black = NULL;
     Image* river = NULL;
     Image* topo = NULL;
+    int end = 0;
 
     // - Gets river and topologic line colors
     gtk_color_chooser_get_rgba(ui->river.color, &river_rgba);
@@ -148,6 +158,12 @@ void treat(unused GtkButton* button, gpointer user_data)
         gdk_pixbuf_save(ui->draw_left.pb, "topo.bmp", "bmp", NULL, NULL);
         gdk_pixbuf_save(ui->draw_left.pb, "river.bmp", "bmp", NULL, NULL);
     }
+
+    else if (ui->type == TOPO)
+        gdk_pixbuf_save(ui->draw_left.pb, "topo.bmp", "bmp", NULL, NULL);
+
+    else
+        gdk_pixbuf_save(ui->draw_left.pb, "river.bmp", "bmp", NULL, NULL);
 
     // - Inits image structs
     river = initImage(&river_rgba, "river.bmp");
@@ -181,6 +197,14 @@ void treat(unused GtkButton* button, gpointer user_data)
             break;
 
         case 2:
+            printf("Finding all extremities...\n");
+            FindAllExtremity(topo->surface);
+            //FindAllExtremity(river->surface);
+            setMonochromatic(topo->surface, black);
+            //setMonochromatic(river->surface, black);
+            break;
+
+        case 3:
             printf("Thickenning topologic lines colors...\n");
             thickenColor(topo->surface, black);
 
@@ -188,9 +212,11 @@ void treat(unused GtkButton* button, gpointer user_data)
             thickenColor(river->surface, black);
             break;
 
-        case 3:
+
+        case 4:
             printf("Making height map from topologic lines...\n");
-            makeHeightMap(topo->name, topo->name);
+            makeHeightMap(topo->name, "height_map.bmp");
+            end = 1;
             break;
 
         default:
@@ -202,6 +228,7 @@ void treat(unused GtkButton* button, gpointer user_data)
 
     // - Loads the treated img
     load_image_from_file(&ui->draw_right, topo->name);
+    ui->type = TOPO;
 
     SDL_FreeSurface(topo->surface);
     SDL_FreeSurface(river->surface);
@@ -210,6 +237,9 @@ void treat(unused GtkButton* button, gpointer user_data)
     free(topo);
     free(river);
     freeColor(black);
+
+    if (end)
+        gtk_main_quit();
 }
 
 void load_image_from_file(DrawManagement* dm, char* filename)
@@ -411,6 +441,8 @@ void uiTreatment()
     ui->points[1].y = -1;
 
     ui->step = -1;
+
+    ui->type = TOPO;
 
     // - Free bulder
     g_object_unref(builder);
