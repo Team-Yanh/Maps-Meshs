@@ -424,12 +424,12 @@ void normalize(SDL_Surface *image, int nbColors)
         setRGB(currentColor, currentColor->rgb->r + 1, currentColor->rgb->g + 1, currentColor->rgb->b + 1);
     }
 
-    setRGB(currentColor, 1 + nbColors, 1 + nbColors, 1 + nbColors);
+    setRGB(currentColor, nbColors, nbColors, nbColors);
     setRGB(c, 255, 255, 255);
 
     // color from top to bottom
     printf("Normalizing... 2/2\n");
-    for(int i = 0; i < nbColors + 1; i++)
+    for(int i = 0; i < nbColors; i++)
     {
         replaceColor(image, currentColor, c);
 
@@ -440,6 +440,176 @@ void normalize(SDL_Surface *image, int nbColors)
     freeColor(currentColor);
     freeColor(c);
 }
+
+void averageImages(SDL_Surface *imageSource, SDL_Surface *imageDest)
+{
+    assert(imageSource->w == imageDest->w);
+    assert(imageSource->h == imageDest->h);
+
+    Color *c = initColor(imageSource->format);
+    Color *c2 = initColor(imageSource->format);
+    Color *average = initColor(imageSource->format);
+
+    for(int i = 0; i < imageSource->w; i++)
+    {
+        for(int j = 0; j< imageSource->h; j++)
+        {
+            setPixel(c, getPixel(imageSource, i, j));
+            setPixel(c2, getPixel(imageDest, i, j));
+            averageColors(c, c2, average);
+            putPixel(imageDest, i, j, average->pixel);
+        }
+    }
+
+    freeColor(c);
+    freeColor(c2);
+    freeColor(average);
+}
+
+
+static int findNextColorH(SDL_Surface *image, Color *c, int x, int y)
+{
+    int newX = x + 1;
+    Color *currentColor = initColor(image->format);
+    while(newX < image->w)
+    {
+        setPixel(currentColor, getPixel(image, newX, y));
+        if(!isSameColor(currentColor, c))
+            break;
+        newX++;
+    }
+    freeColor(currentColor);
+    return newX;
+}
+
+void drawHLine(SDL_Surface *image, Color *c, int x, int y, int x2, int y2)
+{
+    assert(y >= 0 && y < image->h);
+    assert(y == y2);
+
+    if(x < 0)
+        x = 0;
+    if(x > image->w)
+        x = image->w;
+    if(x2 < 0)
+        x2 = 0;
+    if(x2 > image->w)
+        x2 = image->w;
+    
+    assert(x <= x2);
+    
+    for(int i = x; i < x2; i++)
+    {
+        putPixel(image, i, y, c->pixel);
+    }
+}
+
+SDL_Surface *addHBorders(SDL_Surface *image, int width)
+{
+    SDL_Surface *newImage = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
+    SDL_BlitSurface(image,NULL,newImage,NULL);
+
+    Color *currentColor = initColor(image->format);
+    Color *nextColor = initColor(image->format);
+    Color *averageColor = initColor(image->format);
+    int x = 0;
+    int nextColorI = 1;
+
+    for(int y = 0; y < image->h; y++) // for each line
+    {
+        x = 0;
+        setPixel(currentColor, getPixel(image, x, y));
+        
+        while( (nextColorI = findNextColorH(image, currentColor, x, y)) < image->w)
+        {
+            setPixel(nextColor, getPixel(image, nextColorI, y));
+            averageColors(currentColor, nextColor, averageColor);
+            drawHLine(newImage, averageColor, nextColorI - width, y, nextColorI + width, y);
+            x = nextColorI + width;
+
+            setPixel(currentColor, nextColor->pixel);
+        }
+    }
+
+    freeColor(currentColor);
+    freeColor(nextColor);
+    freeColor(averageColor);
+
+    return newImage;
+}
+
+static int findNextColorV(SDL_Surface *image, Color *c, int x, int y)
+{
+    int newY = y + 1;
+    Color *currentColor = initColor(image->format);
+    while(newY < image->h)
+    {
+        setPixel(currentColor, getPixel(image, x, newY));
+        if(!isSameColor(currentColor, c))
+            break;
+        newY++;
+    }
+
+    freeColor(currentColor);
+    return newY;
+}
+
+void drawVLine(SDL_Surface *image, Color *c, int x, int y, int x2, int y2)
+{
+    assert(x >= 0 && x < image->w);
+    assert(x == x2);
+
+    if(y < 0)
+        y = 0;
+    if(y > image->h)
+        y = image->h;
+    if(y2 < 0)
+        y2 = 0;
+    if(y2 > image->h)
+        y2 = image->h;
+    
+    assert(y <= y2);
+    
+    for(int i = y; i < y2; i++)
+    {
+        putPixel(image, x, i, c->pixel);
+    }
+}
+
+SDL_Surface *addVBorders(SDL_Surface *image, int height)
+{
+    SDL_Surface *newImage = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
+    SDL_BlitSurface(image,NULL,newImage,NULL);
+
+    Color *currentColor = initColor(image->format);
+    Color *nextColor = initColor(image->format);
+    Color *averageColor = initColor(image->format);
+    int y = 0;
+    int nextColorI = 1;
+
+    for(int x = 0; x < image->w; x++) // for each column
+    {
+        y = 0;
+        setPixel(currentColor, getPixel(image, x, y));
+        
+        while( (nextColorI = findNextColorV(image, currentColor, x, y)) < image->h)
+        {
+            setPixel(nextColor, getPixel(image, x, nextColorI));
+            averageColors(currentColor, nextColor, averageColor);
+            drawVLine(newImage, averageColor, x, nextColorI - height, x, nextColorI + height);
+            y = nextColorI + height;
+
+            setPixel(currentColor, nextColor->pixel);
+        }
+    }
+
+    freeColor(currentColor);
+    freeColor(nextColor);
+    freeColor(averageColor);
+
+    return newImage;
+}
+
 
 void colorZoneDFS(SDL_Surface *image, Color *c, int x, int y)
 {

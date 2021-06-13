@@ -4,6 +4,7 @@
 #include "SDL/SDL_image.h"
 #include <math.h>
 #include <err.h>
+#include <assert.h>
 #include <pthread.h>
 #include "queue.h"
 #include "imageFilter.h"
@@ -25,6 +26,8 @@ void removeIsolatedPixels(SDL_Surface *image);
 float *heightList(SDL_Surface *image, int nbRows, int nbCols);
 
 int replaceColor(SDL_Surface *image, Color *c1, Color *c2);
+void lerpColor(Color *result, Color *leftColor, Color *rightColor, double f);
+void averageColors(Color *color1, Color *color2, Color *result);
 
 void keepColorAndSave(char *filenameSource, char *filenameDest, RGB c, double threshold); //topoline or river
 void FindAllExtremityAndSave(char *filenameSource, char *filenameDest);
