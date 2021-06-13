@@ -427,8 +427,18 @@ void makeHeightMap(char *filenameSource, char* filenameDest)
     int nbColors = colorAllZonesFromCircles(image);
     printf("Normalizing...\n");
     normalize(image, nbColors);
+    
+    printf("Addind details at borders...\n");
+    int blurValue = 10;
+    SDL_Surface *vImage = addVBorders(image, blurValue);
+    SDL_Surface *hImage = addHBorders(image, blurValue);
+    averageImages(vImage, hImage);
+    SDL_FreeSurface(vImage);
+    SDL_FreeSurface(image);
+    image = hImage;
+
     printf("Bluring...\n");
-    blur(&image, 6);
+    blur(&image, 2);
 
     printf("Height map done\n");
     SDL_SaveBMP(image, filenameDest);
