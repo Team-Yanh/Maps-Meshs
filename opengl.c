@@ -32,6 +32,7 @@ float fov = 45.0f;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+float cameraSpeed = 0.1f;
 
 vec3 lightPos = {1.2f, 1.0f, 2.0f};
 
@@ -334,7 +335,6 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, 1);
 
-    float cameraSpeed = 2.5 * deltaTime;
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
         cameraPos[0] += cameraSpeed * cameraFront[0];
@@ -376,6 +376,17 @@ void processInput(GLFWwindow *window)
         cameraPos[0] -= cameraSpeed * cameraUp[0];
         cameraPos[1] -= cameraSpeed * cameraUp[1];
         cameraPos[2] -= cameraSpeed * cameraUp[2];
+    }
+    if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    {
+        cameraSpeed += 0.005f;
+    }
+    if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        if(cameraSpeed - 0.005f > 0)
+        {
+            cameraSpeed -= 0.005f;
+        }
     }
 }
 
